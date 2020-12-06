@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+}
+.header {
+    height:100px;
+    background:rgb(4, 99, 4);
+}
+#sidebar {
+    width:20%;
+    background:rgb(241, 198, 116);
+    height:500px;
+    float:left;
+}
+#content {
+    float:left;
+}
+#advertising {
+    width:20%;
+    background:rgb(156, 156, 247);
+    height:500px;
+    float:right;
+}
+#footer {
+    height:50px;
+    background:rgb(169, 216, 235);
+    clear: both;
+}
