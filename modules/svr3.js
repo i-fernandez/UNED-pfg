@@ -3,6 +3,23 @@ class Svr3Scheduler {
         this.whichqs = [];
         this.qs = [];
         this.processTable = [];
+
+        // Datos de ejemplo
+        let p1 = new Svr3Process(1, 1000, 80, 20, 50);
+        let p2 = new Svr3Process(2, 1200, 20, 80, 65);
+        let p3 = new Svr3Process(3, 2000, 20, 80, 110);
+        let p4 = new Svr3Process(4, 1600, 160, 40, 71);
+        p1.state = "running_user";
+        p2.state = "running_kernel";
+        p3.state = "sleeping";
+        p4.state = "zombie";
+        this.processTable.push(p1);
+        this.processTable.push(p2);
+        this.processTable.push(p3);
+        this.processTable.push(p4);
+
+
+        
     }
 
     
@@ -10,7 +27,7 @@ class Svr3Scheduler {
          let pr = new Svr3Process(
             this.processTable.length+1, burst, cpu_cycle, io_cycle, pri);
         this.processTable.push(pr);
-        //pr.printData();
+        // TODO: Modificar qs y whichqs
     }
 
     printData() {

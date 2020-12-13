@@ -3,17 +3,26 @@ import View from './view.js';
 
 class Controller {
     constructor() {
-      this.model = new Simulation;
-      this.view = new View;
+        this.model = new Simulation;
+        this.view = new View;
 
-      // Listeners de eventos
-      this.view.addProcessEvent.addListener(data => {
-          this.model.addProcess(data);
-      });
+        // Listeners de eventos
+        this.view.addProcessEvent.addListener(data => {
+            this.model.addProcess(data);
+        });
 
-      this.model.pTableChangedEvent.addListener(pTable => {
-          this.view.displayProcessTable(pTable);
-      });
+        this.view.startSimulationEvent.addListener(() => {
+            this.model.startSimulation();
+        });
+
+        this.model.pTableChangedEvent.addListener(pTable => {
+            this.view.displayProcessTable(pTable);
+        });
+
+        this.model.startVisualizationEvent.addListener(() => {
+            // TODO: Enviar evento
+            this.view._showStart();    
+        });
     }
 
     run() {
@@ -21,7 +30,5 @@ class Controller {
     }
 
 }
-
-
 
 export default Controller;

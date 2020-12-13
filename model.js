@@ -6,9 +6,8 @@ class Simulation {
         this.scheduler = new SVR3Scheduler();
 
         this.pTableChangedEvent = new Event();
+        this.startVisualizationEvent = new Event();
         
-        //this.scheduler.addProcess(1000, 80, 20, 50);
-        //this.scheduler.addProcess(1200, 20, 80, 65);
     }
 
     
@@ -18,22 +17,13 @@ class Simulation {
         this.pTableChangedEvent.trigger(this.scheduler.processTable);
     }
 
+    startSimulation() {
+        console.log("Start simulation");
+        // TODO: Esto enviará el primer estado
+        this.startVisualizationEvent.trigger();
+    }
+
 
 }
 
 export default Simulation;
-
-
-/**
- *         this.form.addEventListener('submit', event => {
-            event.preventDefault();
-            this.addProcessEvent.trigger({
-                burst: this.inputBurst.value,
-                cpu_cycle: this.inputCPU.value,
-                io_cycle: this.inputIO.value,
-                pri: this.inputPriority.value
-            });
-            this._resetInput();
-        });
- * 
- */
