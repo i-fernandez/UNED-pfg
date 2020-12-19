@@ -12,7 +12,7 @@ class View {
         this.title = document.createElement('h1');
         this.title.textContent = "SVR3 : Add Process";
         this.form = document.createElement('form');
-        // TODO: Validacion de datos de entrada
+        // TODO: Validacion de datos de entrada (rangos y no vacios)
         this.inputPriority = document.createElement('input');
         this.inputPriority.type = 'number';
         this.inputPriority.placeholder = 'prioridad';
