@@ -19,9 +19,9 @@ class Controller {
             this.view.displayProcessTable(pTable);
         });
 
-        this.model.startVisualizationEvent.addListener(() => {
+        this.model.startVisualizationEvent.addListener(state => {
             // TODO: Enviar evento
-            this.view._showStart();    
+            this.view._showStart(state);    
         });
     }
 

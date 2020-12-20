@@ -26,16 +26,17 @@ class Simulation {
     // comun
     startSimulation() {
         console.log("Start simulation");
-        // TODO: Esto enviará el primer estado
-        this.startVisualizationEvent.trigger();
-
-        // Envia el estado inicial
+        // Añade el estado inicial
         this.states.push(this.scheduler.start());
         this.states[0].printData();
-
+        
+        // Genera todos los estados
         // while (!(this.scheduler.isFinished())) {
             //this.states.push(this.scheduler.nextTick());
         //}
+
+        // Envia el primer estado
+        this.startVisualizationEvent.trigger(this.states.pop());
 
     }
 

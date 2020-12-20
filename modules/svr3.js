@@ -30,19 +30,32 @@ class Svr3Scheduler {
         let pr = new Svr3Process(
             this.processTable.length+1, burst, cpu_cycle, io_cycle, pri);
         this.processTable.push(pr);
+        this._enqueueProcess(pr);
+    }
 
+    // Añade un proceso a la cola, modifica qs y whichqs (y los ordena)
+    _enqueueProcess(process) {
         // Numero de cola
-        let qn = Math.floor(pri / 4);
+        let qn = Math.floor(process.p_pri / 4);
         // whichqs
         if (!(this.whichqs.includes(qn))) {
             this.whichqs.push(qn);
         }
+        this.whichqs.sort();
+
         // qs
         let queue = this.qs.find(item => item.priority == qn);
         if (queue)
-            queue.enqueue(pr);
+            queue.enqueue(process);
         else
-            this.qs.push(new PriorityQueue(pri, pr));
+            this.qs.push(new PriorityQueue(qn, process));
+        this.qs.sort(function (a, b) {
+            if (a.priority > b.priority)
+                return 1;
+            if (a.priority < b.priority)
+                return -1;
+            return 0;
+        });
     }
 
     printData() {
