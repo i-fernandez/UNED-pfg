@@ -18,6 +18,14 @@ body {
     margin: 10px;
     display: inline;
 }
+.startButton {
+    background: rgb(4, 99, 4);
+    color: white;
+    border: 2px solid rgb(4, 99, 4);
+}
+.startDiv {
+    text-align: center;
+}
 .pr_zombie {
     background: rgb(54, 52, 52);
     color: white;
@@ -34,13 +42,16 @@ body {
 .pr_ready {
     background: rgb(236, 116, 116);
 }
+.no-wrap {
+    white-space: pre-wrap;
+  }
 
 h1 {
     color: rgb(39, 90, 228);
 
 }
 button {
-    margin: 10px;
+    margin: 20px;
     background:  rgb(39, 90, 228);
     color: white;
     border: 2px solid rgb(39, 90, 228);
@@ -49,14 +60,12 @@ button:hover {
     border: 2px solid rgb(0, 0, 0);
 }
 #header {
-    height:100px;
+    margin: 0px;
+    height:80px;
     background:rgb(4, 99, 4);
 }
-#startButton {
-    background: rgb(4, 99, 4);
-    color: white;
-    border: 2px solid rgb(4, 99, 4);
+body {
+    margin: 10px;
 }
-#startDiv {
-    text-align: center;
-}
+
+

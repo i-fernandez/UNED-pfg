@@ -7,6 +7,7 @@ class Svr3Scheduler {
         this.qs = [];
         this.processTable = [];
         this.runrun = false;
+        this.journal = [];
 
         // Datos de ejemplo
         /** 
@@ -58,6 +59,25 @@ class Svr3Scheduler {
         });
     }
 
+    // Elige un proceso para ser planificado y lo desencola
+    _dequeueProcess() {
+        let qn = this.whichqs[0];
+        let queue = this.qs.find(item => item.priority == qn);
+        if (queue) {
+            let pr = queue.dequeue();
+            if (queue.isEmpty()) {
+                // modifica el bit de whichqs
+                this.whichqs.shift();
+                // elimina la cola de qs
+                this.qs.shift();
+            }
+                
+            this.journal.push("Seleccionado proceso pid: " + 
+                pr.pid + " para ejecucion");
+            return pr;
+        }
+    }
+
     printData() {
         this.processTable.forEach(pr => {  
             pr.printData();
@@ -65,7 +85,11 @@ class Svr3Scheduler {
     }
 
     start() {
+        this.journal.push("Inicio de la ejecucion");
+        let pr = this._dequeueProcess();
+        pr.state = "running_user";
         return this._generateState();
+        //this.journal = [];
     }
 
     nextTick() {
@@ -77,7 +101,7 @@ class Svr3Scheduler {
     }
 
     _generateState() {
-        return new Svr3State(this.time, "Inicio", this.processTable, 
+        return new Svr3State(this.time, this.journal, this.processTable, 
             this.qs, this.whichqs, this.runrun);
     }
 
@@ -104,9 +128,9 @@ class Svr3Process {
 }
 
 class Svr3State {
-    constructor(time, text, pTable, qs, whichqs, runrun) {
+    constructor(time, journal, pTable, qs, whichqs, runrun) {
         this.time = time;
-        this.text = text;
+        this.journal = journal;
         this.pTable = pTable;
         this.qs = qs;
         this.whichqs = whichqs;
@@ -114,7 +138,7 @@ class Svr3State {
     }
 
     printData() {
-        console.log("time: " + this.time + " text: " + this.text + 
+        console.log("time: " + this.time + " text: " + this.journal + 
             " pTable: " + this.pTable + " qs: " + this.qs + 
             " whichqs: " + this.whichqs + " runrun: " + this.runrun);
     }
