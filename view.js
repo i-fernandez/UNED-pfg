@@ -2,8 +2,11 @@ import Event from './event.js';
 
 class View {
     constructor() {
-        this.addProcessEvent = new Event();
+        this.addSVR3ProcessEvent = new Event();
+        this.addSVR4ProcessEvent = new Event();
         this.startSimulationEvent = new Event();
+        this.newSVR3Event = new Event();
+        this.newSVR4Event = new Event();
     }
 
     render() {
@@ -18,11 +21,17 @@ class View {
         this.sel_svr3 = document.createElement('li');
         this.sel_svr3.textContent = 'SVR 3';
         this.sel_svr3.classList.add('header-menu-li');
-        this.sel_svr3.addEventListener('click', event => {this._showSvr3Add();});
+        this.sel_svr3.addEventListener('click', event => {
+            this._showSvr3Add();
+            this.newSVR3Event.trigger();
+        });
         this.sel_svr4 = document.createElement('li');
         this.sel_svr4.textContent = 'SVR 4';
         this.sel_svr4.classList.add('header-menu-li');
-        this.sel_svr4.addEventListener('click', event => {this._showSvr4Add();});
+        this.sel_svr4.addEventListener('click', event => {
+            this._showSvr4Add();
+            this.newSVR4Event.trigger();
+        });
         this._append(this.sch_selector,
             [this.sel_svr3, this.sel_svr4]);
         //this.sch_selector.appendChild(this.sel_svr3);
@@ -30,20 +39,12 @@ class View {
         this.header_menu.appendChild(this.sch_selector);
         this.addproc_div = document.createElement('div');
         this.states_div = document.createElement('div');
-        
-        /*
-        document.body.appendChild(this.header);
-        document.body.appendChild(this.header_menu);
-        document.body.appendChild(this.addproc_div);
-        document.body.appendChild(this.states_div);
-        */
-
         this._append(document.body, 
             [this.header, this.header_menu, this.addproc_div, this.states_div]);
 
         this._createSvr3Add();
         this._createSvr4Add();
-        this._showSvr3Add();
+        //this._showSvr3Add();
     }
 
     _createSvr3Add() {
@@ -52,7 +53,7 @@ class View {
         this.form_svr3 = document.createElement('form');
         this.form_svr3.addEventListener('submit', event => {
             event.preventDefault();
-            this.addProcessEvent.trigger(this._getSvr3Input());
+            this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
             this._resetSvr3Input();
         });
 
@@ -75,14 +76,6 @@ class View {
         this.inputIO_svr3.classList.add('inputProcess','svr3-input');
         this.submitButton_svr3 = document.createElement('button');
         this.submitButton_svr3.textContent = 'Add process';
-        /*
-        this.form_svr3.appendChild(this.inputPriority_svr3);
-        this.form_svr3.appendChild(this.inputBurst_svr3);
-        this.form_svr3.appendChild(this.inputCPU_svr3);
-        this.form_svr3.appendChild(this.inputIO_svr3);
-        this.form_svr3.appendChild(this.submitButton_svr3);
-        */
-        
         this._append(this.form_svr3, 
             [this.inputPriority_svr3, this.inputBurst_svr3, 
             this.inputCPU_svr3, this.inputIO_svr3, this.submitButton_svr3]);
@@ -97,19 +90,16 @@ class View {
         this.startButton_svr3.classList.add('startButton');
         this.startButton_svr3.style.display = "none";
         this.startButton_svr3.addEventListener('click', () => {
-            console.log("Starting SVR3...");
+            //console.log("Starting SVR3...");
             this.startSimulationEvent.trigger();
         });
         this.startDiv_svr3.appendChild(this.startButton_svr3);
 
         this._append(this.addproc_div,
             [this.title_svr3, this.form_svr3, this.table_svr3, this.startDiv_svr3]);
-        /*
-        this.addproc_div.appendChild(this.title_svr3);
-        this.addproc_div.appendChild(this.form_svr3);
-        this.addproc_div.appendChild(this.table_svr3);
-        this.addproc_div.appendChild(this.startDiv_svr3);
-        */
+
+        // Inicialmente ocultos
+        this._hideSvr3Add();
     }
 
     _createSvr4Add() {
@@ -118,7 +108,7 @@ class View {
         this.form_svr4 = document.createElement('form');
         this.form_svr4.addEventListener('submit', event => {
             event.preventDefault();
-            //this.addProcessEvent.trigger(this._getInputData());
+            this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
             this._resetSvr4Input();
         });
         // TODO: Validacion de datos de entrada (rangos y no vacios)
@@ -138,19 +128,24 @@ class View {
         this.inputIO_svr4.type = 'number';
         this.inputIO_svr4.placeholder = 'ciclo io (4)';
         this.inputIO_svr4.classList.add('inputProcess','svr4-input');
+        this.classSel = document.createElement('select');
+        
+        let option_rt = document.createElement("option");
+        option_rt.value = "1";
+        option_rt.innerHTML = "Real Time";
+        let option_ts = document.createElement("option");
+        option_ts.value = "2";
+        option_ts.innerHTML = "Time Sharing";
+        this._append(this.classSel, [option_rt, option_ts]);
+        
+        
+
+
         this.submitButton_svr4 = document.createElement('button');
         this.submitButton_svr4.textContent = 'Add process';
-        
-        /*
-        this.form_svr4.appendChild(this.inputPriority_svr4);
-        this.form_svr4.appendChild(this.inputBurst_svr4);
-        this.form_svr4.appendChild(this.inputCPU_svr4);
-        this.form_svr4.appendChild(this.inputIO_svr4);
-        this.form_svr4.appendChild(this.submitButton_svr4);
-        */
         this._append(this.form_svr4, 
-            [this.inputPriority_svr4, this.inputBurst_svr4, 
-            this.inputCPU_svr4, this.inputIO_svr4, this.submitButton_svr4]);
+            [this.inputBurst_svr4, this.inputCPU_svr4, this.inputIO_svr4, 
+            this.classSel, this.inputPriority_svr4, this.submitButton_svr4]);
 
         this.table_svr4 = document.createElement('table');
         this.startDiv_svr4 = document.createElement('div');
@@ -166,16 +161,9 @@ class View {
             //this.startSimulationEvent.trigger();
         });
         this.startDiv_svr3.appendChild(this.startButton_svr4);
-
-
-        /*
-        this.addproc_div.appendChild(this.title_svr4);
-        this.addproc_div.appendChild(this.form_svr4);
-        this.addproc_div.appendChild(this.table_svr4);
-        this.addproc_div.appendChild(this.startDiv_svr4);
-        */
         this._append(this.addproc_div,
             [this.title_svr4, this.form_svr4, this.table_svr4, this.startDiv_svr4]);
+        this._hideSvr4Add();
     }
 
     _showSvr3Add() {
@@ -218,6 +206,19 @@ class View {
         }
         return data;
     }
+
+    _getSvr4Input() {
+        let pc = "RealTime"
+        if (parseInt(this.classSel.value, 10) === 2) {pc = "TimeSharing";}
+        let data = {
+            burst: parseInt(this.inputBurst_svr4.value, 10),
+            cpu_cycle: parseInt(this.inputCPU_svr4.value, 10),
+            io_cycle: parseInt(this.inputIO_svr4.value, 10),
+            pri: parseInt(this.inputPriority_svr4.value, 10),
+            pClass: pc
+        }
+        return data;
+    }
     
     _resetSvr3Input() {
         this.inputPriority_svr3.value = '';
@@ -249,17 +250,7 @@ class View {
         this.qs = document.createElement('ul');
         this.runrun = document.createElement('p');
         this.table_svr3 = document.createElement('table');
-        /*
-        this.states_div.appendChild(title);
-        this.states_div.appendChild(this.time);
-        this.states_div.appendChild(this.whichqs);
-        this.states_div.appendChild(this.qsTitle);
-        this.states_div.appendChild(this.qs);
-        this.states_div.appendChild(this.runrun);
-        this.states_div.appendChild(this.table_svr3);
-        this.states_div.appendChild(this.text);
-        this.states_div.appendChild(this.events);
-        */
+
         this._append(this.states_div, 
             [title, this.time, this.whichqs, this.qsTitle, this.qs, 
             this.runrun, this.table_svr3, this.text, this.events]);
@@ -315,6 +306,7 @@ class View {
         }
     }
 
+    // Darle una vuelta para que sea comun a ambos planificadores
     displayProcessTable(pTable) {
         // Delete all nodes
         while (this.table_svr3.firstChild) {

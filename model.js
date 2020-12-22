@@ -1,25 +1,30 @@
 import SVR3Scheduler from './modules/svr3.js'
+import SVR4Scheduler from './modules/svr4.js'
 import Event from './event.js';
 
 class Simulation {
     constructor() {
-        // Sacar de aqui
-        this.scheduler = new SVR3Scheduler();
-
         // Lista de estados
         this.states = [];
-
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
-        
     }
 
     
-    // Separar por tipo scheduler
-    // burst, cpu_cycle, io_cycle, pri
+
     addProcess(data) {
-        this.scheduler.addProcess(data.burst, data.cpu_cycle, data.io_cycle, data.pri);
+        this.scheduler.addProcess(data);
         this.pTableChangedEvent.trigger(this.scheduler.processTable);
+    }
+
+    createSVR3() {
+        this.scheduler = new SVR3Scheduler(this.states);
+        console.log("New SVR3Scheduler");
+    }
+
+    createSVR4() {
+        this.scheduler = new SVR4Scheduler(this.states);
+        console.log("New SVR4Scheduler");
     }
 
 

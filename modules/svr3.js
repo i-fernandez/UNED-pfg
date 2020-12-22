@@ -1,13 +1,14 @@
 import PriorityQueue from './priorityqueue.js'
 
 class Svr3Scheduler {
-    constructor() {
+    constructor(states) {
         this.time = 0;
         this.whichqs = [];
         this.qs = [];
         this.processTable = [];
         this.runrun = false;
         this.journal = [];
+        this.states = states;
 
         // Datos de ejemplo
         /** 
@@ -27,9 +28,9 @@ class Svr3Scheduler {
     }
 
     
-    addProcess(burst, cpu_cycle, io_cycle, pri) {
+    addProcess(data) {
         let pr = new Svr3Process(
-            this.processTable.length+1, burst, cpu_cycle, io_cycle, pri);
+            this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pri);
         this.processTable.push(pr);
         this._enqueueProcess(pr);
     }
