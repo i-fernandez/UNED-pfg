@@ -14,7 +14,7 @@ class Svr4Scheduler {
 
     addProcess(data) {
         let pr = new Svr4Process(
-            this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pri, data.pClass);
+            this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pClass, data.pri);
         this.processTable.push(pr);
         //this._enqueueProcess(pr);
     }

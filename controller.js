@@ -27,14 +27,22 @@ class Controller {
             this.model.createSVR4();
         });
 
+        this.view.nextStateEvent.addListener(() => {
+            this.model._getNextState();
+        });
+
+        this.view.previousStateEvent.addListener(() => {
+            this.model._getPreviousState();
+        });
+
         this.model.pTableChangedEvent.addListener(pTable => {
             this.view.displayProcessTable(pTable);
         });
 
-        this.model.startVisualizationEvent.addListener(state => {
-            // TODO: Enviar evento
-            this.view._showStart(state);    
+        this.model.startVisualizationEvent.addListener(() => {
+            this.view._createStart();
         });
+        
     }
 
     run() {

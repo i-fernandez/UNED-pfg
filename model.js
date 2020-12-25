@@ -6,11 +6,15 @@ class Simulation {
     constructor() {
         // Lista de estados
         this.states = [];
+        this.currentState = 0;
+        //this.load();
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
     }
 
-    
+    load() {
+        
+    }
 
     addProcess(data) {
         this.scheduler.addProcess(data);
@@ -40,11 +44,26 @@ class Simulation {
             //this.states.push(this.scheduler.nextTick());
         //}
 
+        // Avisa para mostrar datos
+        this.startVisualizationEvent.trigger();
+
         // Envia el primer estado
-        this.startVisualizationEvent.trigger(this.states.pop());
 
     }
 
+    _getNextState() {
+        if (this.currentState+1 < this.states.length) 
+            this.currentState++;
+        
+        return states[this.currentState];
+    }
+
+    _getPreviousState() {
+        if (this.currentState > 0) 
+            this.currentState--;
+        
+        return states[this.currentState];
+    }
 
 }
 
