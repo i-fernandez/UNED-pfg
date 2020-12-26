@@ -2,6 +2,7 @@ import PriorityQueue from './priorityqueue.js'
 
 class Svr3Scheduler {
     constructor(states) {
+        this.name = "SVR3";
         this.time = 0;
         this.whichqs = [];
         this.qs = [];
@@ -116,7 +117,7 @@ class Svr3Process {
         this.cpu_cycle = cpu_cycle;
         this.io_cycle = io_cycle;
         this.p_pri = pri;
-        this.usrpri = pri;
+        this.p_usrpri = pri;
         this.p_cpu = 0;
         this.p_nice = 20;
         this.wait_time = 0;

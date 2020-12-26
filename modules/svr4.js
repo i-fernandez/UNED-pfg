@@ -2,6 +2,7 @@ import PriorityQueue from './priorityqueue.js'
 
 class Svr4Scheduler {
     constructor(states) {
+        this.name = "SVR4";
         this.time = 0;
         this.dqactmap = [];
         this.dispq = [];
@@ -16,7 +17,72 @@ class Svr4Scheduler {
         let pr = new Svr4Process(
             this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pClass, data.pri);
         this.processTable.push(pr);
-        //this._enqueueProcess(pr);
+        this._enqueueProcess(pr);
+    }
+
+    // Añade un proceso a la cola, modifica dispq y dqactmap (y los ordena)
+    _enqueueProcess(process) {
+        // Numero de cola
+        let qn = Math.floor(process.pri / 4);
+        // dqactmap
+        if (!(this.dqactmap.includes(qn))) {
+            this.dqactmap.push(qn);
+        }
+        this.dqactmap.sort();
+
+        // dispq
+        let queue = this.dispq.find(item => item.priority == qn);
+        if (queue)
+            queue.enqueue(process);
+        else
+            this.dispq.push(new PriorityQueue(qn, process));
+        this.dispq.sort(function (a, b) {
+            if (a.priority > b.priority)
+                return 1;
+            if (a.priority < b.priority)
+                return -1;
+            return 0;
+        });
+    }
+
+    // Elige un proceso para ser planificado y lo desencola
+    _dequeueProcess() {
+        let qn = this.dqactmap[0];
+        let queue = this.dispq.find(item => item.priority == qn);
+        if (queue) {
+            let pr = queue.dequeue();
+            if (queue.isEmpty()) {
+                // modifica el bit de dqactmap
+                this.dqactmap.shift();
+                // elimina la cola de dispq
+                this.dispq.shift();
+            }
+                
+            this.journal.push("Seleccionado proceso pid: " + 
+                pr.pid + " para ejecucion");
+            return pr;
+        }
+    }
+
+    start() {
+        this.journal.push("Inicio de la ejecucion");
+        let pr = this._dequeueProcess();
+        pr.state = "running_user";
+        return this._generateState();
+        //this.journal = [];
+    }
+
+    nextTick() {
+        // return state
+    }
+
+    isFinished() {
+        // return bool
+    }
+
+    _generateState() {
+        return new Svr4State(this.time, this.journal, this.processTable, 
+            this.dispq, this.dqactmap, this.runrun);
     }
 }
 
@@ -37,6 +103,14 @@ class Svr4Process {
 
 
 class Svr4State {
+    constructor(time, journal, pTable, dispq, dqactmap, runrun) {
+        this.time = time;
+        this.journal = journal;
+        this.pTable = pTable;
+        this.dispq = dispq;
+        this.dqactmap = dqactmap;
+        this.runrun = runrun;
+    }
 }
 
 

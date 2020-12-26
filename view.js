@@ -36,9 +36,7 @@ class View {
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
-        this._append(this.sch_selector,
-            [this.sel_svr3, this.sel_svr4]);
-
+        this._append(this.sch_selector, [this.sel_svr3, this.sel_svr4]);
         this.header_menu.appendChild(this.sch_selector);
         this.addproc_div = document.createElement('div');
         this.addTitle = document.createElement('h1');
@@ -47,6 +45,14 @@ class View {
         this.startDiv = document.createElement('div');
         this.startDiv.classList.add('startDiv');
         this.startDiv.style.display = "none";
+        this.startButton = document.createElement('button');
+        this.startButton.textContent = 'Start';
+        this.startButton.classList.add('startButton');
+        this.startButton.addEventListener('click', () => {
+            this._createStart();
+            this.startSimulationEvent.trigger();
+        });
+        this.startDiv.appendChild(this.startButton);
         this._append(this.addproc_div, 
             [this.addTitle, this.addForm, this.addTable, this.startDiv]);
         this.states_div = document.createElement('div');
@@ -60,6 +66,7 @@ class View {
 
     _createSvr3Add() {
         // TODO: Validacion de datos de entrada (rangos y no vacios)
+        // TODO: Opcion para eliminar un proceso
         this.inputPriority_svr3 = document.createElement('input');
         this.inputPriority_svr3.type = 'number';
         this.inputPriority_svr3.placeholder = 'prioridad';
@@ -76,27 +83,17 @@ class View {
         this.inputIO_svr3.type = 'number';
         this.inputIO_svr3.placeholder = 'ciclo io';
         this.inputIO_svr3.classList.add('inputProcess');
-        this.submitButton_svr3 = document.createElement('button');
-        this.submitButton_svr3.textContent = 'Add process';
-        this.submitButton_svr3.addEventListener('click', event => {
+        this.addButton_svr3 = document.createElement('button');
+        this.addButton_svr3.textContent = 'Add process';
+        this.addButton_svr3.classList.add('addButton');
+        this.addButton_svr3.addEventListener('click', event => {
             event.preventDefault();
             this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
             this._resetSvr3Input();
         });
         this._append(this.addForm, 
             [this.inputPriority_svr3, this.inputBurst_svr3, 
-            this.inputCPU_svr3, this.inputIO_svr3, this.submitButton_svr3]);
-        this.startButton_svr3 = document.createElement('button');
-        this.startButton_svr3.id = 'startButton';
-        this.startButton_svr3.textContent = 'Start';
-        this.startButton_svr3.classList.add('startButton');
-        this.startButton_svr3.style.display = "none";
-        this.startButton_svr3.addEventListener('click', () => {
-            //console.log("Starting SVR3...");
-            this.startSimulationEvent.trigger();
-            this._createStart();
-        });
-        this.startDiv.appendChild(this.startButton_svr3);
+            this.inputCPU_svr3, this.inputIO_svr3, this.addButton_svr3]);
     }
 
     _createSvr4Add() {
@@ -125,27 +122,17 @@ class View {
         option_ts.value = "2";
         option_ts.innerHTML = "Time Sharing";
         this._append(this.classSel, [option_rt, option_ts]);
-        this.submitButton_svr4 = document.createElement('button');
-        this.submitButton_svr4.textContent = 'Add process';
-        this.submitButton_svr4.addEventListener('click', event => {
+        this.addButton_svr4 = document.createElement('button');
+        this.addButton_svr4.textContent = 'Add process';
+        this.addButton_svr4.classList.add('addButton');
+        this.addButton_svr4.addEventListener('click', event => {
             event.preventDefault();
             this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
             this._resetSvr4Input();
         });
         this._append(this.addForm, 
             [this.inputBurst_svr4, this.inputCPU_svr4, this.inputIO_svr4, 
-            this.classSel, this.inputPriority_svr4, this.submitButton_svr4]);
-        this.startButton_svr4 = document.createElement('button');
-        this.startButton_svr4.id = 'startButton';
-        this.startButton_svr4.textContent = 'Start';
-        this.startButton_svr4.classList.add('startButton');
-        this.startButton_svr4.style.display = "none";
-        this.startButton_svr4.addEventListener('click', () => {
-            console.log("Starting SVR4...");
-            this.startSimulationEvent.trigger();
-            this._createStart();
-        });
-        this.startDiv.appendChild(this.startButton_svr4);
+            this.classSel, this.inputPriority_svr4, this.addButton_svr4]);
     }
 
     _showSvr3Add() {
@@ -155,9 +142,7 @@ class View {
         this.inputCPU_svr3.style.display = "inline";
         this.inputIO_svr3.style.display = "inline";
         this.inputPriority_svr3.style.display = "inline";
-        this.submitButton_svr3.style.display = "inline";
-        this.startButton_svr3.style.display = "inline";
-        this.startDiv.style.display = "none";
+        this.addButton_svr3.style.display = "inline";
     }
 
     _showSvr4Add() {
@@ -167,10 +152,8 @@ class View {
         this.inputCPU_svr4.style.display = "inline";
         this.inputIO_svr4.style.display = "inline";
         this.inputPriority_svr4.style.display = "inline";
-        this.submitButton_svr4.style.display = "inline";
+        this.addButton_svr4.style.display = "inline";
         this.classSel.style.display = "inline";
-        this.startButton_svr4.style.display = "inline";
-        this.startDiv.style.display = "none";
     }
 
     _hideSvr3Add() {
@@ -179,8 +162,7 @@ class View {
         this.inputCPU_svr3.style.display = "none";
         this.inputIO_svr3.style.display = "none";
         this.inputPriority_svr3.style.display = "none";
-        this.submitButton_svr3.style.display = "none";
-        this.startButton_svr3.style.display = "none";
+        this.addButton_svr3.style.display = "none";
     }
 
     _hideSvr4Add() {
@@ -190,8 +172,7 @@ class View {
         this.inputIO_svr4.style.display = "none";
         this.inputPriority_svr4.style.display = "none";
         this.classSel.style.display = "none";
-        this.submitButton_svr4.style.display = "none";
-        this.startButton_svr4.style.display = "none";
+        this.addButton_svr4.style.display = "none";
     }
 
     _clearPTable() {
@@ -242,45 +223,78 @@ class View {
     _createStart() {
         this._hideAddProcess();
         const title = document.createElement('h1');
-        title.textContent = "Let's go";
+        title.textContent = "Estados";
         this.time = document.createElement('p');
-        this.text = document.createElement('p');
-        this.text.textContent = "Eventos:"
-        this.events = document.createElement('ul');
-        this.runrun = document.createElement('p');
         this.arrayQueue = document.createElement('p');
         this.pqTitle = document.createElement('p');
         this.priorityQueue = document.createElement('ul');
+        this.runrun = document.createElement('p');
         this.pTable = document.createElement('table');
+        this.text = document.createElement('p');
+        this.text.textContent = "Eventos:"
+        this.events = document.createElement('ul');
+        this.navigation_div = document.createElement('div');
+        this.prev = document.createElement('button');
+        this.prev.textContent = 'Anterior';
+        this.prev.classList.add('navigationButton');
+        this.prev.addEventListener('click', () => {
+            console.log("Previous");
+        });
+        this.next = document.createElement('button');
+        this.next.textContent = 'Siguiente';
+        this.next.classList.add('navigationButton');
+        this.next.addEventListener('click', () => {
+            console.log("Next");
+        });
+        this._append(this.navigation_div, [this.prev, this.next]);
         this._append(this.states_div,
             [title, this.time, this.arrayQueue, this.pqTitle, this.priorityQueue, 
-            this.runrun, this.pTable, this.text, this.events]);
+            this.runrun, this.pTable, this.text, this.events, this.navigation_div]);
     }
-   
-    _showSvr3State(state) {
-        // Rellena los elementos creados en _showStart
+
+    showState(data) {
+        // Campos comunes
+        let state = data.state;
         this.time.textContent = "Time: " + state.time + " ut";
-        //this.text.textContent = "Eventos: \n" + state.text;
+        this.runrun.textContent = "runrun: " + state.runrun;
+        this._displayProcessTable(state.pTable, this.pTable);
         state.journal.forEach(entry => {
             let li = document.createElement('li');
             li.innerHTML = entry;
             this.events.appendChild(li);
         });
-        this.whichqs.textContent = "whichqs: " + state.whichqs;
-        this.qsTitle.textContent = "qs:";
+
+        // Campos especificos
+        if (data.name == "SVR3") 
+            this._showSvr3State(state);
+        else if (data.name == "SVR4") 
+            this._showSvr4State(state);
+    }
+   
+    _showSvr3State(state) {
+        this.arrayQueue.textContent = "whichqs: " + state.whichqs;
+        this.pqTitle.textContent = "qs:";
         state.qs.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
             item.items.forEach(pr => {listaProc += pr.p_pri + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
-            this.qs.appendChild(li);
+            this.priorityQueue.appendChild(li);
         });
-        this.runrun.textContent = "runrun: " + state.runrun;
-        this.displayProcessTable(state.pTable);
+        
+        
     }
 
     _showSvr4State(state) {
-
+        this.arrayQueue.textContent = "dqactmap: " + state.dqactmap;
+        this.pqTitle.textContent = "dispq:";
+        state.dispq.forEach(item => {
+            let li = document.createElement('li');
+            let listaProc = "";
+            item.items.forEach(pr => {listaProc += pr.pri + " ";});
+            li.innerHTML = item.priority + " -> " + listaProc;
+            this.priorityQueue.appendChild(li);
+        });
     }
 
     _hideAddProcess() {
@@ -306,22 +320,14 @@ class View {
         }
     }
 
-    // Darle una vuelta para que sea comun a ambos planificadores
-    displayProcessTable(pTable) {
-        // Delete all nodes
-        this._clearPTable();
-        /*
-        while (this.addTable.firstChild) {
-            this.addTable.removeChild(this.addTable.firstChild);
-        }
-        */
 
+    _displayProcessTable(pTable, domElement) {
+        while (domElement.firstChild) {
+            domElement.removeChild(this.addTable.firstChild);
+        }
         if (pTable.length > 0) {
-            // TODO: Sacar el startbutton de aqui para reaprovechar esta funcion
-            this.startDiv.style.display = "block";
-            //this.startButton_svr3.style.display = "inline";
-            this.thead = this.addTable.createTHead();
-            this.tbody = this.addTable.createTBody();
+            this.thead = domElement.createTHead();
+            this.tbody = domElement.createTBody();
             // Table head
             let row = this.thead.insertRow();
             let data = Object.keys(pTable[0]);
@@ -342,6 +348,13 @@ class View {
                 }
             });
         }
+    }
+
+    pTableChanged(pTable) {
+        if(pTable.length > 0) 
+            this.startDiv.style.display = "block";
+        
+        this._displayProcessTable(pTable, this.addTable);
     }
 
     _append(parent, elements) {

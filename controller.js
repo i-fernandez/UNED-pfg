@@ -28,19 +28,19 @@ class Controller {
         });
 
         this.view.nextStateEvent.addListener(() => {
-            this.model._getNextState();
+            this.model.getNextState();
         });
 
         this.view.previousStateEvent.addListener(() => {
-            this.model._getPreviousState();
+            this.model.getPreviousState();
         });
 
         this.model.pTableChangedEvent.addListener(pTable => {
-            this.view.displayProcessTable(pTable);
+            this.view.pTableChanged(pTable);
         });
 
-        this.model.startVisualizationEvent.addListener(() => {
-            this.view._createStart();
+        this.model.startVisualizationEvent.addListener(data => {
+            this.view.showState(data);
         });
         
     }

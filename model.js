@@ -12,10 +12,7 @@ class Simulation {
         this.startVisualizationEvent = new Event();
     }
 
-    load() {
-        
-    }
-
+ 
     addProcess(data) {
         this.scheduler.addProcess(data);
         this.pTableChangedEvent.trigger(this.scheduler.processTable);
@@ -35,30 +32,31 @@ class Simulation {
     // comun
     startSimulation() {
         console.log("Start simulation");
-        // Añade el estado inicial
+
+        // Añade el estado inicial [BORRAR]
         this.states.push(this.scheduler.start());
-        this.states[0].printData();
         
         // Genera todos los estados
         // while (!(this.scheduler.isFinished())) {
             //this.states.push(this.scheduler.nextTick());
         //}
 
-        // Avisa para mostrar datos
-        this.startVisualizationEvent.trigger();
-
         // Envia el primer estado
+        this.startVisualizationEvent.trigger({
+            state: this.states[0], 
+            name: this.scheduler.name
+        });
 
     }
 
-    _getNextState() {
+    getNextState() {
         if (this.currentState+1 < this.states.length) 
             this.currentState++;
         
         return states[this.currentState];
     }
 
-    _getPreviousState() {
+    getPreviousState() {
         if (this.currentState > 0) 
             this.currentState--;
         
