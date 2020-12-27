@@ -6,7 +6,14 @@ class Controller {
         this.model = new Simulation;
         this.view = new View;
 
-        // Listeners de eventos
+        this.view.newSVR3Event.addListener(() => {
+            this.model.createSVR3();
+        });
+
+        this.view.newSVR4Event.addListener(() => {
+            this.model.createSVR4();
+        });
+
         this.view.addSVR3ProcessEvent.addListener(data => {
             this.model.addProcess(data);
         });
@@ -19,14 +26,6 @@ class Controller {
             this.model.startSimulation();
         });
 
-        this.view.newSVR3Event.addListener(() => {
-            this.model.createSVR3();
-        });
-
-        this.view.newSVR4Event.addListener(() => {
-            this.model.createSVR4();
-        });
-
         this.view.nextStateEvent.addListener(() => {
             this.model.getNextState();
         });
@@ -34,6 +33,7 @@ class Controller {
         this.view.previousStateEvent.addListener(() => {
             this.model.getPreviousState();
         });
+
 
         this.model.pTableChangedEvent.addListener(pTable => {
             this.view.pTableChanged(pTable);

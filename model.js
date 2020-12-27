@@ -4,12 +4,14 @@ import Event from './event.js';
 
 class Simulation {
     constructor() {
-        // Lista de estados
-        this.states = [];
-        this.currentState = 0;
-        //this.load();
+        this._init();
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
+    }
+
+    _init() {
+        this.states = [];
+        this.currentState = 0;
     }
 
  
@@ -19,17 +21,16 @@ class Simulation {
     }
 
     createSVR3() {
+        this._init();
         this.scheduler = new SVR3Scheduler(this.states);
-        console.log("New SVR3Scheduler");
     }
 
     createSVR4() {
+        this._init();
         this.scheduler = new SVR4Scheduler(this.states);
-        console.log("New SVR4Scheduler");
     }
 
 
-    // comun
     startSimulation() {
         console.log("Start simulation");
 
@@ -49,6 +50,7 @@ class Simulation {
 
     }
 
+    // TODO: no esta completo
     getNextState() {
         if (this.currentState+1 < this.states.length) 
             this.currentState++;

@@ -28,8 +28,7 @@ class Svr4Scheduler {
         if (!(this.dqactmap.includes(qn))) {
             this.dqactmap.push(qn);
         }
-        this.dqactmap.sort();
-
+        this.dqactmap.sort(function(a, b) { return a - b;});
         // dispq
         let queue = this.dispq.find(item => item.priority == qn);
         if (queue)

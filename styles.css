@@ -12,6 +12,13 @@ body {
     position: relative;
     float: left;
     margin-right: 20px;
+    cursor: pointer;
+}
+.header-menu-li:hover {
+    color: rgb(4, 99, 4);    
+}
+.header-menu-sel {
+    border-bottom: 2px solid rgb(4, 99, 4);
 }
 .inputProcess {
     width: 90px;
@@ -24,22 +31,17 @@ body {
     color: white;
     border: 2px solid rgb(39, 90, 228);
 }
-Button:hover {
-    border: 2px solid rgb(0, 0, 0);
-}
 .startButton {
     background: rgb(4, 99, 4);
     color: white;
     border: 2px solid rgb(4, 99, 4);
 }
-
 .navigationButton {
     background: rgb(173, 68, 7);
     color: black;
-    height: 30px;
-    width: 100px;
+    margin: 20px;
 }
-.startDiv {
+.div-center {
     text-align: center;
 }
 .pr_zombie {
@@ -60,11 +62,21 @@ Button:hover {
 }
 .no-wrap {
     white-space: pre-wrap;
-  }
-
+ }
+ 
+Button:hover {
+    border: 2px solid rgb(0, 0, 0);
+}
+button {
+    width: 90px;
+    height: 30px;
+}
 h1 {
     color: rgb(39, 90, 228);
 
+}
+body {
+    margin: 10px;
 }
 
 #header {
@@ -72,8 +84,6 @@ h1 {
     height:80px;
     background:rgb(4, 99, 4);
 }
-body {
-    margin: 10px;
-}
+
 
 

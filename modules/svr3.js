@@ -44,8 +44,7 @@ class Svr3Scheduler {
         if (!(this.whichqs.includes(qn))) {
             this.whichqs.push(qn);
         }
-        this.whichqs.sort();
-
+        this.whichqs.sort(function(a, b) { return a - b;});
         // qs
         let queue = this.qs.find(item => item.priority == qn);
         if (queue)
@@ -73,7 +72,6 @@ class Svr3Scheduler {
                 // elimina la cola de qs
                 this.qs.shift();
             }
-                
             this.journal.push("Seleccionado proceso pid: " + 
                 pr.pid + " para ejecucion");
             return pr;
