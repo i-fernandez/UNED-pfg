@@ -69,8 +69,6 @@ class View {
         this._createStart();
         this._append(document.body, 
             [this.header, this.header_menu, this.addproc_div, this.states_div]);
-        
-
         this._createSvr3Add();
         this._createSvr4Add();
         this._hideSvr3Add();
@@ -78,7 +76,6 @@ class View {
     }
 
     _createSvr3Add() {
-        // TODO: Validacion de datos de entrada (rangos y no vacios)
         // TODO: Opcion para eliminar un proceso
         this.addForm_svr3 = document.createElement('form');
         this.addForm_svr3.addEventListener('submit', event => {
@@ -118,34 +115,44 @@ class View {
     }
 
     _createSvr4Add() {
-        // TODO: Validacion de datos de entrada (rangos y no vacios)
         this.addForm_svr4 = document.createElement('form');
         this.addForm_svr4.addEventListener('submit', event => {
             event.preventDefault();
-            this.addSVR3ProcessEvent.trigger(this._getSvr4Input());
-            this._resetSvr3Input();
+            this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
+            this._resetSvr4Input();
         });
         this.inputPriority_svr4 = document.createElement('input');
         this.inputPriority_svr4.type = 'number';
-        this.inputPriority_svr4.placeholder = 'prioridad (4)';
+        this.inputPriority_svr4.placeholder = 'prioridad';
         this.inputPriority_svr4.classList.add('inputProcess');
         this.inputPriority_svr4.required = true;
+        this.inputPriority_svr4.min = 100;
+        this.inputPriority_svr4.max = 159;
         this.inputBurst_svr4 = document.createElement('input');
         this.inputBurst_svr4.type = 'number';
-        this.inputBurst_svr4.placeholder = 't. ejecucion (4)';
+        this.inputBurst_svr4.placeholder = 't. ejecucion';
         this.inputBurst_svr4.classList.add('inputProcess');
         this.inputBurst_svr4.required = true;
         this.inputCPU_svr4 = document.createElement('input');
         this.inputCPU_svr4.type = 'number';
-        this.inputCPU_svr4.placeholder = 'ciclo cpu (4)';
+        this.inputCPU_svr4.placeholder = 'ciclo cpu';
         this.inputCPU_svr4.classList.add('inputProcess');
         this.inputCPU_svr4.required = true;
         this.inputIO_svr4 = document.createElement('input');
         this.inputIO_svr4.type = 'number';
-        this.inputIO_svr4.placeholder = 'ciclo io (4)';
+        this.inputIO_svr4.placeholder = 'ciclo io';
         this.inputIO_svr4.classList.add('inputProcess');
         this.inputIO_svr4.required = true;
         this.classSel = document.createElement('select');
+        this.classSel.addEventListener('change', event => {
+            if (this.classSel.value == 1) {
+                this.inputPriority_svr4.min = 100;
+                this.inputPriority_svr4.max = 159;
+            } else if (this.classSel.value ==  2) {
+                this.inputPriority_svr4.min = 0;
+                this.inputPriority_svr4.max = 59;
+            }
+        });
         let option_rt = document.createElement("option");
         option_rt.value = "1";
         option_rt.innerHTML = "Real Time";
@@ -202,7 +209,7 @@ class View {
 
     _getSvr4Input() {
         let pc = "RealTime"
-        if (parseInt(this.classSel.value, 10) === 2) {pc = "TimeSharing";}
+        if (this.classSel.value == 2) {pc = "TimeSharing";}
         let data = {
             burst: parseInt(this.inputBurst_svr4.value, 10),
             cpu_cycle: parseInt(this.inputCPU_svr4.value, 10),
@@ -233,7 +240,7 @@ class View {
         this.statesTitle = document.createElement('h1');;
         this.statesTitle.textContent = "Simulacion";
         this.time = document.createElement('p');
-        this.arrayQueue = document.createElement('p');
+        this.queue_div = document.createElement('div');
         this.pqTitle = document.createElement('p');
         this.priorityQueue = document.createElement('ul');
         this.runrun = document.createElement('p');
@@ -257,7 +264,7 @@ class View {
         });
         this._append(this.navigation_div, [this.prev, this.next]);
         this._append(this.states_div,
-            [this.statesTitle, this.time, this.arrayQueue, this.pqTitle, this.priorityQueue, 
+            [this.statesTitle, this.time, this.queue_div, this.pqTitle, this.priorityQueue, 
             this.runrun, this.pTable, this.text, this.events, this.navigation_div]);
     }
 
@@ -267,6 +274,18 @@ class View {
         this.time.textContent = "Time: " + state.time + " ut";
         this.runrun.textContent = "runrun: " + state.runrun;
         this._displayProcessTable(state.pTable, this.pTable);
+
+        // Limpia arrayQueue
+        while (this.queue_div.firstChild) {
+            this.queue_div.removeChild(this.queue_div.firstChild);
+        }
+        // Crea arrayQueue
+        let arrayQueue_div = document.createElement('div');
+        arrayQueue_div.id = "arrayQueue_div";
+        this.arrayQueue_p = document.createElement('p');
+        arrayQueue_div.appendChild(this.arrayQueue_p);
+        this.queue_div.appendChild(arrayQueue_div);
+
         // Limpia priorityQueue
         while (this.priorityQueue.firstChild) {
             this.priorityQueue.removeChild(this.priorityQueue.firstChild);
@@ -288,7 +307,7 @@ class View {
     }
    
     _showSvr3State(state) {
-        this.arrayQueue.textContent = "whichqs: " + state.whichqs;
+        this._showArrayQueue(state.whichqs, "whichqs: ", 32);
         this.pqTitle.textContent = "qs:";
         state.qs.forEach(item => {
             let li = document.createElement('li');
@@ -302,7 +321,7 @@ class View {
     }
 
     _showSvr4State(state) {
-        this.arrayQueue.textContent = "dqactmap: " + state.dqactmap;
+        this._showArrayQueue(state.dqactmap, "dqactmap: ", 160);
         this.pqTitle.textContent = "dispq:";
         state.dispq.forEach(item => {
             let li = document.createElement('li');
@@ -311,6 +330,24 @@ class View {
             li.innerHTML = item.priority + " -> " + listaProc;
             this.priorityQueue.appendChild(li);
         });
+    }
+
+    _showArrayQueue(data, text, n) {
+        this.arrayQueue_p.textContent = text;
+        for (let i=0; i<n; i++) {
+            let d = document.createElement('div');
+            d.classList.add("array-queue");
+            let sp = document.createElement('span');
+            sp.classList.add('tooltip-text');
+            sp.textContent = i;
+            d.appendChild(sp);
+            if (data.find(n => n == i))
+                d.classList.add("array-queue-1");
+            else
+                d.classList.add("array-queue-0");
+            
+            this.queue_div.appendChild(d);
+        }
     }
 
     _hideAddProcess() {

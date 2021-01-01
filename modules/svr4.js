@@ -23,7 +23,7 @@ class Svr4Scheduler {
     // Añade un proceso a la cola, modifica dispq y dqactmap (y los ordena)
     _enqueueProcess(process) {
         // Numero de cola
-        let qn = Math.floor(process.pri / 4);
+        let qn = process.pri;
         // dqactmap
         if (!(this.dqactmap.includes(qn))) {
             this.dqactmap.push(qn);
@@ -46,15 +46,15 @@ class Svr4Scheduler {
 
     // Elige un proceso para ser planificado y lo desencola
     _dequeueProcess() {
-        let qn = this.dqactmap[0];
+        let qn = this.dqactmap[this.dqactmap.length-1];
         let queue = this.dispq.find(item => item.priority == qn);
         if (queue) {
             let pr = queue.dequeue();
             if (queue.isEmpty()) {
-                // modifica el bit de dqactmap
-                this.dqactmap.shift();
+                // modifica el bit de dqactmap (ultimo elemento)
+                this.dqactmap.pop();
                 // elimina la cola de dispq
-                this.dispq.shift();
+                this.dispq.pop();
             }
                 
             this.journal.push("Seleccionado proceso pid: " + 

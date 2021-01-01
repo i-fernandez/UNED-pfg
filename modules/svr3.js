@@ -84,6 +84,7 @@ class Svr3Scheduler {
         });
     }
 
+    // Eliminar
     start() {
         this.journal.push("Inicio de la ejecucion");
         let pr = this._dequeueProcess();
