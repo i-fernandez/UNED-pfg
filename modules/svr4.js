@@ -100,7 +100,7 @@ class Svr4Process {
     }
 }
 
-
+/*
 class Svr4State {
     constructor(time, journal, pTable, dispq, dqactmap, runrun) {
         this.time = time;
@@ -111,6 +111,7 @@ class Svr4State {
         this.runrun = runrun;
     }
 }
+*/
 
 
 export default Svr4Scheduler;

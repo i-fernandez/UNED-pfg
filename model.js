@@ -1,6 +1,7 @@
 import SVR3Scheduler from './modules/svr3.js'
 import SVR4Scheduler from './modules/svr4.js'
 import Event from './event.js';
+import StateManager from './modules/states.js';
 
 class Simulation {
     constructor() {
@@ -10,8 +11,7 @@ class Simulation {
     }
 
     _init() {
-        this.states = [];
-        this.currentState = 0;
+        this.stateManager = new StateManager();
     }
 
  
@@ -22,49 +22,33 @@ class Simulation {
 
     createSVR3() {
         this._init();
-        this.scheduler = new SVR3Scheduler(this.states);
+        this.scheduler = new SVR3Scheduler(this.stateManager);
     }
 
     createSVR4() {
         this._init();
-        this.scheduler = new SVR4Scheduler(this.states);
+        this.scheduler = new SVR4Scheduler(this.stateManager);
     }
 
 
     startSimulation() {
-        console.log("Start simulation");
+        // BORRAR
+        //this.scheduler.start();
+        this.scheduler.nextTick();
 
-        // Añade el estado inicial [BORRAR]
-        this.states.push(this.scheduler.start());
-        
+
         // Genera todos los estados
         // while (!(this.scheduler.isFinished())) {
             //this.states.push(this.scheduler.nextTick());
         //}
 
-        // Envia el primer estado
+        // Visualiza el primer estado
         this.startVisualizationEvent.trigger({
-            state: this.states[0], 
+            state: this.stateManager.states[0], 
             name: this.scheduler.name
         });
 
     }
-
-    // TODO: no esta completo
-    getNextState() {
-        if (this.currentState+1 < this.states.length) 
-            this.currentState++;
-        
-        return states[this.currentState];
-    }
-
-    getPreviousState() {
-        if (this.currentState > 0) 
-            this.currentState--;
-        
-        return states[this.currentState];
-    }
-
 }
 
 export default Simulation;

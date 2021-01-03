@@ -312,7 +312,7 @@ class View {
         state.qs.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
-            item.items.forEach(pr => {listaProc += pr.p_pri + " ";});
+            item.items.forEach(pr => {listaProc += pr.pid + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
             this.priorityQueue.appendChild(li);
         });

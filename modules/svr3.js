@@ -1,31 +1,60 @@
 import PriorityQueue from './priorityqueue.js'
 
+
 class Svr3Scheduler {
-    constructor(states) {
+    constructor(stateManager) {
+        // constantes
+        this.PUSER = 50;
+        this.QUANTUM = 100;
+        this.SCHED = 1000;
+
         this.name = "SVR3";
+        this.stateManager = stateManager;
         this.time = 0;
         this.whichqs = [];
         this.qs = [];
         this.processTable = [];
         this.runrun = false;
         this.journal = [];
-        this.states = states;
+        
 
         // Datos de ejemplo
-        /** 
-        let p1 = new Svr3Process(1, 1000, 80, 20, 50);
-        let p2 = new Svr3Process(2, 1200, 20, 80, 65);
-        let p3 = new Svr3Process(3, 2000, 20, 80, 110);
-        let p4 = new Svr3Process(4, 1600, 160, 40, 71);
-        p1.state = "running_user";
-        p2.state = "running_kernel";
+        
+        this.addProcess({
+            burst: 1000,
+            cpu_cycle: 80,
+            io_cycle: 20,
+            pri: 50
+        });
+        this.addProcess({
+            burst: 1200,
+            cpu_cycle: 20,
+            io_cycle: 80,
+            pri: 65
+        });
+        this.addProcess({
+            burst: 2000,
+            cpu_cycle: 40,
+            io_cycle: 40,
+            pri: 110
+        });
+        this.addProcess({
+            burst: 1600,
+            cpu_cycle: 160,
+            io_cycle: 40,
+            pri: 71
+        });
+
+        let p1 = this.processTable[0];
+        p1.p_cpu = 40;
+        let p2 = this.processTable[1];
+        p2.p_cpu = 50;
+        let p3 = this.processTable[2];
+        p3.p_cpu = 80;
         p3.state = "sleeping";
+        let p4 = this.processTable[3];
+        p4.p_cpu = 25;
         p4.state = "zombie";
-        this.processTable.push(p1);
-        this.processTable.push(p2);
-        this.processTable.push(p3);
-        this.processTable.push(p4);
-        */
     }
 
     
@@ -34,12 +63,14 @@ class Svr3Scheduler {
             this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pri);
         this.processTable.push(pr);
         this._enqueueProcess(pr);
+
     }
 
     // Añade un proceso a la cola, modifica qs y whichqs (y los ordena)
     _enqueueProcess(process) {
         // Numero de cola
         let qn = Math.floor(process.p_pri / 4);
+        //console.log("encolado proceso pid: " + process.pid + " en cola " + qn);
         // whichqs
         if (!(this.whichqs.includes(qn))) {
             this.whichqs.push(qn);
@@ -72,11 +103,11 @@ class Svr3Scheduler {
                 // elimina la cola de qs
                 this.qs.shift();
             }
-            this.journal.push("Seleccionado proceso pid: " + 
-                pr.pid + " para ejecucion");
+            //this.journal.push("Desencolado proceso pid: " + pr.pid);
             return pr;
         }
     }
+
 
     printData() {
         this.processTable.forEach(pr => {  
@@ -85,27 +116,80 @@ class Svr3Scheduler {
     }
 
     // Eliminar
+    /*
     start() {
         this.journal.push("Inicio de la ejecucion");
         let pr = this._dequeueProcess();
         pr.state = "running_user";
-        return this._generateState();
-        //this.journal = [];
+        //this._schedCPU();
+        this._sendState();
     }
+    */
 
     nextTick() {
-        // return state
+        // Inicio de ejecucion
+        if (this.time === 0) {
+            this.journal.push("Inicio de la ejecucion");
+            let pr = this._dequeueProcess();
+            pr.state = "running_user";
+        }
+
+        this._sendState();
     }
 
     isFinished() {
-        // return bool
+        let procesos = this.processTable.filter(pr => pr.state != "zombie");
+        return (procesos.length === 0);
     }
 
-    _generateState() {
-        return new Svr3State(this.time, this.journal, this.processTable, 
-            this.qs, this.whichqs, this.runrun);
+    _sendState() {
+        if (this.journal.length > 0) {
+            this.stateManager.pushState({
+                time: this.time, 
+                journal: this.journal, 
+                pTable: this.processTable,
+                qs: this.qs, 
+                whichqs: this.whichqs,
+                runrun: this.runrun
+            });
+            this.journal = [];
+        }
     }
 
+    // Aplica decay y recalcula prioridades para cada proceso
+    _schedCPU() {
+        this.journal.push("Iniciada rutina schedcpu");
+        let procesos = this.processTable.filter(pr => pr.state != "zombie");
+        procesos.forEach (pr => {
+            pr.p_cpu = Math.floor(pr.p_cpu/2);
+            this._recalculateProcessPriority(pr);
+        });
+
+    }
+    
+    // Recalcula la prioridad de un proceso
+    _recalculateProcessPriority(process) {
+        // Desencola el proceso
+        let qn = Math.floor(process.p_pri / 4);
+        let queue = this.qs.find(item => item.priority == qn);
+        if (queue) {
+            let pr = queue.dequeue();
+            if (queue.isEmpty()) {
+                let i = this.whichqs.indexOf(qn);
+                this.whichqs.splice(i, 1);
+                this.qs.splice(i, 1);
+                //console.log("schedCPU: desencolado proceso pid: " + pr.pid);
+            }
+        }
+        // Recalcula prioridad
+        let pri = Math.floor(this.PUSER + process.p_cpu/4 + process.p_nice*2);
+        process.p_pri = pri;
+        process.p_usrpri = pri;
+        this.journal.push("schedCPU: nueva prioridad proceso " + 
+            process.pid + " = " + process.p_pri);
+        // Encola el proceso
+        this._enqueueProcess(process);
+    }
 }
 
 class Svr3Process {
@@ -122,27 +206,7 @@ class Svr3Process {
         this.wait_time = 0;
         this.current_cycle_time = 0;
     }
-
-    printData() {
-        console.log(this);
-    }
 }
 
-class Svr3State {
-    constructor(time, journal, pTable, qs, whichqs, runrun) {
-        this.time = time;
-        this.journal = journal;
-        this.pTable = pTable;
-        this.qs = qs;
-        this.whichqs = whichqs;
-        this.runrun = runrun;
-    }
-
-    printData() {
-        console.log("time: " + this.time + " text: " + this.journal + 
-            " pTable: " + this.pTable + " qs: " + this.qs + 
-            " whichqs: " + this.whichqs + " runrun: " + this.runrun);
-    }
-}
 
 export default Svr3Scheduler;
