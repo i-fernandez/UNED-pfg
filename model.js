@@ -33,14 +33,18 @@ class Simulation {
 
     startSimulation() {
         // BORRAR
-        //this.scheduler.start();
-        this.scheduler.nextTick();
+        this.scheduler.start();
+        //this.scheduler.nextTick();
 
 
         // Genera todos los estados
-        // while (!(this.scheduler.isFinished())) {
-            //this.states.push(this.scheduler.nextTick());
-        //}
+        let i = 0;
+        while ((!(this.scheduler.isFinished())) && i < 5) {
+            this.scheduler.nextTick();
+            i++;
+        }
+            
+        
 
         // Visualiza el primer estado
         this.startVisualizationEvent.trigger({
