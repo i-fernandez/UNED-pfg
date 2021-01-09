@@ -124,18 +124,6 @@ class Svr3Scheduler {
     }
 
     nextTick() {
-        // Inicio de ejecucion
-        /*
-        if (this.time === 0) {
-            this.journal.push("Inicio de la ejecucion");
-            let pr = this._dequeueProcess();
-            pr.state = "running_user";
-            this.journal.push("Proceso " + pr.pid + " seleccionado para ejecucion");
-            this._sendState();
-            return;
-        }
-        */
-
         this.time += this.TICK;
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
@@ -163,13 +151,16 @@ class Svr3Scheduler {
 
     _sendState() {
         if (this.journal.length > 0) {
-            // TODO: hacer una copia de los objetos
+            // Copia la tabla de procesos
+            let pTable = [];
+            this.processTable.forEach(pr => {pTable.push(pr.copy());});
+
             this.stateManager.pushState({
                 time: this.time, 
                 journal: this.journal, 
-                pTable: this.processTable,
-                qs: this.qs, 
-                whichqs: this.whichqs,
+                pTable: pTable,
+                qs: Array.from(this.qs), 
+                whichqs: Array.from(this.whichqs),
                 runrun: this.runrun
             });
             this.journal = [];
@@ -203,7 +194,6 @@ class Svr3Scheduler {
         this.journal.push("Iniciada rutina schedcpu");
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
-            //pr.p_cpu = Math.floor(pr.p_cpu/2);
             pr.decay();
             this._recalculateProcessPriority(pr);
         });
@@ -225,9 +215,6 @@ class Svr3Scheduler {
             }
         }
         // Recalcula prioridad
-        //let pri = Math.floor(this.PUSER + process.p_cpu/4 + process.p_nice*2);
-        //process.p_pri = pri;
-        //process.p_usrpri = pri;
         process.calcPriority();
         this.journal.push("schedCPU: nueva prioridad proceso " + 
             process.pid + " = " + process.p_pri);
@@ -302,6 +289,21 @@ class Svr3Process {
         }
         return text;
 
+    }
+
+    copy() {
+        return {
+            pid: this.pid,
+            state: this.state,
+            burst_time: this.burst_time,
+            cpu_cycle: this.cpu_cycle,
+            io_cycle: this.io_cycle,
+            p_pri: this.p_pri,
+            p_usrpri: this.p_usrpri,
+            p_cpu: this.p_cpu,
+            p_nice: this.p_nice,
+            wait_time: this.wait_time,
+        };
     }
 }
 

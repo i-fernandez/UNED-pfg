@@ -8,6 +8,7 @@ class Simulation {
         this._init();
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
+        this.sendStateEvent = new Event();
     }
 
     _init() {
@@ -32,12 +33,11 @@ class Simulation {
 
 
     startSimulation() {
-        // BORRAR
         this.scheduler.start();
-        //this.scheduler.nextTick();
 
 
         // Genera todos los estados
+        // TODO: Modificar
         let i = 0;
         while ((!(this.scheduler.isFinished())) && i < 5) {
             this.scheduler.nextTick();
@@ -52,6 +52,20 @@ class Simulation {
             name: this.scheduler.name
         });
 
+    }
+
+    getNextState() {
+        this.sendStateEvent.trigger({
+            state: this.stateManager.getNextState(),
+            name: this.scheduler.name
+        });
+    }
+
+    getPreviousState() {
+        this.sendStateEvent.trigger({
+            state: this.stateManager.getPreviousState(),
+            name: this.scheduler.name
+        });
     }
 }
 

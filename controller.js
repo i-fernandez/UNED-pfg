@@ -42,6 +42,10 @@ class Controller {
         this.model.startVisualizationEvent.addListener(data => {
             this.view.showState(data);
         });
+
+        this.model.sendStateEvent.addListener(data => {
+            this.view.showState(data);
+        });
         
     }
 

@@ -235,7 +235,7 @@ class View {
     }
 
 
-    
+    // Elementos del inicio de la simulacion
     _createStart() {
         this.statesTitle = document.createElement('h1');;
         this.statesTitle.textContent = "Simulacion";
@@ -254,13 +254,13 @@ class View {
         this.prev.textContent = 'Anterior';
         this.prev.classList.add('navigationButton');
         this.prev.addEventListener('click', () => {
-            console.log("Previous");
+            this.previousStateEvent.trigger();
         });
         this.next = document.createElement('button');
         this.next.textContent = 'Siguiente';
         this.next.classList.add('navigationButton');
         this.next.addEventListener('click', () => {
-            console.log("Next");
+            this.nextStateEvent.trigger();
         });
         this._append(this.navigation_div, [this.prev, this.next]);
         this._append(this.states_div,
@@ -268,8 +268,8 @@ class View {
             this.runrun, this.pTable, this.text, this.events, this.navigation_div]);
     }
 
+    // Elementos para mostrar un estado (comunes)
     showState(data) {
-        // Campos comunes
         let state = data.state;
         this.time.textContent = "Time: " + state.time + " ut";
         this.runrun.textContent = "runrun: " + state.runrun;
@@ -306,6 +306,7 @@ class View {
             this._showSvr4State(state);
     }
    
+    // Elementos para mostrar un estado de SVR3
     _showSvr3State(state) {
         this._showArrayQueue(state.whichqs, "whichqs: ", 32);
         this.pqTitle.textContent = "qs:";
@@ -320,6 +321,7 @@ class View {
         
     }
 
+    // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
         this._showArrayQueue(state.dqactmap, "dqactmap: ", 160);
         this.pqTitle.textContent = "dispq:";
