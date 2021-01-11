@@ -6,7 +6,7 @@ class Svr3Scheduler {
         // constantes
         this.QUANTUM = 100;
         this.SCHED = 1000;
-        this.CCONTEXT = 10;
+        this.CONTEXT_SWITCH = 10;
         this.TICK = 10;
 
         this.name = "SVR3";
@@ -17,8 +17,8 @@ class Svr3Scheduler {
         this.processTable = [];
         this.runrun = false;
         this.nextRoundRobin = this.QUANTUM;
-        this.contextChangeCount = 0;
-        this.inContextChange = false;
+        this.contextSwitchCount = 0;
+        this.inContextSwitch = false;
         this.journal = [];
         
 
@@ -27,26 +27,26 @@ class Svr3Scheduler {
         /*
         this.addProcess({
             burst: 1000,
-            cpu_cycle: 80,
-            io_cycle: 20,
+            cpu_burst: 80,
+            io_burst: 20,
             pri: 50
         });
         this.addProcess({
             burst: 1200,
-            cpu_cycle: 20,
-            io_cycle: 80,
+            cpu_burst: 20,
+            io_burst: 80,
             pri: 65
         });
         this.addProcess({
             burst: 2000,
-            cpu_cycle: 40,
-            io_cycle: 40,
+            cpu_burst: 40,
+            io_burst: 40,
             pri: 110
         });
         this.addProcess({
             burst: 1600,
-            cpu_cycle: 160,
-            io_cycle: 40,
+            cpu_burst: 160,
+            io_burst: 40,
             pri: 71
         });
 
@@ -66,7 +66,7 @@ class Svr3Scheduler {
     
     addProcess(data) {
         let pr = new Svr3Process(
-            this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pri);
+            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pri);
         this.processTable.push(pr);
         this._enqueueProcess(pr);
 
@@ -114,6 +114,12 @@ class Svr3Scheduler {
         }
     }
 
+    getPTable() {
+        let pTable = [];
+        this.processTable.forEach(pr => {pTable.push(pr.getData());});
+        return pTable;
+    }
+
 
     start() {
         this.journal.push("Inicio de la ejecucion");
@@ -125,12 +131,37 @@ class Svr3Scheduler {
 
     nextTick() {
         this.time += this.TICK;
+        let running = this._getRunningProcess();
+
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
             let out = pr.runTick(this.TICK);
             if (out)
                 this.journal.push(out);
         });
+
+        if (this.inContextSwitch) {
+            this._swtch();
+        }
+
+        // No hay ningun proceso en ejecucion
+
+        // El proceso en ejecucion finaliza o termina ciclo de cpu
+        /*
+        if (runnning.state.indexOf("running") != -1) {
+            this.journal.push("Comienza cambio de contexto");
+            this.inContextSwitch = true;
+        }
+        */
+
+        // Un proceso que finaliza espera tiene mayor prioridad que el proceso en ejecucion
+
+
+        // Ocurre round robin
+
+
+        // Ocurre schedCPU;
+        
 
         // cuando empieza cambio de contexto
         // poner this.inContextChange = true;
@@ -139,7 +170,7 @@ class Svr3Scheduler {
         // en el proximo tick, se llama a swtch()
 
 
-        let running = this.processTable.filter(pr => pr.state != "/running.*/");
+        
 
         this._sendState();
     }
@@ -153,7 +184,7 @@ class Svr3Scheduler {
         if (this.journal.length > 0) {
             // Copia la tabla de procesos
             let pTable = [];
-            this.processTable.forEach(pr => {pTable.push(pr.copy());});
+            this.processTable.forEach(pr => {pTable.push(pr.getData());});
 
             this.stateManager.pushState({
                 time: this.time, 
@@ -170,21 +201,18 @@ class Svr3Scheduler {
     // Realiza un cambio de contexto
     _swtch() {
         this.runrun = false;
-        this.inContextChange = false;
+        this.inContextSwitch = false;
+        this.contextSwitchCount++;
         // Proximo proceso a ejecutar
         let next_pr = this._dequeueProcess();
         if (next_pr == null) {
             return;
         }
         // Proceso en ejecucion
-        let running = this.processTable.filter(pr => pr.state != "/running.*/");
+        let running = this._getRunningProcess();
         if (running.pid != next_pr.pid) {
             next_pr.state = "running_user";
             this.nextRoundRobin = this.QUANTUM;
-            // Aumenta los tiempos de cambio de contexto
-            // TODO: Falta aumentar el contador de tiempo 
-                //con el tiempo perdido por el cambio de contexto
-            this.contextChangeCount++;
             this.journal.push("Proceso " + next_pr.pid + "Seleccionado para ejecucion");
         }
     }
@@ -221,18 +249,21 @@ class Svr3Scheduler {
         // Encola el proceso
         this._enqueueProcess(process);
     }
+    _getRunningProcess() {
+        return this.processTable.filter(pr => pr.state.indexOf("running") != -1)[0];
+    }
 }
 
 class Svr3Process {
-    constructor(pid, burst, cpu_cycle, io_cycle, pri) {
+    constructor(pid, burst, cpu_burst, io_burst, pri) {
         // constantes
         this.PUSER = 50;
 
         this.pid = pid;
         this.state = "ready";
         this.burst_time = burst;
-        this.cpu_cycle = cpu_cycle;
-        this.io_cycle = io_cycle;
+        this.cpu_burst = cpu_burst;
+        this.io_burst = io_burst;
         this.p_pri = pri;
         this.p_usrpri = pri;
         this.p_cpu = 0;
@@ -266,7 +297,7 @@ class Svr3Process {
                 } else {
                     this.burst_time -= time;
                     this.current_cycle_time += time;
-                    if (this.current_cycle_time == this.cpu_cycle) {
+                    if (this.current_cycle_time == this.cpu_burst) {
                         this.state = "sleeping";
                         this.current_cycle_time = 0;
                         text += "Proceso " + this.pid + " finaliza su ciclo de CPU";
@@ -275,7 +306,7 @@ class Svr3Process {
                 break;
             case "sleeping":
                 this.current_cycle_time += time;
-                if (this.current_cycle_time == this.io_cycle) {
+                if (this.current_cycle_time == this.io_burst) {
                     this.state = "ready";
                     this.current_cycle_time = 0;
                     text += "Proceso " + this.pid + " finaliza su espera por I/O";
@@ -291,13 +322,13 @@ class Svr3Process {
 
     }
 
-    copy() {
+    getData() {
         return {
             pid: this.pid,
             state: this.state,
             burst_time: this.burst_time,
-            cpu_cycle: this.cpu_cycle,
-            io_cycle: this.io_cycle,
+            cpu_burst: this.cpu_burst,
+            io_burst: this.io_burst,
             p_pri: this.p_pri,
             p_usrpri: this.p_usrpri,
             p_cpu: this.p_cpu,

@@ -18,7 +18,7 @@ class Simulation {
  
     addProcess(data) {
         this.scheduler.addProcess(data);
-        this.pTableChangedEvent.trigger(this.scheduler.processTable);
+        this.pTableChangedEvent.trigger(this.scheduler.getPTable());
     }
 
     createSVR3() {
@@ -39,7 +39,7 @@ class Simulation {
         // Genera todos los estados
         // TODO: Modificar
         let i = 0;
-        while ((!(this.scheduler.isFinished())) && i < 5) {
+        while ((!(this.scheduler.isFinished())) && i < 25) {
             this.scheduler.nextTick();
             i++;
         }

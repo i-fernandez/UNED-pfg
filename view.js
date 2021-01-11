@@ -200,8 +200,8 @@ class View {
     _getSvr3Input() {
         let data = {
             burst: parseInt(this.inputBurst_svr3.value, 10),
-            cpu_cycle: parseInt(this.inputCPU_svr3.value, 10),
-            io_cycle: parseInt(this.inputIO_svr3.value, 10),
+            cpu_burst: parseInt(this.inputCPU_svr3.value, 10),
+            io_burst: parseInt(this.inputIO_svr3.value, 10),
             pri: parseInt(this.inputPriority_svr3.value, 10)
         }
         return data;
@@ -212,8 +212,8 @@ class View {
         if (this.classSel.value == 2) {pc = "TimeSharing";}
         let data = {
             burst: parseInt(this.inputBurst_svr4.value, 10),
-            cpu_cycle: parseInt(this.inputCPU_svr4.value, 10),
-            io_cycle: parseInt(this.inputIO_svr4.value, 10),
+            cpu_burst: parseInt(this.inputCPU_svr4.value, 10),
+            io_burst: parseInt(this.inputIO_svr4.value, 10),
             pClass: pc,
             pri: parseInt(this.inputPriority_svr4.value, 10)
         }

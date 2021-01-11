@@ -15,7 +15,7 @@ class Svr4Scheduler {
 
     addProcess(data) {
         let pr = new Svr4Process(
-            this.processTable.length+1, data.burst, data.cpu_cycle, data.io_cycle, data.pClass, data.pri);
+            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pClass, data.pri);
         this.processTable.push(pr);
         this._enqueueProcess(pr);
     }
@@ -71,6 +71,8 @@ class Svr4Scheduler {
         //this.journal = [];
     }
 
+    getPTable() {}
+
     nextTick() {
         // return state
     }
@@ -87,12 +89,12 @@ class Svr4Scheduler {
 
 
 class Svr4Process {
-    constructor(pid, burst, cpu_cycle, io_cycle, pClass, pri) {
+    constructor(pid, burst, cpu_burst, io_burst, pClass, pri) {
         this.pid = pid;
         this.state = "ready";
         this.burst_time = burst;
-        this.cpu_cycle = cpu_cycle;
-        this.io_cycle = io_cycle;
+        this.cpu_burst = cpu_burst;
+        this.io_burst = io_burst;
         this.processClass = pClass;
         this.pri = pri;
         this.wait_time = 0;
