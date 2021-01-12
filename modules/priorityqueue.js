@@ -28,6 +28,13 @@ class PriorityQueue
             return "No elements in Queue"; 
         return this.items[0]; 
     }
+
+    getData() {
+        return {
+            priority : this.priority,
+            items : Array.from(this.items)
+        }
+    }
 } 
 
 export default PriorityQueue;

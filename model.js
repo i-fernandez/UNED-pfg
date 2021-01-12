@@ -39,7 +39,7 @@ class Simulation {
         // Genera todos los estados
         // TODO: Modificar
         let i = 0;
-        while ((!(this.scheduler.isFinished())) && i < 25) {
+        while ((!(this.scheduler.isFinished())) && i < 100) {
             this.scheduler.nextTick();
             i++;
         }
