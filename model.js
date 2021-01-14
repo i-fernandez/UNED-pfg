@@ -43,6 +43,8 @@ class Simulation {
             this.scheduler.nextTick();
             i++;
         }
+        if (this.scheduler.isFinished())
+            console.log("Algoritmo finalizado");
             
         
 

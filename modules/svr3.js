@@ -19,24 +19,27 @@ class Svr3Scheduler {
         this.nextRoundRobin = this.QUANTUM;
         this.contextSwitchCount = 0;
         this.inContextSwitch = false;
+        this.inRoundRobin = false;
         this.journal = [];
         
 
-        // Datos de ejemplo
-        
-        
+        // Datos de ejemplo  
+        /*
         this.addProcess({
-            burst: 1000,
-            cpu_burst: 80,
+            burst: 300,
+            cpu_burst: 100,
             io_burst: 20,
             pri: 50
         });
+        */
+        
         this.addProcess({
-            burst: 1200,
-            cpu_burst: 20,
-            io_burst: 80,
+            burst: 500,
+            cpu_burst: 200,
+            io_burst: 10,
             pri: 65
         });
+        /*
         this.addProcess({
             burst: 2000,
             cpu_burst: 40,
@@ -49,17 +52,6 @@ class Svr3Scheduler {
             io_burst: 40,
             pri: 71
         });
-        /*
-        let p1 = this.processTable[0];
-        p1.p_cpu = 40;
-        let p2 = this.processTable[1];
-        p2.p_cpu = 50;
-        let p3 = this.processTable[2];
-        p3.p_cpu = 80;
-        p3.state = "sleeping";
-        let p4 = this.processTable[3];
-        p4.p_cpu = 25;
-        p4.state = "zombie";
         */
     }
 
@@ -76,7 +68,6 @@ class Svr3Scheduler {
     _enqueueProcess(process) {
         // Numero de cola
         let qn = Math.floor(process.p_pri / 4);
-        //console.log("encolado proceso pid: " + process.pid + " en cola " + qn);
         // whichqs
         if (!(this.whichqs.includes(qn))) {
             this.whichqs.push(qn);
@@ -132,6 +123,7 @@ class Svr3Scheduler {
     nextTick() {
         this.time += this.TICK;
         this.nextRoundRobin -= this.TICK;
+        let sleeping_pr  = this.processTable.filter(pr => pr.state == "sleeping");
         // Actualiza los procesos
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
@@ -140,25 +132,27 @@ class Svr3Scheduler {
                 this.journal.push(out);
         });
 
+        // Encola procesos que finalizaron IO
+        sleeping_pr.forEach(pr => {
+            if (pr.state != "sleeping")
+                this._enqueueProcess(pr);
+        });
+        
+
         // Ocurre schedCPU;
         if (this.time % this.SCHED == 0)
             this._schedCPU();
 
         if (this.inContextSwitch) {
             this._swtch();
-        } else if (this.nextRoundRobin == 0) {
+        } 
+        // Cuanto finalizado, comprueba round robin
+        else if (this.nextRoundRobin == 0) {
             this._roundRobin();
         }
 
-        // No hay ningun proceso en ejecucion o hay encolado uno con mayor prioridad
-        let running = this._getRunningProcess();
-        if (typeof running === 'undefined' && this.whichqs.length > 0) {
-            this.journal.push("Comienza cambio de contexto");
-            this.inContextSwitch = true;
-        } else if (typeof running !== 'undefined' && this.whichqs[0] < Math.floor(running.p_pri/4)) {
-            this.journal.push("Proceso en espera con mayor prioridad");
-            this.inContextSwitch = true;
-        }
+        // Comprueba si empieza un cambio de contexto
+        this._startSwtch();
     
         this._sendState();
     }
@@ -177,12 +171,10 @@ class Svr3Scheduler {
             let _qs = [];
             this.qs.forEach(q => {_qs.push(q.getData());});
 
-
             this.stateManager.pushState({
                 time: this.time, 
                 journal: this.journal, 
                 pTable: pTable,
-                //qs: Array.from(this.qs), 
                 qs: _qs,
                 whichqs: Array.from(this.whichqs),
                 runrun: this.runrun
@@ -191,40 +183,81 @@ class Svr3Scheduler {
         }
     }
 
-    // Realiza un cambio de contexto
-    _swtch() {
-        this.runrun = false;
-        this.nextRoundRobin = this.QUANTUM;
-        this.inContextSwitch = false;
-        // Proximo proceso a ejecutar
-        let next_pr = this._dequeueProcess();
-        if (next_pr == null) {
-            return;
-        }
-
-        
-        // Proceso en ejecucion
+    // Inicio de cambio de contexto
+    _startSwtch() {
         let running = this._getRunningProcess();
-        if (typeof running === 'undefined' || running.pid != next_pr.pid) {
-            this.contextSwitchCount++;
-            next_pr.state = "running_user";
-            this.nextRoundRobin = this.QUANTUM;
-            this.journal.push("Proceso " + next_pr.pid + " Seleccionado para ejecucion");
+        // No hay ningun proceso en ejecucion 
+        if (typeof running === 'undefined' && this.whichqs.length > 0) {
+            this.journal.push("Comienza cambio de contexto");
+            this.inContextSwitch = true;
+        } 
+        // Proceso encolado con mayor prioridad
+        else if (typeof running !== 'undefined' && this.whichqs[0] < Math.floor(running.p_pri/4)) {
+            this.journal.push("Proceso en espera con mayor prioridad");
+            this.journal.push("Comienza cambio de contexto");
+            this.inContextSwitch = true;
+            running.state = "ready";
+            this._enqueueProcess(running);
+        }
+        // Round robin
+        else if (this.inRoundRobin) {
+            this.journal.push("Lanzada rutina round robin");
+            this.journal.push("Comienza cambio de contexto");
+            this.inContextSwitch = true;
+            this.inRoundRobin = false;
+            running.state = "ready";
+            this._enqueueProcess(running);
         }
     }
 
+    // Realiza un cambio de contexto
+    _swtch() {
+        this.runrun = false;
+        this.inContextSwitch = false;
+        // Proximo proceso a ejecutar
+        let next_pr = this._dequeueProcess();
+        if (next_pr == null) 
+            return;
+        
+        this.contextSwitchCount++;
+        next_pr.state = "running_user";
+        this.nextRoundRobin = this.QUANTUM;
+        this.journal.push("Proceso " + next_pr.pid + " Seleccionado para ejecucion");
+    }
+
     // Aplica decay y recalcula prioridades para cada proceso
+    // TODO: probarlo bien
     _schedCPU() {
         this.journal.push("Iniciada rutina schedcpu");
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
             pr.decay();
-            this._recalculateProcessPriority(pr);
+            
+            // No desencolar/encolar si el proceso esta en ejecucion
+
+            // Desencola el proceso
+            let qn = Math.floor(pr.p_pri / 4);
+            let queue = this.qs.find(item => item.priority == qn);
+            if (queue) {
+                //let pr = queue.dequeue();
+                queue.dequeue();    // TODO: debe desencolar un proceso concreto
+                if (queue.isEmpty()) {
+                    let i = this.whichqs.indexOf(qn);
+                    this.whichqs.splice(i, 1);
+                    this.qs.splice(i, 1);
+                }
+            }
+            // Recalcula prioridad
+            pr.calcPriority();
+            this.journal.push("schedCPU: nueva prioridad proceso " + pr.pid + " = " + pr.p_pri);
+            // Encola el proceso
+            this._enqueueProcess(pr);
         });
 
     }
     
     // Recalcula la prioridad de un proceso
+    /*
     _recalculateProcessPriority(process) {
         // Desencola el proceso
         let qn = Math.floor(process.p_pri / 4);
@@ -235,7 +268,6 @@ class Svr3Scheduler {
                 let i = this.whichqs.indexOf(qn);
                 this.whichqs.splice(i, 1);
                 this.qs.splice(i, 1);
-                //console.log("schedCPU: desencolado proceso pid: " + pr.pid);
             }
         }
         // Recalcula prioridad
@@ -245,10 +277,13 @@ class Svr3Scheduler {
         // Encola el proceso
         this._enqueueProcess(process);
     }
+    */
 
-    // TODO: completar
+    // Comprueba si se lanza rutina round robin
     _roundRobin() {
-        this.journal.push("Lanzada rutina round robin");
+        let running = this._getRunningProcess();
+        if (typeof running !== 'undefined' && this.whichqs[0] == Math.floor(running.p_pri/4)) 
+            this.inRoundRobin = true;
     }
 
     _getRunningProcess() {
