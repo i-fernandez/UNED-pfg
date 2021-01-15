@@ -38,11 +38,11 @@ class Simulation {
 
         // Genera todos los estados
         // TODO: Modificar
-        let i = 0;
-        while ((!(this.scheduler.isFinished())) && i < 100) {
+        //let i = 0;
+        while ((!(this.scheduler.isFinished()))) 
             this.scheduler.nextTick();
-            i++;
-        }
+            
+        
         if (this.scheduler.isFinished())
             console.log("Algoritmo finalizado");
             

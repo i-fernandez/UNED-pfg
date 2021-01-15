@@ -24,14 +24,6 @@ class Svr3Scheduler {
         
 
         // Datos de ejemplo  
-        /*
-        this.addProcess({
-            burst: 300,
-            cpu_burst: 100,
-            io_burst: 20,
-            pri: 50
-        });
-        */
         
         this.addProcess({
             burst: 500,
@@ -39,20 +31,36 @@ class Svr3Scheduler {
             io_burst: 10,
             pri: 65
         });
-        /*
+        
+        
         this.addProcess({
-            burst: 2000,
-            cpu_burst: 40,
-            io_burst: 40,
-            pri: 110
+            burst: 500,
+            cpu_burst: 200,
+            io_burst: 20,
+            pri: 65
+        });
+        
+        this.addProcess({
+            burst: 600,
+            cpu_burst: 250,
+            io_burst: 20,
+            pri: 65
         });
         this.addProcess({
-            burst: 1600,
-            cpu_burst: 160,
-            io_burst: 40,
-            pri: 71
+            burst: 600,
+            cpu_burst: 80,
+            io_burst: 10,
+            pri: 66
         });
-        */
+
+        this.addProcess({
+            burst: 300,
+            cpu_burst: 50,
+            io_burst: 200,
+            pri: 67
+        });
+
+        
     }
 
     
@@ -66,14 +74,11 @@ class Svr3Scheduler {
 
     // Añade un proceso a la cola, modifica qs y whichqs (y los ordena)
     _enqueueProcess(process) {
-        // Numero de cola
         let qn = Math.floor(process.p_pri / 4);
-        // whichqs
         if (!(this.whichqs.includes(qn))) {
             this.whichqs.push(qn);
         }
         this.whichqs.sort(function(a, b) { return a - b;});
-        // qs
         let queue = this.qs.find(item => item.priority == qn);
         if (queue)
             queue.enqueue(process);
@@ -95,12 +100,9 @@ class Svr3Scheduler {
         if (queue) {
             let pr = queue.dequeue();
             if (queue.isEmpty()) {
-                // modifica el bit de whichqs
                 this.whichqs.shift();
-                // elimina la cola de qs
                 this.qs.shift();
             }
-            //this.journal.push("Desencolado proceso pid: " + pr.pid);
             return pr;
         }
     }
@@ -188,12 +190,13 @@ class Svr3Scheduler {
         let running = this._getRunningProcess();
         // No hay ningun proceso en ejecucion 
         if (typeof running === 'undefined' && this.whichqs.length > 0) {
-            this.journal.push("Comienza cambio de contexto");
+            this.journal.push("Ningun proceso en ejecucion - comienza cambio de contexto");
             this.inContextSwitch = true;
         } 
         // Proceso encolado con mayor prioridad
         else if (typeof running !== 'undefined' && this.whichqs[0] < Math.floor(running.p_pri/4)) {
-            this.journal.push("Proceso en espera con mayor prioridad");
+            this.journal.push("Proceso en espera con mayor prioridad ("+this.qs[0].front().p_pri+
+                ") vs (" + running.p_pri + ")");
             this.journal.push("Comienza cambio de contexto");
             this.inContextSwitch = true;
             running.state = "ready";
@@ -226,60 +229,38 @@ class Svr3Scheduler {
     }
 
     // Aplica decay y recalcula prioridades para cada proceso
-    // TODO: probarlo bien
     _schedCPU() {
         this.journal.push("Iniciada rutina schedcpu");
         let procesos = this.processTable.filter(pr => pr.state != "zombie");
         procesos.forEach (pr => {
             pr.decay();
-            
-            // No desencolar/encolar si el proceso esta en ejecucion
-
             // Desencola el proceso
-            let qn = Math.floor(pr.p_pri / 4);
-            let queue = this.qs.find(item => item.priority == qn);
-            if (queue) {
-                //let pr = queue.dequeue();
-                queue.dequeue();    // TODO: debe desencolar un proceso concreto
-                if (queue.isEmpty()) {
-                    let i = this.whichqs.indexOf(qn);
-                    this.whichqs.splice(i, 1);
-                    this.qs.splice(i, 1);
+            if (pr.state == "ready") {
+                let qn = Math.floor(pr.p_pri / 4);
+                let queue = this.qs.find(item => item.priority == qn);
+                if (queue) {
+                    queue.remove(pr);
+                    if (queue.isEmpty()) {
+                        let i = this.whichqs.indexOf(qn);
+                        this.whichqs.splice(i, 1);
+                        this.qs.splice(i, 1);
+                    }
                 }
             }
             // Recalcula prioridad
             pr.calcPriority();
             this.journal.push("schedCPU: nueva prioridad proceso " + pr.pid + " = " + pr.p_pri);
             // Encola el proceso
-            this._enqueueProcess(pr);
+            if (pr.state == "ready") {
+                this._enqueueProcess(pr);
+                //this.journal.push("schedCPU: encolando proceso " + pr.pid);
+            }
+                
         });
 
     }
-    
-    // Recalcula la prioridad de un proceso
-    /*
-    _recalculateProcessPriority(process) {
-        // Desencola el proceso
-        let qn = Math.floor(process.p_pri / 4);
-        let queue = this.qs.find(item => item.priority == qn);
-        if (queue) {
-            let pr = queue.dequeue();
-            if (queue.isEmpty()) {
-                let i = this.whichqs.indexOf(qn);
-                this.whichqs.splice(i, 1);
-                this.qs.splice(i, 1);
-            }
-        }
-        // Recalcula prioridad
-        process.calcPriority();
-        this.journal.push("schedCPU: nueva prioridad proceso " + 
-            process.pid + " = " + process.p_pri);
-        // Encola el proceso
-        this._enqueueProcess(process);
-    }
-    */
 
-    // Comprueba si se lanza rutina round robin
+    // Comprueba si round robin produce cambio de contexto
     _roundRobin() {
         let running = this._getRunningProcess();
         if (typeof running !== 'undefined' && this.whichqs[0] == Math.floor(running.p_pri/4)) 

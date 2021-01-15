@@ -10,6 +10,12 @@ class PriorityQueue
         this.items.push(element); 
     } 
 
+    // Elimina de la cola un elemento concreto
+    remove(element) {
+        let i = this.items.findIndex(item => item.pid == element.pid);
+        this.items.splice(i,1);
+    }
+
     // Extrae un elemento del principio
     dequeue() { 
         if(this.isEmpty()) 
