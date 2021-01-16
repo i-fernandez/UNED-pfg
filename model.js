@@ -15,12 +15,6 @@ class Simulation {
         this.stateManager = new StateManager();
     }
 
- 
-    addProcess(data) {
-        this.scheduler.addProcess(data);
-        this.pTableChangedEvent.trigger(this.scheduler.getPTable());
-    }
-
     createSVR3() {
         this._init();
         this.scheduler = new SVR3Scheduler(this.stateManager);
@@ -31,29 +25,42 @@ class Simulation {
         this.scheduler = new SVR4Scheduler(this.stateManager);
     }
 
+    addProcess(data) {
+        this.scheduler.addProcess(data);
+        this.pTableChangedEvent.trigger(this.scheduler.getPTable());
+    }
 
     startSimulation() {
         this.scheduler.start();
 
-
         // Genera todos los estados
-        // TODO: Modificar
-        //let i = 0;
-        while ((!(this.scheduler.isFinished()))) 
+        while (!(this.scheduler.isFinished())) 
             this.scheduler.nextTick();
             
-        
+
+        this.getSummary();
+        /*    
         if (this.scheduler.isFinished())
             console.log("Algoritmo finalizado");
-            
+        */  
         
-
         // Visualiza el primer estado
         this.startVisualizationEvent.trigger({
             state: this.stateManager.states[0], 
             name: this.scheduler.name
         });
 
+    }
+
+    getSummary() {
+        // TODO: faltan eventos para solicitar/enviar
+        let data = this.scheduler.getSummary();
+
+        // eliminar
+        console.log("Numero de procesos: " + data.n_proc);
+        console.log("Tiempo total de ejecucion: " + data.t_time + " ut.");
+        console.log("Tiempo de espera medio: " + data.wait + " ut.");
+        console.log("Numero de cambios de contexto: " + data.cswitch);
     }
 
     getNextState() {

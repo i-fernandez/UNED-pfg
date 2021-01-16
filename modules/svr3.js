@@ -24,7 +24,7 @@ class Svr3Scheduler {
         
 
         // Datos de ejemplo  
-        
+        /*
         this.addProcess({
             burst: 500,
             cpu_burst: 200,
@@ -59,6 +59,7 @@ class Svr3Scheduler {
             io_burst: 200,
             pri: 67
         });
+        */
 
         
     }
@@ -107,12 +108,13 @@ class Svr3Scheduler {
         }
     }
 
+    
     getPTable() {
         let pTable = [];
         this.processTable.forEach(pr => {pTable.push(pr.getData());});
         return pTable;
     }
-
+    
 
     start() {
         this.journal.push("Inicio de la ejecucion");
@@ -127,8 +129,7 @@ class Svr3Scheduler {
         this.nextRoundRobin -= this.TICK;
         let sleeping_pr  = this.processTable.filter(pr => pr.state == "sleeping");
         // Actualiza los procesos
-        let procesos = this.processTable.filter(pr => pr.state != "zombie");
-        procesos.forEach (pr => {
+        this.processTable.forEach (pr => {
             let out = pr.runTick(this.TICK);
             if (out)
                 this.journal.push(out);
@@ -140,19 +141,17 @@ class Svr3Scheduler {
                 this._enqueueProcess(pr);
         });
         
-
         // Ocurre schedCPU;
         if (this.time % this.SCHED == 0)
             this._schedCPU();
 
-        if (this.inContextSwitch) {
+        if (this.inContextSwitch) 
             this._swtch();
-        } 
+        
         // Cuanto finalizado, comprueba round robin
-        else if (this.nextRoundRobin == 0) {
+        else if (this.nextRoundRobin == 0) 
             this._roundRobin();
-        }
-
+        
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
     
@@ -160,16 +159,32 @@ class Svr3Scheduler {
     }
 
     isFinished() {
-        let procesos = this.processTable.filter(pr => pr.state != "zombie");
+        let procesos = this.processTable.filter(pr => pr.state != "finished");
         return (procesos.length === 0);
     }
 
+    getSummary() {
+        let n_proc = this.processTable.length;
+        let t_wait = 0;
+        this.processTable.forEach(pr => t_wait += pr.wait_time);
+
+        return {
+            n_proc : n_proc,
+            t_time : this.time,
+            wait : Math.floor(t_wait / n_proc),
+            cswitch : this.contextSwitchCount
+        }
+    }
+
     _sendState() {
+        if (this.isFinished())
+            this.journal.push("Ejecución finalizada.");
+
         if (this.journal.length > 0) {
-            // Copia la tabla de procesos
             let pTable = [];
-            this.processTable.forEach(pr => {pTable.push(pr.getData());});
-            // Copia array qs
+            this.processTable.filter(pr => pr.state != "finished").forEach(pr => {
+                pTable.push(pr.getData());
+            });
             let _qs = [];
             this.qs.forEach(q => {_qs.push(q.getData());});
 
@@ -190,22 +205,19 @@ class Svr3Scheduler {
         let running = this._getRunningProcess();
         // No hay ningun proceso en ejecucion 
         if (typeof running === 'undefined' && this.whichqs.length > 0) {
-            this.journal.push("Ningun proceso en ejecucion - comienza cambio de contexto");
+            this.journal.push("Ningun proceso en ejecucion - llamada a rutina swtch");
             this.inContextSwitch = true;
         } 
         // Proceso encolado con mayor prioridad
         else if (typeof running !== 'undefined' && this.whichqs[0] < Math.floor(running.p_pri/4)) {
-            this.journal.push("Proceso en espera con mayor prioridad ("+this.qs[0].front().p_pri+
-                ") vs (" + running.p_pri + ")");
-            this.journal.push("Comienza cambio de contexto");
+            this.journal.push("CPU expropiada debido a proceso "+this.qs[0].front().pid);
             this.inContextSwitch = true;
             running.state = "ready";
             this._enqueueProcess(running);
         }
         // Round robin
         else if (this.inRoundRobin) {
-            this.journal.push("Lanzada rutina round robin");
-            this.journal.push("Comienza cambio de contexto");
+            this.journal.push("CPU expropiada debido a rutina roundrobin");
             this.inContextSwitch = true;
             this.inRoundRobin = false;
             running.state = "ready";
@@ -231,7 +243,8 @@ class Svr3Scheduler {
     // Aplica decay y recalcula prioridades para cada proceso
     _schedCPU() {
         this.journal.push("Iniciada rutina schedcpu");
-        let procesos = this.processTable.filter(pr => pr.state != "zombie");
+        let procesos = this.processTable.filter(
+            pr => (pr.state != "zombie" && pr.state != "finished"));
         procesos.forEach (pr => {
             pr.decay();
             // Desencola el proceso
@@ -251,11 +264,9 @@ class Svr3Scheduler {
             pr.calcPriority();
             this.journal.push("schedCPU: nueva prioridad proceso " + pr.pid + " = " + pr.p_pri);
             // Encola el proceso
-            if (pr.state == "ready") {
+            if (pr.state == "ready") 
                 this._enqueueProcess(pr);
-                //this.journal.push("schedCPU: encolando proceso " + pr.pid);
-            }
-                
+            
         });
 
     }
@@ -296,7 +307,7 @@ class Svr3Process {
     }
 
     decay() {
-        if (this.state != "zombie")
+        if (this.state != "zombie" && this.state != "finished")
             this.p_cpu = Math.floor(this.p_cpu/2);
     }
 
@@ -334,6 +345,9 @@ class Svr3Process {
                 break;
             case "ready":
                 this.wait_time += time;
+                break;
+            case "zombie":
+                this.state = "finished";
                 break;
             default:
                 break;
