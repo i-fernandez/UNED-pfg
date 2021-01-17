@@ -208,8 +208,11 @@ class Svr3Scheduler {
             this.journal.push("Ningun proceso en ejecucion - llamada a rutina swtch");
             this.inContextSwitch = true;
         } 
-        // Proceso encolado con mayor prioridad
-        else if (typeof running !== 'undefined' && this.whichqs[0] < Math.floor(running.p_pri/4)) {
+        // Proceso encolado con mayor prioridad y actual no esta en modo kernel
+        else if (typeof running !== 'undefined' && 
+            this.whichqs[0] < Math.floor(running.p_pri/4) &&
+            running.state != "running_kernel") {
+
             this.journal.push("CPU expropiada debido a proceso "+this.qs[0].front().pid);
             this.inContextSwitch = true;
             running.state = "ready";
@@ -235,7 +238,10 @@ class Svr3Scheduler {
             return;
         
         this.contextSwitchCount++;
-        next_pr.state = "running_user";
+        if (next_pr.p_pri < 50)
+            next_pr.state = "running_kernel";
+        else
+            next_pr.state = "running_user";
         this.nextRoundRobin = this.QUANTUM;
         this.journal.push("Proceso " + next_pr.pid + " Seleccionado para ejecucion");
     }
@@ -287,6 +293,7 @@ class Svr3Process {
     constructor(pid, burst, cpu_burst, io_burst, pri) {
         // constantes
         this.PUSER = 50;
+        this.PRIORITIES = [10, 20, 21, 25, 28, 29, 30, 35 ,40];
 
         this.pid = pid;
         this.state = "ready";
@@ -299,6 +306,8 @@ class Svr3Process {
         this.p_nice = 20;
         this.wait_time = 0;
         this.current_cycle_time = 0;
+        this.p_wchan = -1;
+        this.text = "";
     }
 
     calcPriority() {
@@ -312,36 +321,26 @@ class Svr3Process {
     }
 
     runTick(time) {
-        let text = "";
+        this.text = "";
         switch (this.state) {
             case "running_kernel":
+                this._fromSysCall();
             case "running_user":
                 if (this.p_cpu < 127)   
                     this.p_cpu++;
-                if (this.burst_time <= time) {
-                    // Finaliza
-                    this.burst_time = 0;
-                    this.state = "zombie";
-                    text += "Proceso " + this.pid + " finalizado";
-                } else {
+                if (this.burst_time <= time) 
+                    this._toZombie();
+                else {
                     this.burst_time -= time;
                     this.current_cycle_time += time;
-                    if (this.current_cycle_time == this.cpu_burst) {
-                        this.state = "sleeping";
-                        this.current_cycle_time = 0;
-                        text += "Proceso " + this.pid + " finaliza su ciclo de CPU";
-                        // TODO: guardar la prioridad de la vuelta
-                    }
+                    if (this.current_cycle_time >= this.cpu_burst)
+                        this._goToSleep()
                 }
                 break;
             case "sleeping":
                 this.current_cycle_time += time;
-                if (this.current_cycle_time == this.io_burst) {
-                    this.state = "ready";
-                    this.current_cycle_time = 0;
-                    text += "Proceso " + this.pid + " finaliza su espera por I/O";
-                    // TODO: subir temporalmente la prioridad
-                }
+                if (this.current_cycle_time >= this.io_burst) 
+                    this._fromSleep();
                 break;
             case "ready":
                 this.wait_time += time;
@@ -352,7 +351,7 @@ class Svr3Process {
             default:
                 break;
         }
-        return text;
+        return this.text;
 
     }
 
@@ -368,7 +367,37 @@ class Svr3Process {
             p_cpu: this.p_cpu,
             p_nice: this.p_nice,
             wait_time: this.wait_time,
+            p_wchan: this.p_wchan
         };
+    }
+
+    _goToSleep() {
+        this.state = "sleeping";
+        this.current_cycle_time = 0;
+        this.p_wchan = this.PRIORITIES[Math.floor(Math.random() * this.PRIORITIES.length)]
+        this.text = "Proceso " + this.pid + " finaliza su ciclo de CPU. "+
+            "Direccion de dormir: " + this.p_wchan;
+    }
+
+    _fromSleep() {
+        this.state = "ready";
+        this.current_cycle_time = 0;
+        this.p_pri = this.p_wchan;
+        this.p_wchan = -1;
+        this.text = "Proceso " + this.pid + " finaliza su espera por I/O. " + 
+            "Aumentada prioridad temporalmente a " + this.p_pri;
+    }
+
+    _fromSysCall() {
+        this.p_pri = this.p_usrpri;
+        this.state = "running_user";
+        this.text = "Proceso " + this.pid + " finaliza llamada al sistema";
+    }
+
+    _toZombie() {
+        this.burst_time = 0;
+        this.state = "zombie";
+        this.text = "Proceso " + this.pid + " finalizado";
     }
 }
 
