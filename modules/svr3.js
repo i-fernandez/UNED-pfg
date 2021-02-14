@@ -183,7 +183,7 @@ class Svr3Scheduler {
         if (this.journal.length > 0) {
             let pTable = [];
             this.processTable.filter(pr => pr.state != "finished").forEach(pr => {
-                pTable.push(pr.getData());
+                pTable.push(pr.getFullData());
             });
             let _qs = [];
             this.qs.forEach(q => {_qs.push(q.getData());});
@@ -297,16 +297,18 @@ class Svr3Process {
 
         this.pid = pid;
         this.state = "ready";
-        this.burst_time = burst;
-        this.cpu_burst = cpu_burst;
-        this.io_burst = io_burst;
         this.p_pri = pri;
         this.p_usrpri = pri;
         this.p_cpu = 0;
         this.p_nice = 20;
+        this.p_wchan = -1;
+
+        this.burst_time = burst;
+        this.cpu_burst = cpu_burst;
+        this.io_burst = io_burst;
         this.wait_time = 0;
         this.current_cycle_time = 0;
-        this.p_wchan = -1;
+        
         this.text = "";
     }
 
@@ -355,7 +357,20 @@ class Svr3Process {
 
     }
 
+    /* Datos de la pantalla añadir proceso */
     getData() {
+        return {
+            pid: this.pid,
+            state: this.state,
+            burst_time: this.burst_time,
+            cpu_burst: this.cpu_burst,
+            io_burst: this.io_burst,
+            p_pri: this.p_pri
+        };
+    }
+
+    /* Datos para visualizacion de estados */
+    getFullData() {
         return {
             pid: this.pid,
             state: this.state,

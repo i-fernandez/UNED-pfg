@@ -1,4 +1,6 @@
 import PriorityQueue from './priorityqueue.js'
+import Svr4RT from './srv4RT.js'
+import Svr4TS from './svr4TS.js'
 
 class Svr4Scheduler {
     constructor(states) {
@@ -71,49 +73,72 @@ class Svr4Scheduler {
         //this.journal = [];
     }
 
-    getPTable() {}
+    getPTable() {
+        let pTable = [];
+        this.processTable.forEach(pr => {pTable.push(pr.getData());});
+        return pTable;
+    }
 
     nextTick() {
         // return state
     }
 
     isFinished() {
-        // return bool
+        let procesos = this.processTable.filter(pr => pr.state != "finished");
+        return (procesos.length === 0);
     }
 
-    _generateState() {
-        return new Svr4State(this.time, this.journal, this.processTable, 
-            this.dispq, this.dqactmap, this.runrun);
+    _sendState() {
+        //return new Svr4State(this.time, this.journal, this.processTable, 
+        //   this.dispq, this.dqactmap, this.runrun);
     }
 }
 
 
 class Svr4Process {
     constructor(pid, burst, cpu_burst, io_burst, pClass, pri) {
-        this.pid = pid;
-        this.state = "ready";
+        this.p_pid = pid;
+        this.p_state = "ready";
+        this.p_pri = pri;
+
         this.burst_time = burst;
         this.cpu_burst = cpu_burst;
         this.io_burst = io_burst;
-        this.processClass = pClass;
-        this.pri = pri;
-        this.wait_time = 0;
         this.current_cycle_time = 0;
-    }
-}
+        this.wait_time = 0;
 
-/*
-class Svr4State {
-    constructor(time, journal, pTable, dispq, dqactmap, runrun) {
-        this.time = time;
-        this.journal = journal;
-        this.pTable = pTable;
-        this.dispq = dispq;
-        this.dqactmap = dqactmap;
-        this.runrun = runrun;
+        this.class = (pClass = "RealTime") ? new Svr4RT(pri) : new Svr4TS(pri);
+    }
+
+    /* Datos de la pantalla añadir proceso */
+    getData() {
+        return {
+            p_pid: this.p_pid,
+            p_state: this.p_state,
+            p_pri: this.p_pri,
+            class: this.class.name,
+            burst_time: this.burst_time,
+            cpu_burst: this.cpu_burst,
+            io_burst: this.io_burst
+        };
+    }
+
+    /* Datos para visualizacion de estados */
+    getFullData() {
+        return {
+            p_pid: this.p_pid,
+            p_state: this.p_state,
+            p_pri: this.p_pri,
+            class: this.class.name,
+            burst_time: this.burst_time,
+            cpu_burst: this.cpu_burst,
+            io_burst: this.io_burst,
+            current_cycle_time: this.current_cycle_time,
+            wait_time: this.wait_time,
+            classData : this.class.getData()
+        };
     }
 }
-*/
 
 
 export default Svr4Scheduler;
