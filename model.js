@@ -45,10 +45,13 @@ class Simulation {
         */  
         
         // Visualiza el primer estado
+        /*
         this.startVisualizationEvent.trigger({
             state: this.stateManager.states[0], 
             name: this.scheduler.name
-        });
+        });*/
+
+        this.startVisualizationEvent.trigger(this.stateManager.states[0]);
 
     }
 
@@ -64,17 +67,25 @@ class Simulation {
     }
 
     getNextState() {
+        /*
         this.sendStateEvent.trigger({
             state: this.stateManager.getNextState(),
             name: this.scheduler.name
         });
+        */
+
+        this.sendStateEvent.trigger(this.stateManager.getNextState());
     }
 
     getPreviousState() {
+        /*
         this.sendStateEvent.trigger({
             state: this.stateManager.getPreviousState(),
             name: this.scheduler.name
         });
+        */
+
+        this.sendStateEvent.trigger(this.stateManager.getPreviousState());
     }
 }
 

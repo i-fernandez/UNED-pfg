@@ -1,9 +1,9 @@
 
 
 class Svr4TS {
-    constructor(pri) {
+    constructor(pri, pid) {
         this.name = "TimeSharing";
-
+        this.p_pid = pid;
         this.tsdpent = {
             ts_globpri: pri,
             ts_quantum: ts_dptbl(pri)[1],
@@ -28,6 +28,7 @@ class Svr4TS {
 
     getData() {
         return {
+            p_pid: this.p_pid,
             tsdpent: this.tsdpent,
             tsproc: this.tsproc
         };
@@ -38,7 +39,7 @@ class Svr4TS {
 
 function ts_dptbl(pri) {
     /* ts_globpri, ts_quantum, ts_tqexp, ts_slpret, ts_maxwait, ts_lwait */
-    ts_dptbl_t = [
+    let ts_dptbl_t = [
         [0,   100,   0,   10,   5,  10],
         [1,   100,   0,   11,   5,  11],
         [2,   100,   1,   12,   5,  12],
@@ -100,7 +101,7 @@ function ts_dptbl(pri) {
         [58,   10,  48,   59,   5,  59],
         [59,   10,  49,   59,   5,  59]
     ];
-    if (pri < 0 || pro > 59) return null;
+    if (pri < 0 || pri > 59) return null;
     return ts_dptbl_t[pri];
 }
 

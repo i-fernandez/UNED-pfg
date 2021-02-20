@@ -1,7 +1,8 @@
 
 class Svr4RT {
-    constructor(pri) {
+    constructor(pri, pid) {
         this.name = "RealTime"
+        this.p_pid = pid;
         this.rtdpent = {
             rt_glopri: pri,
             rt_quantum: rt_dptbl(pri)
@@ -19,6 +20,7 @@ class Svr4RT {
 
     getData() {
         return {
+            p_pid: this.p_pid,
             rtdpent: this.rtdpent,
             rtproc: this.rtproc
         };

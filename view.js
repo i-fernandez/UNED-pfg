@@ -244,7 +244,9 @@ class View {
         this.pqTitle = document.createElement('p');
         this.priorityQueue = document.createElement('ul');
         this.runrun = document.createElement('p');
+        this.kprunrun = document.createElement('p');
         this.pTable = document.createElement('table');
+        this.classData_div = document.createElement('div');
         this.text = document.createElement('p');
         this.text.textContent = "Eventos:"
         this.events = document.createElement('ul');
@@ -264,8 +266,9 @@ class View {
         });
         this._append(this.navigation_div, [this.prev, this.next]);
         this._append(this.states_div,
-            [this.statesTitle, this.time, this.queue_div, this.pqTitle, this.priorityQueue, 
-            this.runrun, this.pTable, this.text, this.events, this.navigation_div]);
+            [this.statesTitle, this.time, this.queue_div, this.pqTitle, 
+            this.priorityQueue, this.runrun, this.kprunrun, this.pTable, 
+            this.classData_div, this.text, this.events, this.navigation_div]);
     }
 
     // Elementos para mostrar un estado (comunes)
@@ -302,8 +305,12 @@ class View {
         // Campos especificos
         if (data.name == "SVR3") 
             this._showSvr3State(state);
-        else if (data.name == "SVR4") 
+        else if (data.name == "SVR4") {
             this._showSvr4State(state);
+            this._showSvr4RT(data.rt_data.rt);
+            this._showSvr4TS(data.ts_data.ts);
+        }
+            
     }
    
     // Elementos para mostrar un estado de SVR3
@@ -313,7 +320,7 @@ class View {
         state.qs.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
-            item.items.forEach(pr => {listaProc += pr.pid + " ";});
+            item.items.forEach(pr => {listaProc += pr.p_pid + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
             this.priorityQueue.appendChild(li);
         });
@@ -323,16 +330,38 @@ class View {
 
     // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
+        this.kprunrun.textContent = "kprunrun: " + state.kprunrun;
         this._showArrayQueue(state.dqactmap, "dqactmap: ", 160);
         this.pqTitle.textContent = "dispq:";
         state.dispq.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
-            item.items.forEach(pr => {listaProc += pr.pri + " ";});
+            item.items.forEach(pr => {listaProc += pr.p_pid + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
             this.priorityQueue.appendChild(li);
         });
     }
+
+    _showSvr4RT(state) {
+        //let rt = state.rt_data.rt;
+        let rt_table = document.createElement('table');
+        if (state.length > 0) {
+            let t = document.createElement('p');
+            t.textContent = "RT DATA"
+            this.classData_div.appendChild(t);
+        }
+    }
+
+    _showSvr4TS(state) {
+        //let ts = state.ts_data.ts;
+        let ts_table = document.createElement('table');
+        if (state.length > 0) {
+            let t = document.createElement('p');
+            t.textContent = "TS DATA"
+            this.classData_div.appendChild(t);
+        }
+    }
+
 
     _showArrayQueue(data, text, n) {
         this.arrayQueue_p.textContent = text;
@@ -362,7 +391,7 @@ class View {
     }
 
     _setRowClass(row, pr) {
-        switch (pr.state) {
+        switch (pr.p_state) {
             case "running_user":
                 row.classList.add('pr_run_user');
                 break;

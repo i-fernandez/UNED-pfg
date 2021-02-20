@@ -3,21 +3,26 @@ import Svr4RT from './srv4RT.js'
 import Svr4TS from './svr4TS.js'
 
 class Svr4Scheduler {
-    constructor(states) {
+    constructor(stateManager) {
         this.name = "SVR4";
+        this.stateManager = stateManager;
         this.time = 0;
         this.dqactmap = [];
         this.dispq = [];
         this.processTable = [];
         this.runrun = false;
         this.kprunrun = false;
+        this.contextSwitchCount = 0;
         this.journal = [];
-        this.states = states;
+
+        /* BORRAR */
+        this.count = 0;
     }
 
     addProcess(data) {
         let pr = new Svr4Process(
-            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pClass, data.pri);
+            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pClass, data.pri
+        );
         this.processTable.push(pr);
         this._enqueueProcess(pr);
     }
@@ -25,7 +30,7 @@ class Svr4Scheduler {
     // Añade un proceso a la cola, modifica dispq y dqactmap (y los ordena)
     _enqueueProcess(process) {
         // Numero de cola
-        let qn = process.pri;
+        let qn = process.p_pri;
         // dqactmap
         if (!(this.dqactmap.includes(qn))) {
             this.dqactmap.push(qn);
@@ -53,14 +58,9 @@ class Svr4Scheduler {
         if (queue) {
             let pr = queue.dequeue();
             if (queue.isEmpty()) {
-                // modifica el bit de dqactmap (ultimo elemento)
                 this.dqactmap.pop();
-                // elimina la cola de dispq
                 this.dispq.pop();
             }
-                
-            this.journal.push("Seleccionado proceso pid: " + 
-                pr.pid + " para ejecucion");
             return pr;
         }
     }
@@ -68,9 +68,9 @@ class Svr4Scheduler {
     start() {
         this.journal.push("Inicio de la ejecucion");
         let pr = this._dequeueProcess();
-        pr.state = "running_user";
-        return this._generateState();
-        //this.journal = [];
+        pr.p_state = "running_user";
+        this.journal.push("Proceso " + pr.p_pid + " seleccionado para ejecucion");
+        this._sendState();
     }
 
     getPTable() {
@@ -80,17 +80,71 @@ class Svr4Scheduler {
     }
 
     nextTick() {
-        // return state
+        /* BORRAR */
+        this.count++;
+
     }
 
     isFinished() {
+        /* BORRAR */
+        if (this.count >= 5) return true;
+
         let procesos = this.processTable.filter(pr => pr.state != "finished");
         return (procesos.length === 0);
     }
 
+    getSummary() {
+        let n_proc = this.processTable.length;
+        let t_wait = 0;
+        this.processTable.forEach(pr => t_wait += pr.wait_time);
+
+        return {
+            n_proc : n_proc,
+            t_time : this.time,
+            wait : Math.floor(t_wait / n_proc),
+            cswitch : this.contextSwitchCount
+        }
+    }
+
     _sendState() {
-        //return new Svr4State(this.time, this.journal, this.processTable, 
-        //   this.dispq, this.dqactmap, this.runrun);
+        if (this.isFinished())
+            this.journal.push("Ejecución finalizada.");
+
+        if (this.journal.length > 0) {
+            let pTable = [];
+            this.processTable.filter(pr => pr.state != "finished").forEach(pr => {
+                pTable.push(pr.getFullData());
+            });
+            let _dispq = [];
+            this.dispq.forEach(q => {_dispq.push(q.getData());});
+
+            // Datos de la clase
+            let rt = [];
+            let ts = [];
+            this.processTable.filter(pr => pr.class.name == "RealTime").forEach(pr => {
+                rt.push(pr.getClassData());
+            });
+            this.processTable.filter(pr => pr.class.name == "TimeSharing").forEach(pr => {
+                ts.push(pr.getClassData());
+            })
+            
+
+            this.stateManager.pushState({
+                name: this.name,
+                state: {
+                    time: this.time, 
+                    journal: this.journal, 
+                    pTable: pTable,
+                    dispq: _dispq,
+                    dqactmap: Array.from(this.dqactmap),
+                    runrun: this.runrun,
+                    kprunrun: this.kprunrun
+                },
+                rt_data: {rt},
+                ts_data: {ts}
+            });
+            this.journal = [];
+        }
     }
 }
 
@@ -107,7 +161,11 @@ class Svr4Process {
         this.current_cycle_time = 0;
         this.wait_time = 0;
 
-        this.class = (pClass = "RealTime") ? new Svr4RT(pri) : new Svr4TS(pri);
+        this.class = (pClass == "RealTime") ? new Svr4RT(pri, pid) : new Svr4TS(pri, pid);
+    }
+
+    runTick(time) {
+
     }
 
     /* Datos de la pantalla añadir proceso */
@@ -135,8 +193,11 @@ class Svr4Process {
             io_burst: this.io_burst,
             current_cycle_time: this.current_cycle_time,
             wait_time: this.wait_time,
-            classData : this.class.getData()
         };
+    }
+
+    getClassData() {
+        return this.class.getData();
     }
 }
 
