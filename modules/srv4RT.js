@@ -3,6 +3,7 @@ class Svr4RT {
     constructor(pri, pid) {
         this.name = "RealTime"
         this.p_pid = pid;
+        /*
         this.rtdpent = {
             rt_glopri: pri,
             rt_quantum: rt_dptbl(pri)
@@ -12,17 +13,37 @@ class Svr4RT {
             rt_timeleft: this.rtdpent.rt_quantum,
             rt_pri: pri
         };
+        */
+
+        this.rt_glopri = pri;
+        this.rt_quantum = rt_dptbl(pri);
+        this.rt_pquantum = this.rt_quantum;
+        this.rt_timeleft = this.rt_quantum;
+        this.rt_pri = pri;
+
+
     }
 
     getPriority() {
-        return this.rtproc.rt_pri;
+        //return this.rtproc.rt_pri;
+        return this.rt_pri;
     }
 
     getData() {
+        /*
         return {
             p_pid: this.p_pid,
             rtdpent: this.rtdpent,
             rtproc: this.rtproc
+        };
+        */
+        return {
+            p_pid: this.p_pid,
+            rt_glopri: this.rt_glopri,
+            rt_quantum: this.rt_pquantum,
+            rt_pquantum: this.rt_pquantum,
+            rt_timeleft: this.rt_timeleft,
+            rt_pri: this.rt_pri
         };
     }
 

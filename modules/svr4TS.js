@@ -4,6 +4,21 @@ class Svr4TS {
     constructor(pri, pid) {
         this.name = "TimeSharing";
         this.p_pid = pid;
+
+        this.ts_globpri = pri;
+        this.ts_quantum = ts_dptbl(pri)[1];
+        this.ts_tqexp = ts_dptbl(pri)[2];
+        this.ts_slpret = ts_dptbl(pri)[3];
+        this.ts_maxwait = ts_dptbl(pri)[4];
+        this.ts_lwait = ts_dptbl(pri)[5];
+
+        this.ts_timeleft = this.ts_quantum;
+        this.ts_cpu_pri = pri;
+        this.ts_upri = 0;
+        this.ts_umdpri = pri;
+        this.ts_dispwait = 0;
+
+        /*
         this.tsdpent = {
             ts_globpri: pri,
             ts_quantum: ts_dptbl(pri)[1],
@@ -19,19 +34,37 @@ class Svr4TS {
             ts_umdpri: pri,
             ts_dispwait: 0
         };
+        */
         
     }
 
     getPriority() {
-        return this.tsproc.ts_umdpri;
+        //return this.tsproc.ts_umdpri;
+        return this.ts_umdpri;
     }
 
     getData() {
         return {
             p_pid: this.p_pid,
+            ts_globpri: this.ts_globpri,
+            ts_quantum: this.ts_quantum,
+            ts_tqexp: this.ts_tqexp,
+            ts_slpret: this.ts_slpret,
+            ts_maxwait: this.ts_maxwait,
+            ts_lwait: this.ts_lwait,
+            ts_timeleft: this.ts_timeleft,
+            ts_cpu_pri: this.ts_cpu_pri,
+            ts_upri: this.ts_upri,
+            ts_umdpri: this.ts_umdpri,
+            ts_dispwait: this.ts_dispwait
+        }
+        /*
+        return {
+            p_pid: this.p_pid,
             tsdpent: this.tsdpent,
             tsproc: this.tsproc
         };
+        */
     }
 
 }

@@ -92,6 +92,9 @@ body {
 .pr_ready {
     background: rgb(236, 116, 116);
 }
+.pr_class_header {
+    background: rgb(192, 190, 190);
+}
 .no-wrap {
     white-space: pre-wrap;
  }
@@ -116,7 +119,7 @@ body {
     height: 10px;
     display: inline-block;
 }
-#header {
+#header_div {
     margin: 0px;
     height: 80px;
     background:rgb(4, 99, 4);

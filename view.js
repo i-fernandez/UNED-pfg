@@ -15,60 +15,65 @@ class View {
 
     render() {
         // Elementos comunes
-        this.header = document.createElement('div');
-        this.header.id = 'header';
-        this.header_menu = document.createElement('div');
-        this.header_menu.id = 'header_menu';
-        this.header_menu.classList.add('header-menu');
-        this.sch_selector = document.createElement('ul');
-        this.sch_selector.classList.add('header-menu-ul');
-        this.sel_svr3 = document.createElement('li');
-        this.sel_svr3.textContent = 'SVR 3';
-        this.sel_svr3.classList.add('header-menu-li');
-        this.sel_svr3.addEventListener('click', event => {
-            this.sel_svr3.classList.add('header-menu-sel');
-            this.sel_svr4.classList.remove('header-menu-sel');
+        let header_div = document.createElement('div');
+        header_div.id = 'header_div';
+        let header_menu_div = document.createElement('div');
+        header_menu_div.classList.add('header-menu');
+        let sch_selector = document.createElement('ul');
+        sch_selector.classList.add('header-menu-ul');
+        let sel_svr3 = document.createElement('li');
+        sel_svr3.textContent = 'SVR 3';
+        sel_svr3.classList.add('header-menu-li');
+        sel_svr3.addEventListener('click', event => {
+            sel_svr3.classList.add('header-menu-sel');
+            sel_svr4.classList.remove('header-menu-sel');
             this._showAddProcess();
-            this.startDiv.style.display = "none";
+            startDiv.style.display = "none";
             this._showSvr3Add();
             this.newSVR3Event.trigger();
         });
-        this.sel_svr4 = document.createElement('li');
-        this.sel_svr4.textContent = 'SVR 4';
-        this.sel_svr4.classList.add('header-menu-li');
-        this.sel_svr4.addEventListener('click', event => {
-            this.sel_svr4.classList.add('header-menu-sel');
-            this.sel_svr3.classList.remove('header-menu-sel');
+        let sel_svr4 = document.createElement('li');
+        sel_svr4.textContent = 'SVR 4';
+        sel_svr4.classList.add('header-menu-li');
+        sel_svr4.addEventListener('click', event => {
+            sel_svr4.classList.add('header-menu-sel');
+            sel_svr3.classList.remove('header-menu-sel');
             this._showAddProcess();
-            this.startDiv.style.display = "none";
+            startDiv.style.display = "none";
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
-        this._append(this.sch_selector, [this.sel_svr3, this.sel_svr4]);
-        this.header_menu.appendChild(this.sch_selector);
-        this.addproc_div = document.createElement('div');
-        this.addTitle = document.createElement('h1');
-        this.formDiv = document.createElement('div');        
-        this.addTable = document.createElement('table');
-        this.startDiv = document.createElement('div');
-        this.startDiv.classList.add('div-center');
-        this.startDiv.style.display = "none";
-        this.startButton = document.createElement('button');
-        this.startButton.textContent = 'Simular';
-        this.startButton.classList.add('startButton');
-        this.startButton.addEventListener('click', () => {
+        this._append(sch_selector, [sel_svr3, sel_svr4]);
+        header_menu_div.appendChild(sch_selector);
+        let addproc_div = document.createElement('div');
+        addproc_div.id = 'addproc_div';
+        let addTitle = document.createElement('h1');
+        addTitle.id = 'addTitle';
+        let formDiv = document.createElement('div');        
+        formDiv.id = 'inputform_div'
+        let addTable = document.createElement('table');
+        addTable.id = 'addTable';
+        let startDiv = document.createElement('div');
+        startDiv.id = 'start_div';
+        startDiv.classList.add('div-center');
+        startDiv.style.display = "none";
+        let startButton = document.createElement('button');
+        startButton.textContent = 'Simular';
+        startButton.classList.add('startButton');
+        startButton.addEventListener('click', () => {
             this._hideAddProcess();
             this.states_div.style.display = "inline";
             this.startSimulationEvent.trigger();
         });
-        this.startDiv.appendChild(this.startButton);
-        this._append(this.addproc_div, 
-            [this.addTitle, this.formDiv, this.addTable, this.startDiv]);
+        startDiv.appendChild(startButton);
+        this._append(addproc_div, [addTitle, formDiv, addTable, startDiv]);
+
         this.states_div = document.createElement('div');
+        //this.states_div.id = 'states_div';
         this.states_div.style.display = "none";
         this._createStart();
         this._append(document.body, 
-            [this.header, this.header_menu, this.addproc_div, this.states_div]);
+            [header_div, header_menu_div, addproc_div, this.states_div]);
         this._createSvr3Add();
         this._createSvr4Add();
         this._hideSvr3Add();
@@ -77,80 +82,91 @@ class View {
 
     _createSvr3Add() {
         // TODO: Opcion para eliminar un proceso
-        this.addForm_svr3 = document.createElement('form');
-        this.addForm_svr3.addEventListener('submit', event => {
+        let addForm_svr3 = document.createElement('form');
+        addForm_svr3.id = 'addForm_svr3';
+        addForm_svr3.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
-            this._resetSvr3Input();
+            this._resetInput();
         });
-        this.inputPriority_svr3 = document.createElement('input');
-        this.inputPriority_svr3.type = 'number';
-        this.inputPriority_svr3.placeholder = 'prioridad';
-        this.inputPriority_svr3.classList.add('inputProcess');
-        this.inputPriority_svr3.required = true;
-        this.inputPriority_svr3.min = 50;
-        this.inputPriority_svr3.max = 127;
-        this.inputBurst_svr3 = document.createElement('input');
-        this.inputBurst_svr3.type = 'number';
-        this.inputBurst_svr3.placeholder = 't. ejecucion';
-        this.inputBurst_svr3.classList.add('inputProcess');
-        this.inputBurst_svr3.required = true;
-        this.inputCPU_svr3 = document.createElement('input');
-        this.inputCPU_svr3.type = 'number';
-        this.inputCPU_svr3.placeholder = 'ciclo cpu';
-        this.inputCPU_svr3.classList.add('inputProcess');
-        this.inputCPU_svr3.required = true;
-        this.inputIO_svr3 = document.createElement('input');
-        this.inputIO_svr3.type = 'number';
-        this.inputIO_svr3.placeholder = 'ciclo io';
-        this.inputIO_svr3.classList.add('inputProcess');
-        this.inputIO_svr3.required = true;
-        this.addButton_svr3 = document.createElement('button');
-        this.addButton_svr3.textContent = 'Agregar';
-        this.addButton_svr3.classList.add('addButton');
-        this.formDiv.appendChild(this.addForm_svr3);
-        this._append(this.addForm_svr3, 
-            [this.inputPriority_svr3, this.inputBurst_svr3, 
-            this.inputCPU_svr3, this.inputIO_svr3, this.addButton_svr3]);
+        let inputPriority_svr3 = document.createElement('input');
+        inputPriority_svr3.id = 'inputPriority_svr3';
+        inputPriority_svr3.type = 'number';
+        inputPriority_svr3.placeholder = 'prioridad';
+        inputPriority_svr3.classList.add('inputProcess');
+        inputPriority_svr3.required = true;
+        inputPriority_svr3.min = 50;
+        inputPriority_svr3.max = 127;
+        let inputBurst_svr3 = document.createElement('input');
+        inputBurst_svr3.id = 'inputBurst_svr3';
+        inputBurst_svr3.type = 'number';
+        inputBurst_svr3.placeholder = 't. ejecucion';
+        inputBurst_svr3.classList.add('inputProcess');
+        inputBurst_svr3.required = true;
+        let inputCPU_svr3 = document.createElement('input');
+        inputCPU_svr3.id = 'inputCPU_svr3';
+        inputCPU_svr3.type = 'number';
+        inputCPU_svr3.placeholder = 'ciclo cpu';
+        inputCPU_svr3.classList.add('inputProcess');
+        inputCPU_svr3.required = true;
+        let inputIO_svr3 = document.createElement('input');
+        inputIO_svr3.id = 'inputIO_svr3';
+        inputIO_svr3.type = 'number';
+        inputIO_svr3.placeholder = 'ciclo io';
+        inputIO_svr3.classList.add('inputProcess');
+        inputIO_svr3.required = true;
+        let addButton_svr3 = document.createElement('button');
+        addButton_svr3.textContent = 'Agregar';
+        addButton_svr3.classList.add('addButton');
+        document.getElementById('inputform_div').appendChild(addForm_svr3);
+        this._append(addForm_svr3, 
+            [inputPriority_svr3, inputBurst_svr3, 
+            inputCPU_svr3, inputIO_svr3, addButton_svr3]);
     }
 
     _createSvr4Add() {
-        this.addForm_svr4 = document.createElement('form');
-        this.addForm_svr4.addEventListener('submit', event => {
+        let addForm_svr4 = document.createElement('form');
+        addForm_svr4.id = 'addForm_svr4';
+        addForm_svr4.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
-            this._resetSvr4Input();
+            this._resetInput();
         });
-        this.inputPriority_svr4 = document.createElement('input');
-        this.inputPriority_svr4.type = 'number';
-        this.inputPriority_svr4.placeholder = 'prioridad';
-        this.inputPriority_svr4.classList.add('inputProcess');
-        this.inputPriority_svr4.required = true;
-        this.inputPriority_svr4.min = 100;
-        this.inputPriority_svr4.max = 159;
-        this.inputBurst_svr4 = document.createElement('input');
-        this.inputBurst_svr4.type = 'number';
-        this.inputBurst_svr4.placeholder = 't. ejecucion';
-        this.inputBurst_svr4.classList.add('inputProcess');
-        this.inputBurst_svr4.required = true;
-        this.inputCPU_svr4 = document.createElement('input');
-        this.inputCPU_svr4.type = 'number';
-        this.inputCPU_svr4.placeholder = 'ciclo cpu';
-        this.inputCPU_svr4.classList.add('inputProcess');
-        this.inputCPU_svr4.required = true;
-        this.inputIO_svr4 = document.createElement('input');
-        this.inputIO_svr4.type = 'number';
-        this.inputIO_svr4.placeholder = 'ciclo io';
-        this.inputIO_svr4.classList.add('inputProcess');
-        this.inputIO_svr4.required = true;
-        this.classSel = document.createElement('select');
-        this.classSel.addEventListener('change', event => {
-            if (this.classSel.value == 1) {
-                this.inputPriority_svr4.min = 100;
-                this.inputPriority_svr4.max = 159;
-            } else if (this.classSel.value ==  2) {
-                this.inputPriority_svr4.min = 0;
-                this.inputPriority_svr4.max = 59;
+        let inputPriority_svr4 = document.createElement('input');
+        inputPriority_svr4.id = 'inputPriority_svr4';
+        inputPriority_svr4.type = 'number';
+        inputPriority_svr4.placeholder = 'prioridad';
+        inputPriority_svr4.classList.add('inputProcess');
+        inputPriority_svr4.required = true;
+        inputPriority_svr4.min = 100;
+        inputPriority_svr4.max = 159;
+        let inputBurst_svr4 = document.createElement('input');
+        inputBurst_svr4.id = 'inputBurst_svr4';
+        inputBurst_svr4.type = 'number';
+        inputBurst_svr4.placeholder = 't. ejecucion';
+        inputBurst_svr4.classList.add('inputProcess');
+        inputBurst_svr4.required = true;
+        let inputCPU_svr4 = document.createElement('input');
+        inputCPU_svr4.id = 'inputCPU_svr4';
+        inputCPU_svr4.type = 'number';
+        inputCPU_svr4.placeholder = 'ciclo cpu';
+        inputCPU_svr4.classList.add('inputProcess');
+        inputCPU_svr4.required = true;
+        let inputIO_svr4 = document.createElement('input');
+        inputIO_svr4.id = 'inputIO_svr4';
+        inputIO_svr4.type = 'number';
+        inputIO_svr4.placeholder = 'ciclo io';
+        inputIO_svr4.classList.add('inputProcess');
+        inputIO_svr4.required = true;
+        let classSel = document.createElement('select');
+        classSel.id = 'class_sel';
+        classSel.addEventListener('change', event => {
+            if (classSel.value == 1) {
+                inputPriority_svr4.min = 100;
+                inputPriority_svr4.max = 159;
+            } else if (classSel.value ==  2) {
+                inputPriority_svr4.min = 0;
+                inputPriority_svr4.max = 59;
             }
         });
         let option_rt = document.createElement("option");
@@ -159,81 +175,74 @@ class View {
         let option_ts = document.createElement("option");
         option_ts.value = "2";
         option_ts.innerHTML = "Time Sharing";
-        this._append(this.classSel, [option_rt, option_ts]);
-        this.addButton_svr4 = document.createElement('button');
-        this.addButton_svr4.textContent = 'Agregar';
-        this.addButton_svr4.classList.add('addButton');
-        this.formDiv.appendChild(this.addForm_svr4);
-        this._append(this.addForm_svr4, 
-            [this.inputBurst_svr4, this.inputCPU_svr4, this.inputIO_svr4, 
-            this.classSel, this.inputPriority_svr4, this.addButton_svr4]);
+        this._append(classSel, [option_rt, option_ts]);
+        let addButton_svr4 = document.createElement('button');
+        addButton_svr4.textContent = 'Agregar';
+        addButton_svr4.classList.add('addButton');
+        document.getElementById('inputform_div').appendChild(addForm_svr4);
+        this._append(addForm_svr4, 
+            [inputBurst_svr4, inputCPU_svr4, inputIO_svr4, 
+            classSel, inputPriority_svr4, addButton_svr4]);
     }
 
     _showSvr3Add() {
         this._hideSvr4Add();
-        this.addTitle.textContent = "SVR3 : Agregar procesos";
-        this.addForm_svr3.style.display = "inline";
+        document.getElementById('addTitle').textContent = "SVR3 : Agregar procesos";
+        document.getElementById('addForm_svr3').style.display = "inline";
     }
 
     _showSvr4Add() {
         this._hideSvr3Add();
-        this.addTitle.textContent = "SVR4 : Agregar procesos";
-        this.addForm_svr4.style.display = "inline";
+        document.getElementById('addTitle').textContent = "SVR4 : Agregar procesos";
+        document.getElementById('addForm_svr4').style.display = "inline";
+        //this.addForm_svr4.style.display = "inline";
     }
 
     _hideSvr3Add() {
-        this._clearPTable();
-        this.addForm_svr3.style.display = "none";
+        this._clearTable(document.getElementById('addTable'));
+        document.getElementById('addForm_svr3').style.display = "none";
     }
 
     _hideSvr4Add() {
-        this._clearPTable();
-        this.addForm_svr4.style.display = "none";
+        this._clearTable(document.getElementById('addTable'));
+        document.getElementById('addForm_svr4').style.display = "none";
     }
 
-    _clearPTable() {
-        while (this.addTable.firstChild) {
-            this.addTable.removeChild(this.addTable.firstChild);
+    // Elimina los elementos de una tabla
+    _clearTable(domElement) {
+        while (domElement.firstChild) {
+            domElement.removeChild(domElement.firstChild);
         }
     }
 
     _getSvr3Input() {
         let data = {
-            burst: parseInt(this.inputBurst_svr3.value, 10),
-            cpu_burst: parseInt(this.inputCPU_svr3.value, 10),
-            io_burst: parseInt(this.inputIO_svr3.value, 10),
-            pri: parseInt(this.inputPriority_svr3.value, 10)
+            burst: parseInt(document.getElementById('inputBurst_svr3').value, 10),
+            cpu_burst: parseInt(document.getElementById('inputCPU_svr3').value, 10),
+            io_burst: parseInt(document.getElementById('inputIO_svr3').value, 10),
+            pri: parseInt(document.getElementById('inputPriority_svr3').value, 10)
         }
         return data;
     }
 
     _getSvr4Input() {
         let pc = "RealTime"
-        if (this.classSel.value == 2) {pc = "TimeSharing";}
+        if (document.getElementById('class_sel').value == 2) {pc = "TimeSharing";}
         let data = {
-            burst: parseInt(this.inputBurst_svr4.value, 10),
-            cpu_burst: parseInt(this.inputCPU_svr4.value, 10),
-            io_burst: parseInt(this.inputIO_svr4.value, 10),
+            burst: parseInt(document.getElementById('inputBurst_svr4').value, 10),
+            cpu_burst: parseInt(document.getElementById('inputCPU_svr4').value, 10),
+            io_burst: parseInt(document.getElementById('inputIO_svr4').value, 10),
             pClass: pc,
-            pri: parseInt(this.inputPriority_svr4.value, 10)
+            pri: parseInt(document.getElementById('inputPriority_svr4').value, 10)
         }
         return data;
     }
+
+    _resetInput() {
+        let items = document.getElementsByClassName('inputProcess');
+        Array.prototype.forEach.call(items, function(i) {i.value = ''});
+    }
     
-    _resetSvr3Input() {
-        this.inputPriority_svr3.value = '';
-        this.inputBurst_svr3.value = '';
-        this.inputCPU_svr3.value = '';
-        this.inputIO_svr3.value = '';
-    }
-
-    _resetSvr4Input() {
-        this.inputPriority_svr4.value = '';
-        this.inputBurst_svr4.value = '';
-        this.inputCPU_svr4.value = '';
-        this.inputIO_svr4.value = '';
-    }
-
 
     // Elementos del inicio de la simulacion
     _createStart() {
@@ -247,6 +256,12 @@ class View {
         this.kprunrun = document.createElement('p');
         this.pTable = document.createElement('table');
         this.classData_div = document.createElement('div');
+
+        let rtTable = document.createElement('table');
+        rtTable.id = "rtTable";
+        let tsTable = document.createElement('table');
+        tsTable.id = "tsTable";
+
         this.text = document.createElement('p');
         this.text.textContent = "Eventos:"
         this.events = document.createElement('ul');
@@ -264,11 +279,16 @@ class View {
         this.next.addEventListener('click', () => {
             this.nextStateEvent.trigger();
         });
+        this._append(this.classData_div, [rtTable, tsTable]);
         this._append(this.navigation_div, [this.prev, this.next]);
+        // TODO: el createstart se llama cuando empieza la simulacion, y se oculta la 
+        //  parte de añadir procesos
+        
         this._append(this.states_div,
             [this.statesTitle, this.time, this.queue_div, this.pqTitle, 
             this.priorityQueue, this.runrun, this.kprunrun, this.pTable, 
             this.classData_div, this.text, this.events, this.navigation_div]);
+        
     }
 
     // Elementos para mostrar un estado (comunes)
@@ -307,8 +327,10 @@ class View {
             this._showSvr3State(state);
         else if (data.name == "SVR4") {
             this._showSvr4State(state);
-            this._showSvr4RT(data.rt_data.rt);
-            this._showSvr4TS(data.ts_data.ts);
+            let rtt = document.getElementById('rtTable');
+            let tst = document.getElementById('tsTable');
+            this._showSvr4ClassDepent(data.rt_data.rt, rtt, "rtdpent", "2", "rtproc", "3");
+            this._showSvr4ClassDepent(data.ts_data.ts, tst, "tsdpent", "6", "tsproc", "5");
         }
             
     }
@@ -342,26 +364,48 @@ class View {
         });
     }
 
-    _showSvr4RT(state) {
-        //let rt = state.rt_data.rt;
-        let rt_table = document.createElement('table');
-        if (state.length > 0) {
-            let t = document.createElement('p');
-            t.textContent = "RT DATA"
-            this.classData_div.appendChild(t);
-        }
-    }
 
-    _showSvr4TS(state) {
-        //let ts = state.ts_data.ts;
-        let ts_table = document.createElement('table');
+    // Muestra los datos dependientes de la clase 
+    _showSvr4ClassDepent(state, domElement, dpent, n_dpent, proc, n_proc) {
+        this._clearTable(domElement);
         if (state.length > 0) {
-            let t = document.createElement('p');
-            t.textContent = "TS DATA"
-            this.classData_div.appendChild(t);
-        }
-    }
+            let thead = domElement.createTHead();
+            let tbody = domElement.createTBody();
 
+            // Table head
+            let row = thead.insertRow();
+            row.classList.add('pr_class_header');
+            row.appendChild(document.createElement('th'));
+            let dp = document.createElement('th');
+            dp.appendChild(document.createTextNode(dpent));
+            dp.colSpan = n_dpent;
+            row.appendChild(dp);
+            let pr = document.createElement('th');
+            pr.appendChild(document.createTextNode(proc));
+            pr.colSpan = n_proc;
+            row.appendChild(pr);
+
+            // First row
+            let row1 = tbody.insertRow();
+            let data = Object.keys(state[0]);
+            for (let key of data) {
+                let td = document.createElement('td');
+                td.appendChild(document.createTextNode(key));
+                row1.appendChild(td);
+            }
+
+            // Table data
+            state.forEach(pr => {
+                let r = tbody.insertRow();
+                for (let item in pr) {
+                    let td = document.createElement('td');
+                    td.appendChild(document.createTextNode(pr[item]));
+                    r.appendChild(td);
+                }
+            });
+        }
+
+    }
 
     _showArrayQueue(data, text, n) {
         this.arrayQueue_p.textContent = text;
@@ -382,11 +426,12 @@ class View {
     }
 
     _hideAddProcess() {
-        this.addproc_div.style.display = "none";
+        document.getElementById('addproc_div').style.display = "none";
     }
 
     _showAddProcess() {
-        this.addproc_div.style.display = "inline";
+        document.getElementById('addproc_div').style.display = "inline";
+        //document.getElementById('states_div').style.display = "none";
         this.states_div.style.display = "none";
     }
 
@@ -411,9 +456,7 @@ class View {
 
 
     _displayProcessTable(pTable, domElement) {
-        while (domElement.firstChild) {
-            domElement.removeChild(domElement.firstChild);
-        }
+        this._clearTable(domElement)
         if (pTable.length > 0) {
             this.thead = domElement.createTHead();
             this.tbody = domElement.createTBody();
@@ -431,7 +474,7 @@ class View {
                 let row = this.tbody.insertRow();
                 this._setRowClass(row, pr);
                 for (let item in pr) {
-                    let tb = document.createElement('td')
+                    let tb = document.createElement('td');
                     tb.appendChild(document.createTextNode(pr[item]));
                     row.appendChild(tb)
                 }
@@ -441,9 +484,9 @@ class View {
 
     pTableChanged(pTable) {
         if(pTable.length > 0) 
-            this.startDiv.style.display = "block";
+            document.getElementById('start_div').style.display = "block";
         
-        this._displayProcessTable(pTable, this.addTable);
+        this._displayProcessTable(pTable, document.getElementById('addTable'));
     }
 
     _append(parent, elements) {

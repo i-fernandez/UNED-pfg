@@ -199,17 +199,6 @@ class Svr3Scheduler {
                     runrun: this.runrun
                 }
             });
-
-            /*
-            this.stateManager.pushState({
-                time: this.time, 
-                journal: this.journal, 
-                pTable: pTable,
-                qs: _qs,
-                whichqs: Array.from(this.whichqs),
-                runrun: this.runrun
-            });
-            */
             this.journal = [];
         }
     }
