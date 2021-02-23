@@ -13,6 +13,8 @@ class View {
         
     }
 
+    /* Añadir proceso */
+
     render() {
         // Elementos comunes
         let header_div = document.createElement('div');
@@ -67,13 +69,12 @@ class View {
         });
         startDiv.appendChild(startButton);
         this._append(addproc_div, [addTitle, formDiv, addTable, startDiv]);
-
         this.states_div = document.createElement('div');
-        //this.states_div.id = 'states_div';
         this.states_div.style.display = "none";
         this._createStart();
         this._append(document.body, 
-            [header_div, header_menu_div, addproc_div, this.states_div]);
+            [header_div, header_menu_div, addproc_div, this.states_div]
+        );
         this._createSvr3Add();
         this._createSvr4Add();
         this._hideSvr3Add();
@@ -120,8 +121,9 @@ class View {
         addButton_svr3.classList.add('addButton');
         document.getElementById('inputform_div').appendChild(addForm_svr3);
         this._append(addForm_svr3, 
-            [inputPriority_svr3, inputBurst_svr3, 
-            inputCPU_svr3, inputIO_svr3, addButton_svr3]);
+            [inputPriority_svr3, inputBurst_svr3, inputCPU_svr3, 
+            inputIO_svr3, addButton_svr3]
+        );
     }
 
     _createSvr4Add() {
@@ -182,7 +184,8 @@ class View {
         document.getElementById('inputform_div').appendChild(addForm_svr4);
         this._append(addForm_svr4, 
             [inputBurst_svr4, inputCPU_svr4, inputIO_svr4, 
-            classSel, inputPriority_svr4, addButton_svr4]);
+            classSel, inputPriority_svr4, addButton_svr4]
+        );
     }
 
     _showSvr3Add() {
@@ -195,25 +198,20 @@ class View {
         this._hideSvr3Add();
         document.getElementById('addTitle').textContent = "SVR4 : Agregar procesos";
         document.getElementById('addForm_svr4').style.display = "inline";
-        //this.addForm_svr4.style.display = "inline";
     }
 
     _hideSvr3Add() {
-        this._clearTable(document.getElementById('addTable'));
+        this._clearChilds(document.getElementById('addTable'));
         document.getElementById('addForm_svr3').style.display = "none";
     }
 
     _hideSvr4Add() {
-        this._clearTable(document.getElementById('addTable'));
+        this._clearChilds(document.getElementById('addTable'));
+        this._clearChilds(document.getElementById('rtTable'));
+        this._clearChilds(document.getElementById('tsTable'));
         document.getElementById('addForm_svr4').style.display = "none";
     }
 
-    // Elimina los elementos de una tabla
-    _clearTable(domElement) {
-        while (domElement.firstChild) {
-            domElement.removeChild(domElement.firstChild);
-        }
-    }
 
     _getSvr3Input() {
         let data = {
@@ -242,85 +240,115 @@ class View {
         let items = document.getElementsByClassName('inputProcess');
         Array.prototype.forEach.call(items, function(i) {i.value = ''});
     }
+
+    _hideAddProcess() {
+        document.getElementById('addproc_div').style.display = "none";
+    }
+
+    _showAddProcess() {
+        document.getElementById('addproc_div').style.display = "inline";
+        this.states_div.style.display = "none";
+    }
     
+
+    /* Simulacion */
 
     // Elementos del inicio de la simulacion
     _createStart() {
-        this.statesTitle = document.createElement('h1');;
-        this.statesTitle.textContent = "Simulacion";
-        this.time = document.createElement('p');
-        this.queue_div = document.createElement('div');
-        this.pqTitle = document.createElement('p');
-        this.priorityQueue = document.createElement('ul');
-        this.runrun = document.createElement('p');
-        this.kprunrun = document.createElement('p');
-        this.pTable = document.createElement('table');
-        this.classData_div = document.createElement('div');
+        let statesTitle = document.createElement('h1');;
+        statesTitle.textContent = "Simulacion";
+        let time_p = document.createElement('p');
+        time_p.id = 'time_p';
+        let queue_div = document.createElement('div');
+        queue_div.id = 'queue_div';
 
+        let queue_data_div = document.createElement('div');
+        queue_data_div.id = 'queue_data_div';
+        let queue_map_div = document.createElement('div');
+        queue_map_div.id = 'queue_map_div';
+        
+        // TODO: Añadir una tabla de 2 columnas / 3 filas en lugar de esto
+        for (let i=0; i<3; i++) {
+            queue_map_div.appendChild(document.createElement('div'));
+        }
+
+        this._append(queue_div, [queue_data_div, queue_map_div]);
+
+        let pqTitle = document.createElement('p');
+        pqTitle.id = 'pqTitle_p';
+        let priorityQueue = document.createElement('ul');
+        priorityQueue.id = 'priorityQueue';
+        let runrun_p = document.createElement('p');
+        runrun_p.id = 'runrun_p';
+        let kprunrun_p = document.createElement('p');
+        kprunrun_p.id = 'kprunrun_p';
+        let pTable = document.createElement('table');
+        pTable.id = 'pTable';
+        let classData_div = document.createElement('div');
         let rtTable = document.createElement('table');
         rtTable.id = "rtTable";
         let tsTable = document.createElement('table');
         tsTable.id = "tsTable";
-
-        this.text = document.createElement('p');
-        this.text.textContent = "Eventos:"
-        this.events = document.createElement('ul');
-        this.navigation_div = document.createElement('div');
-        this.navigation_div.classList.add('div-center');
-        this.prev = document.createElement('button');
-        this.prev.textContent = 'Anterior';
-        this.prev.classList.add('navigationButton');
-        this.prev.addEventListener('click', () => {
+        let text = document.createElement('p');
+        text.textContent = "Eventos:"
+        let events = document.createElement('ul');
+        events.id = 'events';
+        let navigation_div = document.createElement('div');
+        navigation_div.classList.add('div-center');
+        let prev = document.createElement('button');
+        prev.textContent = 'Anterior';
+        prev.classList.add('navigationButton');
+        prev.addEventListener('click', () => {
             this.previousStateEvent.trigger();
         });
-        this.next = document.createElement('button');
-        this.next.textContent = 'Siguiente';
-        this.next.classList.add('navigationButton');
-        this.next.addEventListener('click', () => {
+        let next = document.createElement('button');
+        next.textContent = 'Siguiente';
+        next.classList.add('navigationButton');
+        next.addEventListener('click', () => {
             this.nextStateEvent.trigger();
         });
-        this._append(this.classData_div, [rtTable, tsTable]);
-        this._append(this.navigation_div, [this.prev, this.next]);
-        // TODO: el createstart se llama cuando empieza la simulacion, y se oculta la 
-        //  parte de añadir procesos
-        
+        this._append(classData_div, [rtTable, tsTable]);
+        this._append(navigation_div, [prev, next]);
         this._append(this.states_div,
-            [this.statesTitle, this.time, this.queue_div, this.pqTitle, 
-            this.priorityQueue, this.runrun, this.kprunrun, this.pTable, 
-            this.classData_div, this.text, this.events, this.navigation_div]);
+            [statesTitle, time_p, queue_div, pqTitle, priorityQueue, 
+            runrun_p, kprunrun_p, pTable, classData_div, text, events, navigation_div]
+        );
         
     }
 
     // Elementos para mostrar un estado (comunes)
     showState(data) {
         let state = data.state;
-        this.time.textContent = "Time: " + state.time + " ut";
-        this.runrun.textContent = "runrun: " + state.runrun;
-        this._displayProcessTable(state.pTable, this.pTable);
+        //let queue_div = document.getElementById('queue_div');
+        let queue_data_div = document.getElementById('queue_data_div');
+        //let queue_map_div = document.getElementById('queue_map_div');
+        document.getElementById('time_p').textContent = "Time: " + state.time + " ut";
+        document.getElementById('runrun_p').textContent = "runrun: " + state.runrun;
+        this._displayProcessTable(state.pTable, document.getElementById('pTable'));
 
-        // Limpia arrayQueue
-        while (this.queue_div.firstChild) {
-            this.queue_div.removeChild(this.queue_div.firstChild);
-        }
-        // Crea arrayQueue
-        let arrayQueue_div = document.createElement('div');
-        arrayQueue_div.id = "arrayQueue_div";
-        this.arrayQueue_p = document.createElement('p');
-        arrayQueue_div.appendChild(this.arrayQueue_p);
-        this.queue_div.appendChild(arrayQueue_div);
+        // Recrea arrayQueue
+        //this._clearChilds(queue_div);
+        //this._clearChilds(queue_map_div);
+        //let arrayQueue_div = document.createElement('div');
+        //arrayQueue_div.id = "arrayQueue_div";
+        let arrayQueue_p = document.createElement('p');
+        arrayQueue_p.id = ('arrayQueue_p');
+        queue_data_div.appendChild(arrayQueue_p);
+        //arrayQueue_div.appendChild(arrayQueue_p);
+        //queue_div.appendChild(arrayQueue_div);
+        
 
         // Limpia priorityQueue
-        while (this.priorityQueue.firstChild) {
-            this.priorityQueue.removeChild(this.priorityQueue.firstChild);
-        }
+        this._clearChilds(document.getElementById('priorityQueue'));
+
         // Limpia eventos
-        while (this.events.firstChild) {
-            this.events.removeChild(this.events.firstChild);
-        }
+        let events = document.getElementById('events');
+        this._clearChilds(events);
+
         state.journal.forEach(entry => {
             let li = document.createElement('li');
             li.innerHTML = entry;
-            this.events.appendChild(li);
+            events.appendChild(li);
         });
         // Campos especificos
         if (data.name == "SVR3") 
@@ -337,14 +365,21 @@ class View {
    
     // Elementos para mostrar un estado de SVR3
     _showSvr3State(state) {
-        this._showArrayQueue(state.whichqs, "whichqs: ", 32);
-        this.pqTitle.textContent = "qs:";
+        //let queue_map_div = document.getElementById('queue_map_div');
+        let map = document.getElementById('queue_map_div').firstChild;
+        //this._clearChilds(queue_map_div);
+        this._clearChilds(map);
+
+        // todo: pasar la estructura a rellenar (o el id)
+        document.getElementById('arrayQueue_p').textContent = "whichqs: ";
+        this._showArrayQueue(state.whichqs, map, " ", 0, 31);
+        document.getElementById('pqTitle_p').textContent = "qs:";
         state.qs.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
             item.items.forEach(pr => {listaProc += pr.p_pid + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
-            this.priorityQueue.appendChild(li);
+            document.getElementById('priorityQueue').appendChild(li);
         });
         
         
@@ -352,22 +387,36 @@ class View {
 
     // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
-        this.kprunrun.textContent = "kprunrun: " + state.kprunrun;
-        this._showArrayQueue(state.dqactmap, "dqactmap: ", 160);
-        this.pqTitle.textContent = "dispq:";
+        //let queue_map_div = document.getElementById('queue_map_div');
+        //this._clearChilds(queue_map_div);
+        let map0 = document.getElementById('queue_map_div').childNodes[0];
+        this._clearChilds(map0);
+        this._showArrayQueue(state.dqactmap, map0, " TS:  ", 0, 59);
+        let map1 = document.getElementById('queue_map_div').childNodes[1];
+        this._clearChilds(map1);
+        this._showArrayQueue(state.dqactmap, map1, " KERNEL:  ", 60, 99);
+        let map2 = document.getElementById('queue_map_div').childNodes[2];
+        this._clearChilds(map2);
+        this._showArrayQueue(state.dqactmap, map2, " RT:  ", 100, 159);
+
+
+        document.getElementById('kprunrun_p').textContent = "kprunrun: " + state.kprunrun;
+        document.getElementById('arrayQueue_p').textContent = "dqactmap: ";
+        //this._showArrayQueue(state.dqactmap, " DQ:  ", 0, 160);
+        document.getElementById('pqTitle_p').textContent = "dispq:";
         state.dispq.forEach(item => {
             let li = document.createElement('li');
             let listaProc = "";
             item.items.forEach(pr => {listaProc += pr.p_pid + " ";});
             li.innerHTML = item.priority + " -> " + listaProc;
-            this.priorityQueue.appendChild(li);
+            document.getElementById('priorityQueue').appendChild(li);
         });
     }
 
 
     // Muestra los datos dependientes de la clase 
     _showSvr4ClassDepent(state, domElement, dpent, n_dpent, proc, n_proc) {
-        this._clearTable(domElement);
+        this._clearChilds(domElement);
         if (state.length > 0) {
             let thead = domElement.createTHead();
             let tbody = domElement.createTBody();
@@ -407,8 +456,11 @@ class View {
 
     }
 
+
+    /* Funciones auxiliares */
+    /*
     _showArrayQueue(data, text, n) {
-        this.arrayQueue_p.textContent = text;
+        document.getElementById('arrayQueue_p').textContent = text;
         for (let i=0; i<n; i++) {
             let d = document.createElement('div');
             d.classList.add("array-queue");
@@ -421,18 +473,31 @@ class View {
             else
                 d.classList.add("array-queue-0");
             
-            this.queue_div.appendChild(d);
+            document.getElementById('queue_div').appendChild(d);
         }
-    }
+    }*/
 
-    _hideAddProcess() {
-        document.getElementById('addproc_div').style.display = "none";
-    }
+    _showArrayQueue(data, dom, text, start, end) {
+        //let map = document.getElementById('queue_map_div');
+        let t = document.createElement('p');
+        t.textContent = text;
+        t.classList.add('map-inline');
+        dom.appendChild(t);
 
-    _showAddProcess() {
-        document.getElementById('addproc_div').style.display = "inline";
-        //document.getElementById('states_div').style.display = "none";
-        this.states_div.style.display = "none";
+        for (let i=start; i<=end; i++) {
+            let d = document.createElement('div');
+            d.classList.add("array-queue");
+            let sp = document.createElement('span');
+            sp.classList.add('tooltip-text');
+            sp.textContent = i;
+            d.appendChild(sp);
+            if (data.find(n => n == i))
+                d.classList.add("array-queue-1");
+            else
+                d.classList.add("array-queue-0");
+            
+            dom.appendChild(d);
+        }
     }
 
     _setRowClass(row, pr) {
@@ -456,7 +521,7 @@ class View {
 
 
     _displayProcessTable(pTable, domElement) {
-        this._clearTable(domElement)
+        this._clearChilds(domElement)
         if (pTable.length > 0) {
             this.thead = domElement.createTHead();
             this.tbody = domElement.createTBody();
@@ -489,10 +554,20 @@ class View {
         this._displayProcessTable(pTable, document.getElementById('addTable'));
     }
 
+    
+
     _append(parent, elements) {
         elements.forEach(item => {
             parent.appendChild(item);
         });
+    }
+
+
+    // Elimina los elementos de una tabla
+    _clearChilds(domElement) {
+        while (domElement.firstChild) {
+            domElement.removeChild(domElement.firstChild);
+        }
     }
 
 }

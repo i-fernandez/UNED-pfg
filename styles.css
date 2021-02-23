@@ -98,7 +98,11 @@ body {
 .no-wrap {
     white-space: pre-wrap;
  }
- 
+ .map-inline {
+    display: inline-block;
+    font-style: italic;
+    margin: 20px;
+ }
 Button:hover {
     border: 2px solid rgb(0, 0, 0);
 }
