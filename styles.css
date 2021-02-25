@@ -98,11 +98,14 @@ body {
 .no-wrap {
     white-space: pre-wrap;
  }
- .map-inline {
-    display: inline-block;
+ .table-italic {
     font-style: italic;
+    color: rgb(48, 48, 48);
     margin: 20px;
- }
+}
+.bold {
+    font-weight: bold;
+}
 Button:hover {
     border: 2px solid rgb(0, 0, 0);
 }

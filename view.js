@@ -261,19 +261,11 @@ class View {
         time_p.id = 'time_p';
         let queue_div = document.createElement('div');
         queue_div.id = 'queue_div';
-
         let queue_data_div = document.createElement('div');
         queue_data_div.id = 'queue_data_div';
-        let queue_map_div = document.createElement('div');
-        queue_map_div.id = 'queue_map_div';
-        
-        // TODO: Añadir una tabla de 2 columnas / 3 filas en lugar de esto
-        for (let i=0; i<3; i++) {
-            queue_map_div.appendChild(document.createElement('div'));
-        }
-
-        this._append(queue_div, [queue_data_div, queue_map_div]);
-
+        let queue_map_t = document.createElement('table');
+        queue_map_t.id = 'queue_map_t';
+        this._append(queue_div, [queue_data_div, queue_map_t]);
         let pqTitle = document.createElement('p');
         pqTitle.id = 'pqTitle_p';
         let priorityQueue = document.createElement('ul');
@@ -319,24 +311,13 @@ class View {
     // Elementos para mostrar un estado (comunes)
     showState(data) {
         let state = data.state;
-        //let queue_div = document.getElementById('queue_div');
         let queue_data_div = document.getElementById('queue_data_div');
-        //let queue_map_div = document.getElementById('queue_map_div');
         document.getElementById('time_p').textContent = "Time: " + state.time + " ut";
         document.getElementById('runrun_p').textContent = "runrun: " + state.runrun;
         this._displayProcessTable(state.pTable, document.getElementById('pTable'));
-
-        // Recrea arrayQueue
-        //this._clearChilds(queue_div);
-        //this._clearChilds(queue_map_div);
-        //let arrayQueue_div = document.createElement('div');
-        //arrayQueue_div.id = "arrayQueue_div";
         let arrayQueue_p = document.createElement('p');
         arrayQueue_p.id = ('arrayQueue_p');
         queue_data_div.appendChild(arrayQueue_p);
-        //arrayQueue_div.appendChild(arrayQueue_p);
-        //queue_div.appendChild(arrayQueue_div);
-        
 
         // Limpia priorityQueue
         this._clearChilds(document.getElementById('priorityQueue'));
@@ -365,14 +346,11 @@ class View {
    
     // Elementos para mostrar un estado de SVR3
     _showSvr3State(state) {
-        //let queue_map_div = document.getElementById('queue_map_div');
-        let map = document.getElementById('queue_map_div').firstChild;
-        //this._clearChilds(queue_map_div);
-        this._clearChilds(map);
-
-        // todo: pasar la estructura a rellenar (o el id)
         document.getElementById('arrayQueue_p').textContent = "whichqs: ";
-        this._showArrayQueue(state.whichqs, map, " ", 0, 31);
+        let table = document.getElementById('queue_map_t');
+        this._clearChilds(table);
+        let tbody = table.createTBody();
+        this._showArrayQueue(state.whichqs, tbody, "", 0, 31);
         document.getElementById('pqTitle_p').textContent = "qs:";
         state.qs.forEach(item => {
             let li = document.createElement('li');
@@ -387,22 +365,14 @@ class View {
 
     // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
-        //let queue_map_div = document.getElementById('queue_map_div');
-        //this._clearChilds(queue_map_div);
-        let map0 = document.getElementById('queue_map_div').childNodes[0];
-        this._clearChilds(map0);
-        this._showArrayQueue(state.dqactmap, map0, " TS:  ", 0, 59);
-        let map1 = document.getElementById('queue_map_div').childNodes[1];
-        this._clearChilds(map1);
-        this._showArrayQueue(state.dqactmap, map1, " KERNEL:  ", 60, 99);
-        let map2 = document.getElementById('queue_map_div').childNodes[2];
-        this._clearChilds(map2);
-        this._showArrayQueue(state.dqactmap, map2, " RT:  ", 100, 159);
-
-
-        document.getElementById('kprunrun_p').textContent = "kprunrun: " + state.kprunrun;
         document.getElementById('arrayQueue_p').textContent = "dqactmap: ";
-        //this._showArrayQueue(state.dqactmap, " DQ:  ", 0, 160);
+        let table = document.getElementById('queue_map_t');
+        this._clearChilds(table);
+        let tbody = table.createTBody();
+        this._showArrayQueue(state.dqactmap, tbody, "TimeSharing: ", 0, 59);
+        this._showArrayQueue(state.dqactmap, tbody, "Kernel: ", 60, 99);
+        this._showArrayQueue(state.dqactmap, tbody, "RealTime: ", 100, 159);
+        document.getElementById('kprunrun_p').textContent = "kprunrun: " + state.kprunrun;
         document.getElementById('pqTitle_p').textContent = "dispq:";
         state.dispq.forEach(item => {
             let li = document.createElement('li');
@@ -458,31 +428,15 @@ class View {
 
 
     /* Funciones auxiliares */
-    /*
-    _showArrayQueue(data, text, n) {
-        document.getElementById('arrayQueue_p').textContent = text;
-        for (let i=0; i<n; i++) {
-            let d = document.createElement('div');
-            d.classList.add("array-queue");
-            let sp = document.createElement('span');
-            sp.classList.add('tooltip-text');
-            sp.textContent = i;
-            d.appendChild(sp);
-            if (data.find(n => n == i))
-                d.classList.add("array-queue-1");
-            else
-                d.classList.add("array-queue-0");
-            
-            document.getElementById('queue_div').appendChild(d);
-        }
-    }*/
 
-    _showArrayQueue(data, dom, text, start, end) {
-        //let map = document.getElementById('queue_map_div');
-        let t = document.createElement('p');
-        t.textContent = text;
-        t.classList.add('map-inline');
-        dom.appendChild(t);
+    _showArrayQueue(data, tbody, text, start, end) {
+        let row = tbody.insertRow();
+        let td_txt = document.createElement('td');
+        td_txt.classList.add('table-italic');
+        td_txt.appendChild(document.createTextNode(text));
+        row.appendChild(td_txt);
+        let td_data = document.createElement('td');
+        row.appendChild(td_data);
 
         for (let i=start; i<=end; i++) {
             let d = document.createElement('div');
@@ -496,7 +450,7 @@ class View {
             else
                 d.classList.add("array-queue-0");
             
-            dom.appendChild(d);
+            td_data.appendChild(d);
         }
     }
 
