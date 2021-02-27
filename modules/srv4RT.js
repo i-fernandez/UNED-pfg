@@ -3,40 +3,20 @@ class Svr4RT {
     constructor(pri, pid) {
         this.name = "RealTime"
         this.p_pid = pid;
-        /*
-        this.rtdpent = {
-            rt_glopri: pri,
-            rt_quantum: rt_dptbl(pri)
-        };
-        this.rtproc = {
-            rt_pquantum: this.rtdpent.rt_quantum,
-            rt_timeleft: this.rtdpent.rt_quantum,
-            rt_pri: pri
-        };
-        */
-
+        // rtdpent
         this.rt_glopri = pri;
         this.rt_quantum = rt_dptbl(pri);
+        // rtproc
         this.rt_pquantum = this.rt_quantum;
         this.rt_timeleft = this.rt_quantum;
         this.rt_pri = pri;
-
-
     }
 
     getPriority() {
-        //return this.rtproc.rt_pri;
         return this.rt_pri;
     }
 
     getData() {
-        /*
-        return {
-            p_pid: this.p_pid,
-            rtdpent: this.rtdpent,
-            rtproc: this.rtproc
-        };
-        */
         return {
             p_pid: this.p_pid,
             rt_glopri: this.rt_glopri,
@@ -46,6 +26,64 @@ class Svr4RT {
             rt_pri: this.rt_pri
         };
     }
+
+    startRun() {
+        this.rt_timeleft = this.rt_quantum;
+    }
+
+    runTick(pr, time) {
+        this.text = "";
+        switch (pr.p_state) {
+            case "running_kernel":
+
+            case "running_user":
+                if (pr.burst_time <= time)
+                    this._toZombie(pr);
+                else {
+                    this.rt_timeleft -= time;
+                    pr.burst_time -= time;
+                    pr.current_cycle_time += time;
+                    if (pr.current_cycle_time >= pr.cpu_burst)
+                        this._goToSleep(pr);
+                    else if (this.rt_timeleft <= 0)
+                        pr.roundRobin = true;
+                }
+                break;
+            case "sleeping":
+                pr.current_cycle_time += time;
+                if (pr.current_cycle_time >= pr.io_burst)
+                    this._fromSleep(pr);
+                break;
+            case "ready":
+                pr.wait_time += time;
+                break;
+            case "zombie":
+                pr.p_state = "finished";
+                break;
+            default:
+                break;
+        }
+        return this.text;
+    }
+
+    _toZombie(pr) {
+        pr.burst_time = 0;
+        pr.p_state = "zombie";
+        this.text = "Proceso " + this.p_pid + " finalizado";
+    }
+
+    _goToSleep(pr) {
+        pr.p_state = "sleeping";
+        pr.current_cycle_time = 0;
+        this.text = "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
+    }
+
+    _fromSleep(pr) {
+        pr.p_state = "ready";
+        pr.current_cycle_time = 0;
+        this.text = "Proceso " + this.p_pid + " finaliza su espera por I/O."
+    }
+
 
 
 

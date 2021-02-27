@@ -67,6 +67,24 @@ class Svr4TS {
         */
     }
 
+    runTick(pr, time) {
+        switch (pr.p_state) {
+            case "running_kernel":
+
+            case "running_user":
+                break;
+            case "sleeping":
+                break;
+            case "ready":
+                break;
+            case "zombie":
+                break;
+            default:
+                break;
+        }
+
+    }
+
 }
 
 

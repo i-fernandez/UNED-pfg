@@ -4,6 +4,10 @@ import Svr4TS from './svr4TS.js'
 
 class Svr4Scheduler {
     constructor(stateManager) {
+        // constantes
+        this.CONTEXT_SWITCH = 10;
+        this.TICK = 10;
+
         this.name = "SVR4";
         this.stateManager = stateManager;
         this.time = 0;
@@ -13,6 +17,8 @@ class Svr4Scheduler {
         this.runrun = false;
         this.kprunrun = false;
         this.contextSwitchCount = 0;
+        this.inContextSwitch = false;
+        this.inRoundRobin = false;
         this.journal = [];
 
         /* BORRAR */
@@ -24,24 +30,44 @@ class Svr4Scheduler {
             this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pClass, data.pri
         );
         this.processTable.push(pr);
-        this._enqueueProcess(pr);
+        this._setBackDQ(pr);
     }
 
-    // Añade un proceso a la cola, modifica dispq y dqactmap (y los ordena)
-    _enqueueProcess(process) {
-        // Numero de cola
+    // Añade un proceso al inicio de la cola (proceso expropiado)
+    _setFrontDQ(process) {
         let qn = process.p_pri;
-        // dqactmap
-        if (!(this.dqactmap.includes(qn))) {
-            this.dqactmap.push(qn);
-        }
-        this.dqactmap.sort(function(a, b) { return a - b;});
-        // dispq
+        this._setDqactmap(qn);
+        let queue = this.dispq.find(item => item.priority == qn);
+        if (queue)
+            queue.addFront(process);
+        else
+            this.dispq.push(new PriorityQueue(qn, process));
+
+        this._sortDispq();
+    }
+
+    // Añade un proceso al final de la cola (nuevo proceso)
+    _setBackDQ(process) {
+        let qn = process.p_pri;
+        this._setDqactmap(qn);
         let queue = this.dispq.find(item => item.priority == qn);
         if (queue)
             queue.enqueue(process);
         else
             this.dispq.push(new PriorityQueue(qn, process));
+
+        this._sortDispq();
+    }
+
+    _setDqactmap(qn) {
+        if (!(this.dqactmap.includes(qn))) {
+            this.dqactmap.push(qn);
+        }
+        this.dqactmap.sort(function(a, b) { return a - b;});
+    }
+
+    // Ordena el array disqp
+    _sortDispq () {
         this.dispq.sort(function (a, b) {
             if (a.priority > b.priority)
                 return 1;
@@ -50,6 +76,9 @@ class Svr4Scheduler {
             return 0;
         });
     }
+
+
+
 
     // Elige un proceso para ser planificado y lo desencola
     _dequeueProcess() {
@@ -68,7 +97,8 @@ class Svr4Scheduler {
     start() {
         this.journal.push("Inicio de la ejecucion");
         let pr = this._dequeueProcess();
-        pr.p_state = "running_user";
+        //pr.p_state = "running_user";
+        pr.startRun();
         this.journal.push("Proceso " + pr.p_pid + " seleccionado para ejecucion");
         this._sendState();
     }
@@ -81,15 +111,95 @@ class Svr4Scheduler {
 
     nextTick() {
         /* BORRAR */
-        this.count++;
+        //this.count++;
+
+        this.time += this.TICK;
+        let sleeping_pr  = this.processTable.filter(pr => pr.p_state == "sleeping");
+
+        // Actualiza los procesos
+        this.processTable.forEach (pr => {
+            let out = pr.runTick(this.TICK);
+            if (out)
+                this.journal.push(out);
+        });
+
+        // Encola procesos que finalizaron IO
+        sleeping_pr.forEach(pr => {
+            if (pr.p_state != "sleeping") 
+                this._setBackDQ(pr);
+        });
+
+        if (this.inContextSwitch) 
+            this._swtch();
+        else
+            this._roundRobin();
+            
+        // Comprueba si empieza un cambio de contexto
+        this._startSwtch();
+
+        this._sendState();
+
+    }
+
+    _swtch() {
+        this.runrun = false;
+        this.kprunrun = false;
+        this.inContextSwitch = false;
+        // Proximo proceso a ejecutar
+        let next_pr = this._dequeueProcess();
+        if (next_pr == null) 
+            return;
+        
+        this.contextSwitchCount++;
+        //next_pr.p_state = "running_user";
+        next_pr.startRun();
+        this.journal.push("Proceso " + next_pr.p_pid + " Seleccionado para ejecucion");
+    }
+
+    _startSwtch() {
+        let running = this._getRunningProcess();
+        // No hay ningun proceso en ejecucion 
+        if (typeof running === 'undefined' && this.dqactmap.length > 0) {
+            this.journal.push("Ningun proceso en ejecucion - llamada a rutina swtch");
+            this.inContextSwitch = true;
+        }
+        // Proceso encolado con mayor prioridad y actual no esta en modo kernel
+        else if (typeof running !== 'undefined' && 
+            this.dqactmap[this.dqactmap.length-1] > running.p_pri &&
+            running.p_state != "running_kernel") {
+
+            this.journal.push("CPU expropiada debido a proceso " + 
+                this.dispq[this.dispq.length-1].front().p_pid);
+            this.inContextSwitch = true;
+            running.p_state = "ready";
+            this._setFrontDQ(running);
+        }
+        // Round robin
+        else if (this.inRoundRobin) {
+            this.journal.push("CPU expropiada debido a rutina roundrobin");
+            this.inRoundRobin = false;
+            this.inContextSwitch = true;
+            running.p_state = "ready";
+            this._setBackDQ(running);
+        }
+    }
+
+    // Comprueba si round robin produce un cambio de contexto
+    _roundRobin() {
+        let running = this._getRunningProcess();
+        if (typeof running !== 'undefined' && 
+            running.roundRobin && 
+            this.dqactmap.find(item => item == running.p_pri)) {
+                this.inRoundRobin = true;
+        }
 
     }
 
     isFinished() {
         /* BORRAR */
-        if (this.count >= 5) return true;
+        //if (this.count >= 100) return true;
 
-        let procesos = this.processTable.filter(pr => pr.state != "finished");
+        let procesos = this.processTable.filter(pr => pr.p_state != "finished");
         return (procesos.length === 0);
     }
 
@@ -112,22 +222,23 @@ class Svr4Scheduler {
 
         if (this.journal.length > 0) {
             let pTable = [];
-            this.processTable.filter(pr => pr.state != "finished").forEach(pr => {
+            let notFinished = this.processTable.filter(pr => pr.p_state != "finished");
+            notFinished.forEach(pr => {
                 pTable.push(pr.getFullData());
             });
+
             let _dispq = [];
             this.dispq.forEach(q => {_dispq.push(q.getData());});
 
             // Datos de la clase
             let rt = [];
             let ts = [];
-            this.processTable.filter(pr => pr.class.name == "RealTime").forEach(pr => {
+            notFinished.filter(pr => pr.class.name == "RealTime").forEach(pr => {
                 rt.push(pr.getClassData());
             });
-            this.processTable.filter(pr => pr.class.name == "TimeSharing").forEach(pr => {
+            notFinished.filter(pr => pr.class.name == "TimeSharing").forEach(pr => {
                 ts.push(pr.getClassData());
-            })
-            
+            });
 
             this.stateManager.pushState({
                 name: this.name,
@@ -146,6 +257,10 @@ class Svr4Scheduler {
             this.journal = [];
         }
     }
+
+    _getRunningProcess() {
+        return this.processTable.filter(pr => pr.p_state.indexOf("running") != -1)[0];
+    }
 }
 
 
@@ -160,12 +275,38 @@ class Svr4Process {
         this.io_burst = io_burst;
         this.current_cycle_time = 0;
         this.wait_time = 0;
+        this.roundRobin = false;
 
         this.class = (pClass == "RealTime") ? new Svr4RT(pri, pid) : new Svr4TS(pri, pid);
     }
 
+    // TODO
     runTick(time) {
+        /*
+        let text = "";
+        switch (this.p_state) {
+            case "running_kernel":
 
+            case "running_user":
+                break;
+            case "sleeping":
+                break;
+            case "ready":
+                break;
+            case "zombie":
+                break;
+            default:
+                break;
+        }
+        */
+        
+        return this.class.runTick(this, time);
+    }
+
+    startRun() {
+        this.p_state = "running_user";
+        this.roundRobin = false;
+        this.class.startRun();
     }
 
     /* Datos de la pantalla añadir proceso */

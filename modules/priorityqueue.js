@@ -10,6 +10,11 @@ class PriorityQueue
         this.items.push(element); 
     } 
 
+    // Añade un elemento al inicio de la cola
+    addFront(element) {
+        this.items.unshift(element);
+    }
+
     // Elimina de la cola un elemento concreto
     remove(element) {
         let i = this.items.findIndex(item => item.pid == element.pid);
