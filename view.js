@@ -257,15 +257,10 @@ class View {
     _createStart() {
         let statesTitle = document.createElement('h1');;
         statesTitle.textContent = "Simulacion";
+
+        /*
         let time_p = document.createElement('p');
         time_p.id = 'time_p';
-        let queue_div = document.createElement('div');
-        queue_div.id = 'queue_div';
-        let queue_data_div = document.createElement('div');
-        queue_data_div.id = 'queue_data_div';
-        let queue_map_t = document.createElement('table');
-        queue_map_t.id = 'queue_map_t';
-        this._append(queue_div, [queue_data_div, queue_map_t]);
         let pqTitle = document.createElement('p');
         pqTitle.id = 'pqTitle_p';
         let priorityQueue = document.createElement('ul');
@@ -274,17 +269,40 @@ class View {
         runrun_p.id = 'runrun_p';
         let kprunrun_p = document.createElement('p');
         kprunrun_p.id = 'kprunrun_p';
+        */
+
+        let state_div = document.createElement('div');
+        let state_table = document.createElement('table');
+        state_table.id = 'state_table';
+        //let state_tbody = state_table.createTBody();
+        //state_tbody.id = 'state_tbody';
+        state_div.appendChild(state_table);
+
+        let queue_div = document.createElement('div');
+        queue_div.id = 'queue_div';
+        let queue_data_div = document.createElement('div');
+        queue_data_div.id = 'queue_data_div';
+        let queue_map_t = document.createElement('table');
+        queue_map_t.id = 'queue_map_t';
+        this._append(queue_div, [queue_data_div, queue_map_t]);
+        let pTable_div = document.createElement('div');
         let pTable = document.createElement('table');
         pTable.id = 'pTable';
-        let classData_div = document.createElement('div');
+        pTable_div.appendChild(pTable);
+        let rtTable_div = document.createElement('div');
         let rtTable = document.createElement('table');
         rtTable.id = "rtTable";
+        rtTable_div.appendChild(rtTable);
+        let tsTable_div = document.createElement('div');
         let tsTable = document.createElement('table');
         tsTable.id = "tsTable";
+        tsTable_div.appendChild(tsTable);
+        let events_div = document.createElement('div');
         let text = document.createElement('p');
         text.textContent = "Eventos:"
         let events = document.createElement('ul');
         events.id = 'events';
+        this._append(events_div, [text, events]);
         let navigation_div = document.createElement('div');
         navigation_div.classList.add('div-center');
         let prev = document.createElement('button');
@@ -299,11 +317,17 @@ class View {
         next.addEventListener('click', () => {
             this.nextStateEvent.trigger();
         });
-        this._append(classData_div, [rtTable, tsTable]);
         this._append(navigation_div, [prev, next]);
+
+        /*this._append(this.states_div,
+            [statesTitle, time_p, pqTitle, priorityQueue, 
+            runrun_p, kprunrun_p, queue_div, pTable_div, rtTable_div, tsTable_div, 
+            events_div, navigation_div]
+        );
+        */
         this._append(this.states_div,
-            [statesTitle, time_p, queue_div, pqTitle, priorityQueue, 
-            runrun_p, kprunrun_p, pTable, classData_div, text, events, navigation_div]
+            [statesTitle, state_div, queue_div, pTable_div, 
+            rtTable_div, tsTable_div, events_div, navigation_div]
         );
         
     }
@@ -311,16 +335,24 @@ class View {
     // Elementos para mostrar un estado (comunes)
     showState(data) {
         let state = data.state;
+
+        let s_table = document.getElementById('state_table');
+        this._clearChilds(s_table);
+        this._addBinaryRow(s_table, "Time: ", state.time);
+        this._addBinaryRow(s_table, "runrun: ", state.runrun);
+
+        //document.getElementById('time_p').textContent = "Time: " + state.time + " ut";
+        //document.getElementById('runrun_p').textContent = "runrun: " + state.runrun;
+        
         let queue_data_div = document.getElementById('queue_data_div');
-        document.getElementById('time_p').textContent = "Time: " + state.time + " ut";
-        document.getElementById('runrun_p').textContent = "runrun: " + state.runrun;
-        this._displayProcessTable(state.pTable, document.getElementById('pTable'));
         let arrayQueue_p = document.createElement('p');
         arrayQueue_p.id = ('arrayQueue_p');
         queue_data_div.appendChild(arrayQueue_p);
 
         // Limpia priorityQueue
-        this._clearChilds(document.getElementById('priorityQueue'));
+        //this._clearChilds(document.getElementById('priorityQueue'));
+
+        this._displayProcessTable(state.pTable, document.getElementById('pTable'));
 
         // Limpia eventos
         let events = document.getElementById('events');
@@ -341,26 +373,39 @@ class View {
             this._showSvr4ClassDepent(data.rt_data.rt, rtt, "rtdpent", "2", "rtproc", "3");
             this._showSvr4ClassDepent(data.ts_data.ts, tst, "tsdpent", "6", "tsproc", "5");
         }
+        
+        
             
     }
    
     // Elementos para mostrar un estado de SVR3
     _showSvr3State(state) {
+        let s_table = document.getElementById('state_table');
+        let row_qs = s_table.insertRow();
+        let td_t = document.createElement('td');
+        td_t.classList.add('bold');
+        td_t.appendChild(document.createTextNode("qs:"));
+        td_t.classList.add('top');
+        let td_d = document.createElement('td');
+        this._fillPriorityQueue(td_d, state.qs);
+        this._append(row_qs, [td_t, td_d]);
+
+        let row_wq = s_table.insertRow();
+        let td_w = document.createElement('td');
+        td_w.classList.add('bold');
+        td_w.appendChild(document.createTextNode("whichqs: "));
+        let td_a = document.createElement('td');
+        // TODO: Modificar esto para que encaje
+        // Crear table en td_a y que _showArrayQueue cree una row (sin tbody)
+        //this._showArrayQueue(state.whichqs, td_a, "", 0, 31);   
+
+        this._append(row_wq, [td_w])
+        
+
         document.getElementById('arrayQueue_p').textContent = "whichqs: ";
-        let table = document.getElementById('queue_map_t');
-        this._clearChilds(table);
-        let tbody = table.createTBody();
-        this._showArrayQueue(state.whichqs, tbody, "", 0, 31);
-        document.getElementById('pqTitle_p').textContent = "qs:";
-        state.qs.forEach(item => {
-            let li = document.createElement('li');
-            let listaProc = "";
-            item.items.forEach(pr => {listaProc += pr.p_pid + " ";});
-            li.innerHTML = item.priority + " -> " + listaProc;
-            document.getElementById('priorityQueue').appendChild(li);
-        });
-        
-        
+        let q_table = document.getElementById('queue_map_t');
+        this._clearChilds(q_table);
+        this._showArrayQueue(state.whichqs, q_table, "", 0, 31);   
     }
 
     // Elementos para mostrar un estado de SVR4
@@ -477,10 +522,10 @@ class View {
     _displayProcessTable(pTable, domElement) {
         this._clearChilds(domElement)
         if (pTable.length > 0) {
-            this.thead = domElement.createTHead();
-            this.tbody = domElement.createTBody();
+            let thead = domElement.createTHead();
+            let tbody = domElement.createTBody();
             // Table head
-            let row = this.thead.insertRow();
+            let row = thead.insertRow();
             let data = Object.keys(pTable[0]);
             for (let key of data) {
                 let th = document.createElement('th');
@@ -490,7 +535,7 @@ class View {
             }
             // Table Data
             pTable.forEach(pr => {
-                let row = this.tbody.insertRow();
+                let row = tbody.insertRow();
                 this._setRowClass(row, pr);
                 for (let item in pr) {
                     let tb = document.createElement('td');
@@ -499,6 +544,33 @@ class View {
                 }
             });
         }
+    }
+
+    _addBinaryRow(table, text, data) {
+        let row = table.insertRow();
+        let td_t = document.createElement('td');
+        td_t.classList.add('bold');
+        td_t.appendChild(document.createTextNode(text));
+        let td_d = document.createElement('td');
+        td_d.appendChild(document.createTextNode(data));
+        this._append(row, [td_t, td_d]);
+    }
+
+    _fillPriorityQueue(domElement, data) {
+        let table = document.createElement('table');
+        data.forEach(item => {
+            let listaProc = "";
+            item.items.forEach(pr => {listaProc += pr.p_pid + " <--> ";});
+            let row = table.insertRow();
+            let td_t = document.createElement('td');
+            td_t.appendChild(document.createTextNode(item.priority));
+            let td_a = document.createElement('td');
+            td_a.appendChild(document.createTextNode(" --> "));
+            let td_p = document.createElement('td');
+            td_p.appendChild(document.createTextNode(listaProc.slice(0, -6)));
+            this._append(row, [td_t, td_a, td_p]);
+        });
+        domElement.appendChild(table);
     }
 
     pTableChanged(pTable) {

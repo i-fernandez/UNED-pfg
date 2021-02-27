@@ -67,6 +67,10 @@ class Svr4TS {
         */
     }
 
+    startRun() {
+        //this.rt_timeleft = this.rt_quantum;
+    }
+
     runTick(pr, time) {
         switch (pr.p_state) {
             case "running_kernel":

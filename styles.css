@@ -103,6 +103,9 @@ body {
     color: rgb(48, 48, 48);
     margin: 20px;
 }
+.top {
+    vertical-align: top;
+}
 .bold {
     font-weight: bold;
 }
