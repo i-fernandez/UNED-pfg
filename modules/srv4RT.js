@@ -31,14 +31,14 @@ class Svr4RT {
         this.rt_timeleft = this.rt_pquantum;
     }
 
-    runTick(pr, time) {
+    runTick(pr, time, currentTime) {
         let text = "";
         switch (pr.p_state) {
             case "running_kernel":
 
             case "running_user":
                 if (pr.burst_time <= time)
-                    text = this._toZombie(pr);
+                    text = this._toZombie(pr, currentTime);
                 else {
                     this.rt_timeleft -= time;
                     pr.burst_time -= time;
@@ -56,10 +56,11 @@ class Svr4RT {
         return text;
     }
 
-    _toZombie(pr) {
+    _toZombie(pr, currentTime) {
         pr.burst_time = 0;
         pr.p_state = "zombie";
-        return "Proceso " + this.p_pid + " finalizado";
+        pr.finish_time = currentTime;
+        return "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";
     }
 
     _toSleep(pr) {

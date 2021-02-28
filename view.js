@@ -19,8 +19,12 @@ class View {
         // Elementos comunes
         let header_div = document.createElement('div');
         header_div.id = 'header_div';
+        let logo = document.createElement('img');
+        logo.src = './resources/uned_logo.png';
+        logo.classList.add('image-right');
+        header_div.appendChild(logo);
         let header_menu_div = document.createElement('div');
-        header_menu_div.classList.add('header-menu', 'div-main');
+        header_menu_div.id = 'header_menu_div';
         let sch_selector = document.createElement('ul');
         sch_selector.classList.add('header-menu-ul');
         let sel_svr3 = document.createElement('li');
@@ -56,9 +60,10 @@ class View {
         formDiv.id = 'inputform_div'
         let addTable = document.createElement('table');
         addTable.id = 'addTable';
+        addTable.classList.add('div-main', 'div-states');
         let startDiv = document.createElement('div');
         startDiv.id = 'start_div';
-        startDiv.classList.add('div-center');
+        startDiv.classList.add('high_margin','div-states');
         startDiv.style.display = "none";
         let startButton = document.createElement('button');
         startButton.textContent = 'Simular';

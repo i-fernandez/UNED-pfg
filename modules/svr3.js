@@ -130,7 +130,7 @@ class Svr3Scheduler {
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == "sleeping");
         // Actualiza los procesos
         this.processTable.forEach (pr => {
-            let out = pr.runTick(this.TICK);
+            let out = pr.runTick(this.TICK, this.time);
             if (out)
                 this.journal.push(out);
         });
@@ -167,12 +167,15 @@ class Svr3Scheduler {
         let n_proc = this.processTable.length;
         let t_wait = 0;
         this.processTable.forEach(pr => t_wait += pr.wait_time);
+        let table = [];
+        this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
 
         return {
             n_proc : n_proc,
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
-            cswitch : this.contextSwitchCount
+            cswitch : this.contextSwitchCount,
+            data: table
         }
     }
 
@@ -311,6 +314,7 @@ class Svr3Process {
         this.io_burst = io_burst;
         this.wait_time = 0;
         this.current_cycle_time = 0;
+        this.finish_time = 0;
         
         this.text = "";
     }
@@ -325,7 +329,7 @@ class Svr3Process {
             this.p_cpu = Math.floor(this.p_cpu/2);
     }
 
-    runTick(time) {
+    runTick(time, currentTime) {
         this.text = "";
         switch (this.p_state) {
             case "running_kernel":
@@ -334,7 +338,7 @@ class Svr3Process {
                 if (this.p_cpu < 127)   
                     this.p_cpu++;
                 if (this.burst_time <= time) 
-                    this._toZombie();
+                    this._toZombie(currentTime);
                 else {
                     this.burst_time -= time;
                     this.current_cycle_time += time;
@@ -389,6 +393,15 @@ class Svr3Process {
         };
     }
 
+    /* Datos para la vista resumen */
+    getSummaryData() {
+        return {
+            p_pid: this.p_pid,
+            wait_time: this.wait_time,
+            ex_time: this.finish_time
+        }
+    }
+
     _toSleep() {
         this.p_state = "sleeping";
         this.current_cycle_time = 0;
@@ -412,10 +425,11 @@ class Svr3Process {
         this.text = "Proceso " + this.p_pid + " finaliza llamada al sistema";
     }
 
-    _toZombie() {
+    _toZombie(currentTime) {
         this.burst_time = 0;
         this.p_state = "zombie";
-        this.text = "Proceso " + this.p_pid + " finalizado";
+        this.finish_time = currentTime;
+        this.text = "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";
     }
 }
 

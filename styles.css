@@ -1,6 +1,3 @@
-.header-menu {
-    display: inline-block;
-}
 .header-menu-ul {
     list-style-type: none;
     float: left;
@@ -12,10 +9,12 @@
     cursor: pointer;
 }
 .header-menu-li:hover {
-    color: rgb(4, 99, 4);    
+    color: rgb(0, 76, 48);    
 }
 .header-menu-sel {
-    border-bottom: 2px solid rgb(4, 99, 4);
+    border-bottom: 2px solid rgb(0, 76, 48);
+    font-weight: bold;
+    color: rgb(0, 76, 48);    
 }
 .inputProcess {
     width: 90px;
@@ -29,9 +28,9 @@
     border: 2px solid rgb(39, 90, 228);
 }
 .startButton {
-    background: rgb(4, 99, 4);
+    background: rgb(0, 76, 48);
     color: white;
-    border: 2px solid rgb(4, 99, 4);
+    border: 2px solid rgb(0, 76, 48);
 }
 .navigationButton {
     background: rgb(173, 68, 7);
@@ -80,10 +79,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
-.separator-line {
-    width: 700px;
-    text-align: left;
-    margin-left: 40px;
+.high_margin {
+    margin-left: 200px;
 }
 .pr_zombie {
     background: rgb(54, 52, 52);
@@ -118,6 +115,10 @@
 .bold {
     font-weight: bold;
 }
+.image-right{
+    margin-right: 20px;
+    float: right;
+}
 Button:hover {
     border: 2px solid rgb(0, 0, 0);
 }
@@ -126,14 +127,20 @@ button {
     height: 30px;
 }
 h1 {
-    color: rgb(39, 90, 228);
+    color: rgb(0, 76, 48);
+    font-family: 'Times New Roman', Times, serif;
 }
 body {
     margin: 0px;
 }
 #header_div {
     margin: 0px;
-    height: 80px;
-    background:rgb(4, 99, 4);
+    height: 100px;
+    background:rgb(0,76,48);
+}
+#header_menu_div {
+    margin: 0px;
+    height: 50px;
+    background: rgb(210, 210, 210);
 }
 

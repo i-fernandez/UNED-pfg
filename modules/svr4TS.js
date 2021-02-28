@@ -44,7 +44,7 @@ class Svr4TS {
         this.ts_timeleft = this.ts_pquantum;
     }
 
-    runTick(pr, time) {
+    runTick(pr, time, currentTime) {
         switch (pr.p_state) {
             case "running_kernel":
 

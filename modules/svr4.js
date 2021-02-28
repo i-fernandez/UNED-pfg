@@ -118,7 +118,7 @@ class Svr4Scheduler {
 
         // Actualiza los procesos
         this.processTable.forEach (pr => {
-            let out = pr.runTick(this.TICK);
+            let out = pr.runTick(this.TICK, this.time);
             if (out)
                 this.journal.push(out);
         });
@@ -208,12 +208,15 @@ class Svr4Scheduler {
         let n_proc = this.processTable.length;
         let t_wait = 0;
         this.processTable.forEach(pr => t_wait += pr.wait_time);
+        let table = [];
+        this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
 
         return {
             n_proc : n_proc,
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
-            cswitch : this.contextSwitchCount
+            cswitch : this.contextSwitchCount,
+            data: table
         }
     }
 
@@ -276,19 +279,20 @@ class Svr4Process {
         this.io_burst = io_burst;
         this.current_cycle_time = 0;
         this.wait_time = 0;
+        this.finish_time = 0;
         this.roundRobin = false;
 
         this.class = (pClass == "RealTime") ? new Svr4RT(pri, pid) : new Svr4TS(pri, pid);
     }
 
     // TODO
-    runTick(time) {
+    runTick(time, currentTime) {
         
         let text = "";
         switch (this.p_state) {
             case "running_kernel":
             case "running_user":
-                text = this.class.runTick(this, time);
+                text = this.class.runTick(this, time, currentTime);
                 break;
             case "sleeping":
                 this.current_cycle_time += time;
@@ -344,6 +348,15 @@ class Svr4Process {
             current_cycle_time: this.current_cycle_time,
             wait_time: this.wait_time,
         };
+    }
+
+    /* Datos para la vista resumen */
+    getSummaryData() {
+        return {
+            p_pid: this.p_pid,
+            wait_time: this.wait_time,
+            ex_time: this.finish_time
+        }
     }
 
     getClassData() {

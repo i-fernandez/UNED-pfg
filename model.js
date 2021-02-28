@@ -58,6 +58,12 @@ class Simulation {
         console.log("Tiempo total de ejecucion: " + data.t_time + " ut.");
         console.log("Tiempo de espera medio: " + data.wait + " ut.");
         console.log("Numero de cambios de contexto: " + data.cswitch);
+        console.log(" -------------------------------- ")
+        console.log("PID   WAIT_TIME   EXECUTION_TIME");
+        data.data.forEach(item => {
+            console.log(item.p_pid + ":    " + item.wait_time + 
+            "               " + item.ex_time);
+        });
     }
 
     getNextState() {
