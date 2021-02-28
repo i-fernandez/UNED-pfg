@@ -1,6 +1,3 @@
-body {
-    margin: 0;
-}
 .header-menu {
     display: inline-block;
 }
@@ -73,8 +70,20 @@ body {
 .array-queue:hover .tooltip-text {
     visibility: visible;
 }
+.div-main {
+    margin-left: 20px;
+}
 .div-center {
     text-align: center;
+}
+.div-states {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.separator-line {
+    width: 700px;
+    text-align: left;
+    margin-left: 40px;
 }
 .pr_zombie {
     background: rgb(54, 52, 52);
@@ -97,8 +106,8 @@ body {
 }
 .no-wrap {
     white-space: pre-wrap;
- }
- .table-italic {
+}
+.table-italic {
     font-style: italic;
     color: rgb(48, 48, 48);
     margin: 20px;
@@ -118,16 +127,9 @@ button {
 }
 h1 {
     color: rgb(39, 90, 228);
-
 }
 body {
-    margin: 10px;
-}
-#arrayQueue_div {
-    margin: 1px;
-    width: 90px;
-    height: 10px;
-    display: inline-block;
+    margin: 0px;
 }
 #header_div {
     margin: 0px;
