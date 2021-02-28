@@ -339,7 +339,7 @@ class Svr3Process {
                     this.burst_time -= time;
                     this.current_cycle_time += time;
                     if (this.current_cycle_time >= this.cpu_burst)
-                        this._goToSleep()
+                        this._toSleep()
                 }
                 break;
             case "sleeping":
@@ -389,7 +389,7 @@ class Svr3Process {
         };
     }
 
-    _goToSleep() {
+    _toSleep() {
         this.p_state = "sleeping";
         this.current_cycle_time = 0;
         this.p_wchan = this.PRIORITIES[Math.floor(Math.random() * this.PRIORITIES.length)]

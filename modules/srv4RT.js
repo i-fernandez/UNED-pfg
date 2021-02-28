@@ -27,66 +27,46 @@ class Svr4RT {
         };
     }
 
-    startRun() {
-        this.rt_timeleft = this.rt_quantum;
+    resetQuantum() {
+        this.rt_timeleft = this.rt_pquantum;
     }
 
     runTick(pr, time) {
-        this.text = "";
+        let text = "";
         switch (pr.p_state) {
             case "running_kernel":
 
             case "running_user":
                 if (pr.burst_time <= time)
-                    this._toZombie(pr);
+                    text = this._toZombie(pr);
                 else {
                     this.rt_timeleft -= time;
                     pr.burst_time -= time;
                     pr.current_cycle_time += time;
-                    if (pr.current_cycle_time >= pr.cpu_burst)
-                        this._goToSleep(pr);
-                    else if (this.rt_timeleft <= 0)
+                    if (pr.current_cycle_time >= pr.cpu_burst) 
+                        text = this._toSleep(pr);
+                    else if (this.rt_timeleft <= 0) 
                         pr.roundRobin = true;
                 }
                 break;
-            case "sleeping":
-                pr.current_cycle_time += time;
-                if (pr.current_cycle_time >= pr.io_burst)
-                    this._fromSleep(pr);
-                break;
-            case "ready":
-                pr.wait_time += time;
-                break;
-            case "zombie":
-                pr.p_state = "finished";
-                break;
+
             default:
                 break;
         }
-        return this.text;
+        return text;
     }
 
     _toZombie(pr) {
         pr.burst_time = 0;
         pr.p_state = "zombie";
-        this.text = "Proceso " + this.p_pid + " finalizado";
+        return "Proceso " + this.p_pid + " finalizado";
     }
 
-    _goToSleep(pr) {
+    _toSleep(pr) {
         pr.p_state = "sleeping";
         pr.current_cycle_time = 0;
-        this.text = "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
+        return "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
     }
-
-    _fromSleep(pr) {
-        pr.p_state = "ready";
-        pr.current_cycle_time = 0;
-        this.text = "Proceso " + this.p_pid + " finaliza su espera por I/O."
-    }
-
-
-
-
 }
 
 /* Devuelve el valor de cuanto correspondiente a la prioridad */

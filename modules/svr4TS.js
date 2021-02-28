@@ -16,30 +16,10 @@ class Svr4TS {
         this.ts_cpu_pri = pri;
         this.ts_upri = 0;
         this.ts_umdpri = pri;
-        this.ts_dispwait = 0;
-
-        /*
-        this.tsdpent = {
-            ts_globpri: pri,
-            ts_quantum: ts_dptbl(pri)[1],
-            ts_tqexp: ts_dptbl(pri)[2],
-            ts_slpret: ts_dptbl(pri)[3], 
-            ts_maxwait: ts_dptbl(pri)[4],
-            ts_lwait: ts_dptbl(pri)[5]
-        };
-        this.tsproc = {
-            ts_timeleft: this.tsdpent.ts_quantum,
-            ts_cpu_pri: pri,
-            ts_upri: 0,
-            ts_umdpri: pri,
-            ts_dispwait: 0
-        };
-        */
-        
+        this.ts_dispwait = 0;        
     }
 
     getPriority() {
-        //return this.tsproc.ts_umdpri;
         return this.ts_umdpri;
     }
 
@@ -58,17 +38,10 @@ class Svr4TS {
             ts_umdpri: this.ts_umdpri,
             ts_dispwait: this.ts_dispwait
         }
-        /*
-        return {
-            p_pid: this.p_pid,
-            tsdpent: this.tsdpent,
-            tsproc: this.tsproc
-        };
-        */
     }
 
-    startRun() {
-        //this.rt_timeleft = this.rt_quantum;
+    resetQuantum() {
+        this.ts_timeleft = this.ts_pquantum;
     }
 
     runTick(pr, time) {
@@ -77,12 +50,7 @@ class Svr4TS {
 
             case "running_user":
                 break;
-            case "sleeping":
-                break;
-            case "ready":
-                break;
-            case "zombie":
-                break;
+
             default:
                 break;
         }

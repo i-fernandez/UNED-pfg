@@ -187,10 +187,11 @@ class Svr4Scheduler {
     // Comprueba si round robin produce un cambio de contexto
     _roundRobin() {
         let running = this._getRunningProcess();
-        if (typeof running !== 'undefined' && 
-            running.roundRobin && 
-            this.dqactmap.find(item => item == running.p_pri)) {
+        if (typeof running !== 'undefined' && running.roundRobin){
+            if (this.dqactmap.find(item => item == running.p_pri))
                 this.inRoundRobin = true;
+            else
+                running.resetQuantum();
         }
 
     }
@@ -282,31 +283,39 @@ class Svr4Process {
 
     // TODO
     runTick(time) {
-        /*
+        
         let text = "";
         switch (this.p_state) {
             case "running_kernel":
-
             case "running_user":
+                text = this.class.runTick(this, time);
                 break;
             case "sleeping":
+                this.current_cycle_time += time;
+                if (this.current_cycle_time >= this.io_burst)
+                    text = this._fromSleep();
                 break;
             case "ready":
+                this.wait_time += time;
                 break;
             case "zombie":
+                this.p_state = "finished";
                 break;
             default:
                 break;
         }
-        */
         
-        return this.class.runTick(this, time);
+        return text;
     }
 
     startRun() {
         this.p_state = "running_user";
         this.roundRobin = false;
-        this.class.startRun();
+        this.resetQuantum();
+    }
+
+    resetQuantum() {
+        this.class.resetQuantum();
     }
 
     /* Datos de la pantalla añadir proceso */
@@ -339,6 +348,12 @@ class Svr4Process {
 
     getClassData() {
         return this.class.getData();
+    }
+
+    _fromSleep() {
+        this.p_state = "ready";
+        this.current_cycle_time = 0;
+        return "Proceso " + this.p_pid + " finaliza su espera por I/O.";
     }
 }
 
