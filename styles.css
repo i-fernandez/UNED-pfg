@@ -2,20 +2,48 @@
     list-style-type: none;
     float: left;
 }
+.header-menu-ul-center {
+    list-style-type: none;
+    display: inline-block;
+    height: 60px;
+    margin-left: 20%;
+    margin-top: 0px;
+    font-size: 20px;
+    padding: 0px;
+    display: flex;
+}
 .header-menu-li {
     position: relative;
-    float: left;
-    margin-right: 20px;
+    display: inline-grid;
+    width: 90px;
+    text-align: center;
+    align-items: center;
+    margin-right: 5px;
     cursor: pointer;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
 }
+.header-menu-li:hover {
+    color: rgb(210, 210, 210);    
+}
+.header-menu-sel {
+    color: rgb(0, 76, 48);
+    background: rgb(210, 210, 210);
+}
+.header-menu-sel:hover {
+    color: rgb(0, 76, 48);    
+}
+/*
 .header-menu-li:hover {
     color: rgb(0, 76, 48);    
 }
+
 .header-menu-sel {
     border-bottom: 2px solid rgb(0, 76, 48);
     font-weight: bold;
     color: rgb(0, 76, 48);    
 }
+*/
 .inputProcess {
     width: 90px;
     margin: 10px;
@@ -28,9 +56,10 @@
     border: 2px solid rgb(39, 90, 228);
 }
 .startButton {
+    margin: 20px;
     background: rgb(0, 76, 48);
     color: white;
-    border: 2px solid rgb(0, 76, 48);
+    border: 2px solid rgb(0, 163, 103);
 }
 .navigationButton {
     background: rgb(173, 68, 7);
@@ -82,6 +111,7 @@
 .high_margin {
     margin-left: 200px;
 }
+/* Tablas de procesos */
 .pr_zombie {
     background: rgb(54, 52, 52);
     color: white;
@@ -101,6 +131,7 @@
 .pr_class_header {
     background: rgb(192, 190, 190);
 }
+
 .no-wrap {
     white-space: pre-wrap;
 }
@@ -116,7 +147,7 @@
     font-weight: bold;
 }
 .image-right{
-    margin-right: 20px;
+    margin-right: 10%;
     float: right;
 }
 Button:hover {
@@ -133,9 +164,10 @@ h1 {
 body {
     margin: 0px;
 }
+/* Clases por id */
 #header_div {
     margin: 0px;
-    height: 100px;
+    height: 60px;
     background:rgb(0,76,48);
 }
 #header_menu_div {

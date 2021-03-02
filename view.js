@@ -20,13 +20,15 @@ class View {
         let header_div = document.createElement('div');
         header_div.id = 'header_div';
         let logo = document.createElement('img');
-        logo.src = './resources/uned_logo.png';
+        logo.src = './resources/uned_etsi_60.png';
         logo.classList.add('image-right');
         header_div.appendChild(logo);
+
         let header_menu_div = document.createElement('div');
         header_menu_div.id = 'header_menu_div';
         let sch_selector = document.createElement('ul');
-        sch_selector.classList.add('header-menu-ul');
+        sch_selector.classList.add('header-menu-ul-center');
+        //sch_selector.classList.add('header-menu-ul');
         let sel_svr3 = document.createElement('li');
         sel_svr3.textContent = 'SVR 3';
         sel_svr3.classList.add('header-menu-li');
@@ -50,7 +52,9 @@ class View {
             this.newSVR4Event.trigger();
         });
         this._append(sch_selector, [sel_svr3, sel_svr4]);
-        header_menu_div.appendChild(sch_selector);
+        header_div.appendChild(sch_selector);
+        //header_menu_div.appendChild(sch_selector);
+
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
         addproc_div.classList.add('div-main');
@@ -125,7 +129,8 @@ class View {
         inputIO_svr3.required = true;
         let addButton_svr3 = document.createElement('button');
         addButton_svr3.textContent = 'Agregar';
-        addButton_svr3.classList.add('addButton');
+        addButton_svr3.classList.add('startButton');
+        //addButton_svr3.classList.add('addButton');
         document.getElementById('inputform_div').appendChild(addForm_svr3);
         this._append(addForm_svr3, 
             [inputPriority_svr3, inputBurst_svr3, inputCPU_svr3, 
