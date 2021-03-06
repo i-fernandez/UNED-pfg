@@ -26,9 +26,35 @@ class View {
 
         let header_menu_div = document.createElement('div');
         header_menu_div.id = 'header_menu_div';
+        header_menu_div.style.display = 'none';
+        let nav_menu = document.createElement('ul');
+        nav_menu.classList.add('states-menu-ul');
+        let summary_li = document.createElement('li');
+        summary_li.textContent = 'RESUMEN';
+        summary_li.classList.add('states-menu-li','states-menu-li-sel');
+        summary_li.addEventListener('click', event => {
+            summary_li.classList.add('states-menu-li-sel');
+            states_li.classList.remove('states-menu-li-sel');
+            this.summary_div.style.display = 'inherit';
+            this.states_div.style.display = 'none';
+        });
+
+        let states_li = document.createElement('li');
+        states_li.textContent = 'ESTADOS';
+        states_li.classList.add('states-menu-li');
+        states_li.addEventListener('click', event => {
+            states_li.classList.add('states-menu-li-sel');
+            summary_li.classList.remove('states-menu-li-sel');
+            this.states_div.style.display = 'inherit';
+            this.summary_div.style.display = 'none';
+        });
+        
+        header_menu_div.appendChild(nav_menu);
+        this._append(nav_menu, [summary_li, states_li]);
+
+
         let sch_selector = document.createElement('ul');
         sch_selector.classList.add('header-menu-ul-center');
-        //sch_selector.classList.add('header-menu-ul');
         let sel_svr3 = document.createElement('li');
         sel_svr3.textContent = 'SVR 3';
         sel_svr3.classList.add('header-menu-li');
@@ -36,7 +62,8 @@ class View {
             sel_svr3.classList.add('header-menu-sel');
             sel_svr4.classList.remove('header-menu-sel');
             this._showAddProcess();
-            startDiv.style.display = "none";
+            this.states_div.style.display = "none";
+            this.summary_div.style.display = 'none';
             this._showSvr3Add();
             this.newSVR3Event.trigger();
         });
@@ -47,44 +74,49 @@ class View {
             sel_svr4.classList.add('header-menu-sel');
             sel_svr3.classList.remove('header-menu-sel');
             this._showAddProcess();
-            startDiv.style.display = "none";
+            this.states_div.style.display = "none";
+            this.summary_div.style.display = 'none';
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
         this._append(sch_selector, [sel_svr3, sel_svr4]);
         header_div.appendChild(sch_selector);
-        //header_menu_div.appendChild(sch_selector);
 
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
         addproc_div.classList.add('div-main');
         let addTitle = document.createElement('h1');
         addTitle.id = 'addTitle';
+        addTitle.classList.add('text');
         let formDiv = document.createElement('div');        
         formDiv.id = 'inputform_div'
         let addTable = document.createElement('table');
         addTable.id = 'addTable';
-        addTable.classList.add('div-main', 'div-states');
-        let startDiv = document.createElement('div');
-        startDiv.id = 'start_div';
-        startDiv.classList.add('high_margin','div-states');
-        startDiv.style.display = "none";
+        let start_div = document.createElement('div');
+        start_div.id = 'states_div';
+        start_div.classList.add('high_margin','div-states');
+        start_div.style.display = 'none';
+
         let startButton = document.createElement('button');
         startButton.textContent = 'Simular';
         startButton.classList.add('startButton');
         startButton.addEventListener('click', () => {
             this._hideAddProcess();
-            this.states_div.style.display = "inherit";
+            this.summary_div.style.display = 'inherit';
+            header_menu_div.style.display = 'inherit';
             this.startSimulationEvent.trigger();
         });
-        startDiv.appendChild(startButton);
-        this._append(addproc_div, [addTitle, formDiv, addTable, startDiv]);
+        start_div.appendChild(startButton);
+        this._append(addproc_div, [addTitle, formDiv, addTable, start_div]);
         this.states_div = document.createElement('div');
         this.states_div.classList.add('div-main');
         this.states_div.style.display = "none";
-        this._createStart();
+        this.summary_div = document.createElement('div');
+        this.summary_div.classList.add('div-main');
+        this.summary_div.style.display = 'none';
+        this._createStates();
         this._append(document.body, 
-            [header_div, header_menu_div, addproc_div, this.states_div]
+            [header_div, header_menu_div, addproc_div, this.summary_div, this.states_div]
         );
         this._createSvr3Add();
         this._createSvr4Add();
@@ -192,7 +224,7 @@ class View {
         this._append(classSel, [option_rt, option_ts]);
         let addButton_svr4 = document.createElement('button');
         addButton_svr4.textContent = 'Agregar';
-        addButton_svr4.classList.add('addButton');
+        addButton_svr4.classList.add('startButton');
         document.getElementById('inputform_div').appendChild(addForm_svr4);
         this._append(addForm_svr4, 
             [inputBurst_svr4, inputCPU_svr4, inputIO_svr4, 
@@ -265,10 +297,22 @@ class View {
 
     /* Simulacion */
 
-    // Elementos del inicio de la simulacion
-    _createStart() {
+    createSummary(data) {
+        this._clearChilds(this.summary_div);
+        let summaryTitle = document.createElement('h1');
+        summaryTitle.textContent = "Resumen de la simulacion";
+        summaryTitle.classList.add('text');
+        let np = document.createElement('p');
+        np.textContent = "Numero de procesos: " + data.n_proc;
+        let t = document.createElement('p');
+        t.textContent = "Tiempo de ejecución: " + data.t_time;
+        this._append(this.summary_div, [summaryTitle, np, t]);
+    }
+
+    _createStates() {
         let statesTitle = document.createElement('h1');;
         statesTitle.textContent = "Simulacion";
+        statesTitle.classList.add('text');
         let state_div = document.createElement('div');
         state_div.classList.add('div-states');
         let state_table = document.createElement('table');
@@ -317,13 +361,13 @@ class View {
         //navigation_div.classList.add('div-center');
         let prev = document.createElement('button');
         prev.textContent = 'Anterior';
-        prev.classList.add('navigationButton');
+        prev.classList.add('startButton');
         prev.addEventListener('click', () => {
             this.previousStateEvent.trigger();
         });
         let next = document.createElement('button');
         next.textContent = 'Siguiente';
-        next.classList.add('navigationButton');
+        next.classList.add('startButton');
         next.addEventListener('click', () => {
             this.nextStateEvent.trigger();
         });
@@ -562,7 +606,7 @@ class View {
 
     pTableChanged(pTable) {
         if(pTable.length > 0) 
-            document.getElementById('start_div').style.display = "block";
+            document.getElementById('states_div').style.display = "block";
         
         this._displayProcessTable(pTable, document.getElementById('addTable'));
     }

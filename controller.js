@@ -40,7 +40,8 @@ class Controller {
         });
 
         this.model.startVisualizationEvent.addListener(data => {
-            this.view.showState(data);
+            this.view.createSummary(data.summary);
+            this.view.showState(data.state);
         });
 
         this.model.sendStateEvent.addListener(data => {

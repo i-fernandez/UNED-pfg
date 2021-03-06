@@ -1,10 +1,9 @@
-.header-menu-ul {
-    list-style-type: none;
-    float: left;
+.text {
+    color: rgb(0, 128, 128);
+    font-family: 'Times New Roman', Times, serif;
 }
 .header-menu-ul-center {
     list-style-type: none;
-    display: inline-block;
     height: 60px;
     margin-left: 20%;
     margin-top: 0px;
@@ -24,14 +23,38 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 .header-menu-li:hover {
-    color: rgb(210, 210, 210);    
+    color: rgb(221, 221, 221);    
 }
 .header-menu-sel {
     color: rgb(0, 76, 48);
-    background: rgb(210, 210, 210);
+    background: rgb(221, 221, 221);
 }
 .header-menu-sel:hover {
     color: rgb(0, 76, 48);    
+}
+.states-menu-ul {
+    list-style-type: none;
+    display: flex;
+    margin-top: 0px;
+    margin-left: 18%;
+    height: 36px;
+}
+.states-menu-li {
+    position: relative;
+    display: inline-grid;
+    text-align: center;
+    align-items: center;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    width: 90px;
+    margin-right: 10px;
+}
+.states-menu-li:hover {
+    color: rgb(0, 76, 48);    
+    border-bottom: 3px solid rgb(0, 76, 48);
+}
+.states-menu-li-sel {
+    border-bottom: 3px solid rgb(0, 76, 48);
 }
 /*
 .header-menu-li:hover {
@@ -49,23 +72,19 @@
     margin: 10px;
     display: inline;
 }
-.addButton {
-    margin: 20px;
-    background:  rgb(39, 90, 228);
-    color: white;
-    border: 2px solid rgb(39, 90, 228);
-}
 .startButton {
     margin: 20px;
-    background: rgb(0, 76, 48);
+    background: rgb(0, 128, 128);
     color: white;
-    border: 2px solid rgb(0, 163, 103);
+    border: 2px solid rgb(0, 103, 103);
 }
+/*
 .navigationButton {
     background: rgb(173, 68, 7);
     color: black;
     margin: 20px;
 }
+*/
 .array-queue {
     margin: 1px;
     width: 10px;
@@ -99,7 +118,7 @@
     visibility: visible;
 }
 .div-main {
-    margin-left: 20px;
+    margin-left: 10%;
 }
 .div-center {
     text-align: center;
@@ -151,16 +170,20 @@
     float: right;
 }
 Button:hover {
-    border: 2px solid rgb(0, 0, 0);
+    border: 2px solid rgb(0, 103, 103);
+    background: rgb(0, 42, 32);
+    cursor: pointer;
 }
 button {
     width: 90px;
     height: 30px;
 }
+/*
 h1 {
     color: rgb(0, 76, 48);
     font-family: 'Times New Roman', Times, serif;
 }
+*/
 body {
     margin: 0px;
 }
@@ -172,7 +195,7 @@ body {
 }
 #header_menu_div {
     margin: 0px;
-    height: 50px;
-    background: rgb(210, 210, 210);
+    height: 36px;
+    background: rgb(221, 221, 221);
 }
 
