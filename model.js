@@ -64,6 +64,7 @@ class Simulation {
         this.startVisualizationEvent.trigger(data);
     }
 
+    /*
     getSummary() {
         // TODO: faltan eventos para solicitar/enviar
         let data = this.scheduler.getSummary();
@@ -80,6 +81,7 @@ class Simulation {
             "               " + item.ex_time);
         });
     }
+    */
 
     getNextState() {
         this.sendStateEvent.trigger(this.stateManager.getNextState());

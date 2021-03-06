@@ -56,17 +56,6 @@
 .states-menu-li-sel {
     border-bottom: 3px solid rgb(0, 76, 48);
 }
-/*
-.header-menu-li:hover {
-    color: rgb(0, 76, 48);    
-}
-
-.header-menu-sel {
-    border-bottom: 2px solid rgb(0, 76, 48);
-    font-weight: bold;
-    color: rgb(0, 76, 48);    
-}
-*/
 .inputProcess {
     width: 90px;
     margin: 10px;
@@ -78,13 +67,6 @@
     color: white;
     border: 2px solid rgb(0, 103, 103);
 }
-/*
-.navigationButton {
-    background: rgb(173, 68, 7);
-    color: black;
-    margin: 20px;
-}
-*/
 .array-queue {
     margin: 1px;
     width: 10px;
@@ -118,14 +100,16 @@
     visibility: visible;
 }
 .div-main {
-    margin-left: 10%;
+    margin-left: 5%;
 }
 .div-center {
     text-align: center;
 }
 .div-states {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 15px;
+}
+.div-nav {
+    margin-left: 10%;
 }
 .high_margin {
     margin-left: 200px;

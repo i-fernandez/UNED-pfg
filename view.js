@@ -31,7 +31,7 @@ class View {
         nav_menu.classList.add('states-menu-ul');
         let summary_li = document.createElement('li');
         summary_li.textContent = 'RESUMEN';
-        summary_li.classList.add('states-menu-li','states-menu-li-sel');
+        summary_li.classList.add('states-menu-li');
         summary_li.addEventListener('click', event => {
             summary_li.classList.add('states-menu-li-sel');
             states_li.classList.remove('states-menu-li-sel');
@@ -62,7 +62,9 @@ class View {
             sel_svr3.classList.add('header-menu-sel');
             sel_svr4.classList.remove('header-menu-sel');
             this._showAddProcess();
-            this.states_div.style.display = "none";
+            init_div.style.display = 'none';
+            header_menu_div.style.display = 'none';
+            this.states_div.style.display = 'none';
             this.summary_div.style.display = 'none';
             this._showSvr3Add();
             this.newSVR3Event.trigger();
@@ -74,13 +76,25 @@ class View {
             sel_svr4.classList.add('header-menu-sel');
             sel_svr3.classList.remove('header-menu-sel');
             this._showAddProcess();
-            this.states_div.style.display = "none";
+            init_div.style.display = 'none';
+            header_menu_div.style.display = 'none';
+            this.states_div.style.display = 'none';
             this.summary_div.style.display = 'none';
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
         this._append(sch_selector, [sel_svr3, sel_svr4]);
         header_div.appendChild(sch_selector);
+
+        let init_div = document.createElement('div');
+        init_div.classList.add('div-main');
+        let title = document.createElement('h1');
+        title.classList.add('text');
+        title.textContent = 'Simulador de algoritmos de planificación de procesos';
+        let description = document.createElement('p');
+        description.textContent = "Seleccione un algoritmo de planificación para empezar...";
+
+        this._append(init_div, [title, description]);
 
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
@@ -104,6 +118,8 @@ class View {
             this._hideAddProcess();
             this.summary_div.style.display = 'inherit';
             header_menu_div.style.display = 'inherit';
+            summary_li.classList.add('states-menu-li-sel');
+            states_li.classList.remove('states-menu-li-sel');
             this.startSimulationEvent.trigger();
         });
         start_div.appendChild(startButton);
@@ -116,7 +132,8 @@ class View {
         this.summary_div.style.display = 'none';
         this._createStates();
         this._append(document.body, 
-            [header_div, header_menu_div, addproc_div, this.summary_div, this.states_div]
+            [header_div, header_menu_div, init_div, addproc_div, 
+            this.summary_div, this.states_div]
         );
         this._createSvr3Add();
         this._createSvr4Add();
@@ -299,20 +316,48 @@ class View {
 
     createSummary(data) {
         this._clearChilds(this.summary_div);
-        let summaryTitle = document.createElement('h1');
-        summaryTitle.textContent = "Resumen de la simulacion";
-        summaryTitle.classList.add('text');
-        let np = document.createElement('p');
-        np.textContent = "Numero de procesos: " + data.n_proc;
-        let t = document.createElement('p');
-        t.textContent = "Tiempo de ejecución: " + data.t_time;
-        this._append(this.summary_div, [summaryTitle, np, t]);
+        let title_div = document.createElement('div');
+        title_div.classList.add('div-states');
+        let title = document.createElement('h1');
+        title.textContent = "Resumen de la simulacion";
+        title.classList.add('text');
+        title_div.appendChild(title);
+        let data_div = document.createElement('div');
+        data_div.classList.add('div-states');
+        let data_table = document.createElement('table');
+        this._addBinaryRow(data_table, "Número de procesos: ", data.n_proc);
+        this._addBinaryRow(data_table, "Tiempo de ejecución: ", data.t_time + " ut.");
+        this._addBinaryRow(data_table, "Tiempo medio de espera: ", data.wait);
+        this._addBinaryRow(data_table, "Número de cambios de contexto: ", data.cswitch);
+        data_div.appendChild(data_table);
+        let table_div = document.createElement('div');
+        table_div.classList.add('div-states');
+        this._createSummaryTable(table_div, data.proc_data);
+        this._append(this.summary_div, [title_div, data_div, table_div]);
     }
 
     _createStates() {
-        let statesTitle = document.createElement('h1');;
-        statesTitle.textContent = "Simulacion";
-        statesTitle.classList.add('text');
+
+        let navigation_div = document.createElement('div');
+        navigation_div.classList.add('div-nav', 'div-states');
+        let prev = document.createElement('button');
+        prev.textContent = 'Anterior';
+        prev.classList.add('startButton');
+        prev.addEventListener('click', () => {
+            this.previousStateEvent.trigger();
+        });
+        let next = document.createElement('button');
+        next.textContent = 'Siguiente';
+        next.classList.add('startButton');
+        next.addEventListener('click', () => {
+            this.nextStateEvent.trigger();
+        });
+        this._append(navigation_div, [prev, next]);
+
+        //let statesTitle = document.createElement('h1');;
+        //statesTitle.textContent = "Simulacion";
+        //statesTitle.classList.add('text');
+
         let state_div = document.createElement('div');
         state_div.classList.add('div-states');
         let state_table = document.createElement('table');
@@ -356,25 +401,10 @@ class View {
         let events = document.createElement('ul');
         events.id = 'events';
         this._append(events_div, [text, events]);
-        let navigation_div = document.createElement('div');
-        navigation_div.classList.add('div-states', 'div-center');
-        //navigation_div.classList.add('div-center');
-        let prev = document.createElement('button');
-        prev.textContent = 'Anterior';
-        prev.classList.add('startButton');
-        prev.addEventListener('click', () => {
-            this.previousStateEvent.trigger();
-        });
-        let next = document.createElement('button');
-        next.textContent = 'Siguiente';
-        next.classList.add('startButton');
-        next.addEventListener('click', () => {
-            this.nextStateEvent.trigger();
-        });
-        this._append(navigation_div, [prev, next]);
+
         this._append(this.states_div,
-            [statesTitle, state_div, pTable_div,
-            rtTable_div, tsTable_div, events_div, navigation_div]
+            [navigation_div, state_div, pTable_div,
+            rtTable_div, tsTable_div, events_div]
         );
         
     }
@@ -575,6 +605,36 @@ class View {
                 }
             });
         }
+    }
+
+    _createSummaryTable(domElement, data) {
+        if (data.length > 0) {
+            let table = document.createElement('table');
+            // Head
+            let thead = table.createTHead();
+            let head_row = thead.insertRow();
+            let th_1 = document.createElement('th');
+            th_1.appendChild(document.createTextNode('pid'));
+            head_row.appendChild(th_1);
+            let th_2 = document.createElement('th');
+            th_2.appendChild(document.createTextNode('tiempo de espera'));
+            head_row.appendChild(th_2);
+            let th_3 = document.createElement('th');
+            th_3.appendChild(document.createTextNode('tiempo de ejecución'));
+            head_row.appendChild(th_3);
+            // Body
+            let tbody = table.createTBody();
+            data.forEach(pr => {
+                let row = tbody.insertRow();
+                for (let item in pr) {
+                    let tb = document.createElement('td');
+                    tb.appendChild(document.createTextNode(pr[item]));
+                    row.appendChild(tb);
+                }
+            });
+            domElement.appendChild(table);
+        }
+        
     }
 
     _addBinaryRow(table, text, data) {

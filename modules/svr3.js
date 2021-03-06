@@ -175,7 +175,7 @@ class Svr3Scheduler {
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
             cswitch : this.contextSwitchCount,
-            data: table
+            proc_data: table
         }
     }
 
