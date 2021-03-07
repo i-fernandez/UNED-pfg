@@ -20,48 +20,7 @@ class Svr3Scheduler {
         this.contextSwitchCount = 0;
         this.inContextSwitch = false;
         this.inRoundRobin = false;
-        this.journal = [];
-        
-
-        // Datos de ejemplo  
-        /*
-        this.addProcess({
-            burst: 500,
-            cpu_burst: 200,
-            io_burst: 10,
-            pri: 65
-        });
-        
-        
-        this.addProcess({
-            burst: 500,
-            cpu_burst: 200,
-            io_burst: 20,
-            pri: 65
-        });
-        
-        this.addProcess({
-            burst: 600,
-            cpu_burst: 250,
-            io_burst: 20,
-            pri: 65
-        });
-        this.addProcess({
-            burst: 600,
-            cpu_burst: 80,
-            io_burst: 10,
-            pri: 66
-        });
-
-        this.addProcess({
-            burst: 300,
-            cpu_burst: 50,
-            io_burst: 200,
-            pri: 67
-        });
-        */
-
-        
+        this.journal = [];  
     }
 
     
@@ -316,7 +275,7 @@ class Svr3Process {
         this.current_cycle_time = 0;
         this.finish_time = 0;
         
-        this.text = "";
+        //this.text = "";
     }
 
     calcPriority() {
@@ -330,26 +289,26 @@ class Svr3Process {
     }
 
     runTick(time, currentTime) {
-        this.text = "";
+        let text = "";
         switch (this.p_state) {
             case "running_kernel":
-                this._fromSysCall();
+                text = this._fromSysCall();
             case "running_user":
                 if (this.p_cpu < 127)   
                     this.p_cpu++;
                 if (this.burst_time <= time) 
-                    this._toZombie(currentTime);
+                    text = this._toZombie(currentTime);
                 else {
                     this.burst_time -= time;
                     this.current_cycle_time += time;
                     if (this.current_cycle_time >= this.cpu_burst)
-                        this._toSleep()
+                        text = this._toSleep()
                 }
                 break;
             case "sleeping":
                 this.current_cycle_time += time;
                 if (this.current_cycle_time >= this.io_burst) 
-                    this._fromSleep();
+                    text = this._fromSleep();
                 break;
             case "ready":
                 this.wait_time += time;
@@ -360,7 +319,7 @@ class Svr3Process {
             default:
                 break;
         }
-        return this.text;
+        return text;
 
     }
 
@@ -406,7 +365,7 @@ class Svr3Process {
         this.p_state = "sleeping";
         this.current_cycle_time = 0;
         this.p_wchan = this.PRIORITIES[Math.floor(Math.random() * this.PRIORITIES.length)]
-        this.text = "Proceso " + this.p_pid + " finaliza su ciclo de CPU. "+
+        return "Proceso " + this.p_pid + " finaliza su ciclo de CPU. "+
             "Direccion de dormir: " + this.p_wchan;
     }
 
@@ -415,21 +374,21 @@ class Svr3Process {
         this.current_cycle_time = 0;
         this.p_pri = this.p_wchan;
         this.p_wchan = -1;
-        this.text = "Proceso " + this.p_pid + " finaliza su espera por I/O. " + 
+        return "Proceso " + this.p_pid + " finaliza su espera por I/O. " + 
             "Aumentada prioridad temporalmente a " + this.p_pri;
     }
 
     _fromSysCall() {
         this.p_pri = this.p_usrpri;
         this.p_state = "running_user";
-        this.text = "Proceso " + this.p_pid + " finaliza llamada al sistema";
+        return "Proceso " + this.p_pid + " finaliza llamada al sistema";
     }
 
     _toZombie(currentTime) {
         this.burst_time = 0;
         this.p_state = "zombie";
         this.finish_time = currentTime;
-        this.text = "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";
+        return "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";
     }
 }
 

@@ -3,12 +3,18 @@ class Svr4RT {
     constructor(pri, pid) {
         this.name = "RealTime"
         this.p_pid = pid;
-        // rtdpent
+        
+
+        // Prioridad global
         this.rt_glopri = pri;
+        // Cuanto asociado a la prioridad
         this.rt_quantum = rt_dptbl(pri);
-        // rtproc
+        
+        // Cuanto asignado
         this.rt_pquantum = this.rt_quantum;
+        // Tiempo restante del cuanto
         this.rt_timeleft = this.rt_quantum;
+        // Prioridad actual
         this.rt_pri = pri;
     }
 
@@ -31,42 +37,23 @@ class Svr4RT {
         this.rt_timeleft = this.rt_pquantum;
     }
 
-    runTick(pr, time, currentTime) {
+    runTick(pr) {
         let text = "";
         switch (pr.p_state) {
             case "running_kernel":
 
             case "running_user":
-                if (pr.burst_time <= time)
-                    text = this._toZombie(pr, currentTime);
-                else {
-                    this.rt_timeleft -= time;
-                    pr.burst_time -= time;
-                    pr.current_cycle_time += time;
-                    if (pr.current_cycle_time >= pr.cpu_burst) 
-                        text = this._toSleep(pr);
-                    else if (this.rt_timeleft <= 0) 
-                        pr.roundRobin = true;
-                }
+                this.rt_timeleft -= pr.sched.TICK;
+                if (pr.current_cycle_time >= pr.cpu_burst) 
+                    text = pr._toSleep();
+                else if (this.rt_timeleft <= 0) 
+                    pr.roundRobin = true;
                 break;
 
             default:
                 break;
         }
         return text;
-    }
-
-    _toZombie(pr, currentTime) {
-        pr.burst_time = 0;
-        pr.p_state = "zombie";
-        pr.finish_time = currentTime;
-        return "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";
-    }
-
-    _toSleep(pr) {
-        pr.p_state = "sleeping";
-        pr.current_cycle_time = 0;
-        return "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
     }
 }
 

@@ -27,10 +27,11 @@ class Svr4Scheduler {
 
     addProcess(data) {
         let pr = new Svr4Process(
-            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pClass, data.pri
+            this, this.processTable.length+1, data.burst, data.cpu_burst, 
+            data.io_burst, data.pClass, data.pri
         );
         this.processTable.push(pr);
-        this._setBackDQ(pr);
+        this.setBackDQ(pr);
     }
 
     // Añade un proceso al inicio de la cola (proceso expropiado)
@@ -47,7 +48,7 @@ class Svr4Scheduler {
     }
 
     // Añade un proceso al final de la cola (nuevo proceso)
-    _setBackDQ(process) {
+    setBackDQ(process) {
         let qn = process.p_pri;
         this._setDqactmap(qn);
         let queue = this.dispq.find(item => item.priority == qn);
@@ -81,7 +82,7 @@ class Svr4Scheduler {
 
 
     // Elige un proceso para ser planificado y lo desencola
-    _dequeueProcess() {
+    dequeueProcess() {
         let qn = this.dqactmap[this.dqactmap.length-1];
         let queue = this.dispq.find(item => item.priority == qn);
         if (queue) {
@@ -96,8 +97,7 @@ class Svr4Scheduler {
 
     start() {
         this.journal.push("Inicio de la ejecucion");
-        let pr = this._dequeueProcess();
-        //pr.p_state = "running_user";
+        let pr = this.dequeueProcess();
         pr.startRun();
         this.journal.push("Proceso " + pr.p_pid + " seleccionado para ejecucion");
         this._sendState();
@@ -110,15 +110,13 @@ class Svr4Scheduler {
     }
 
     nextTick() {
-        /* BORRAR */
-        //this.count++;
-
         this.time += this.TICK;
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == "sleeping");
 
         // Actualiza los procesos
         this.processTable.forEach (pr => {
-            let out = pr.runTick(this.TICK, this.time);
+            //let out = pr.runTick(this.TICK, this.time);
+            let out = pr.runTick();
             if (out)
                 this.journal.push(out);
         });
@@ -126,7 +124,7 @@ class Svr4Scheduler {
         // Encola procesos que finalizaron IO
         sleeping_pr.forEach(pr => {
             if (pr.p_state != "sleeping") 
-                this._setBackDQ(pr);
+                this.setBackDQ(pr);
         });
 
         if (this.inContextSwitch) 
@@ -137,6 +135,9 @@ class Svr4Scheduler {
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
 
+        // Encola procesos cuya prioridad ha cambiado
+        this._reQueue();
+
         this._sendState();
 
     }
@@ -146,12 +147,11 @@ class Svr4Scheduler {
         this.kprunrun = false;
         this.inContextSwitch = false;
         // Proximo proceso a ejecutar
-        let next_pr = this._dequeueProcess();
+        let next_pr = this.dequeueProcess();
         if (next_pr == null) 
             return;
         
         this.contextSwitchCount++;
-        //next_pr.p_state = "running_user";
         next_pr.startRun();
         this.journal.push("Proceso " + next_pr.p_pid + " Seleccionado para ejecucion");
     }
@@ -180,7 +180,7 @@ class Svr4Scheduler {
             this.inRoundRobin = false;
             this.inContextSwitch = true;
             running.p_state = "ready";
-            this._setBackDQ(running);
+            this.setBackDQ(running);
         }
     }
 
@@ -196,10 +196,29 @@ class Svr4Scheduler {
 
     }
 
-    isFinished() {
-        /* BORRAR */
-        //if (this.count >= 100) return true;
+    // Reencola procesos ready cuya prioridad ha cambiado
+    _reQueue() {
+        let procesos = this.processTable.filter(pr => pr.p_state == "ready" && pr.changePriority == "true");
+        procesos.forEach(pr => {
+            pr.changePriority = false;
+            // Elimina el  proceso de la cola actual
+            // Hay que buscar en todas las colas
+            let queue = this.qs.find(item => item.priority == pr.p_pri);
+            if (queue) {
+                queue.remove(pr);
+                if (queue.isEmpty()) {
+                    this.dqactmap.pop();
+                    this.dispq.pop();
+                }
+            }
 
+            // Encola el proceso de nuevo
+            this.setBackDQ(pr);
+            console.log(this.time + " : Proceso " + pr.p_pid + " reencolado: " + pr.p_pri);
+        });
+    }
+
+    isFinished() {
         let procesos = this.processTable.filter(pr => pr.p_state != "finished");
         return (procesos.length === 0);
     }
@@ -269,7 +288,8 @@ class Svr4Scheduler {
 
 
 class Svr4Process {
-    constructor(pid, burst, cpu_burst, io_burst, pClass, pri) {
+    constructor(sched, pid, burst, cpu_burst, io_burst, pClass, pri) {
+        this.sched = sched;
         this.p_pid = pid;
         this.p_state = "ready";
         this.p_pri = pri;
@@ -285,22 +305,28 @@ class Svr4Process {
         this.class = (pClass == "RealTime") ? new Svr4RT(pri, pid) : new Svr4TS(pri, pid);
     }
 
-    // TODO
-    runTick(time, currentTime) {
-        
+    runTick() {
         let text = "";
         switch (this.p_state) {
             case "running_kernel":
             case "running_user":
-                text = this.class.runTick(this, time, currentTime);
+                this.burst_time -= this.sched.TICK;
+                if (this.burst_time <= 0)
+                    text = this._toZombie();
+                else {
+                    this.current_cycle_time += this.sched.TICK;
+                    text = this.class.runTick(this);
+                }        
                 break;
             case "sleeping":
-                this.current_cycle_time += time;
+                this.current_cycle_time += this.sched.TICK;
                 if (this.current_cycle_time >= this.io_burst)
                     text = this._fromSleep();
+                else
+                    text = this.class.runTick(this);
                 break;
             case "ready":
-                this.wait_time += time;
+                this.wait_time += this.sched.TICK;
                 break;
             case "zombie":
                 this.p_state = "finished";
@@ -308,7 +334,6 @@ class Svr4Process {
             default:
                 break;
         }
-        
         return text;
     }
 
@@ -367,6 +392,19 @@ class Svr4Process {
         this.p_state = "ready";
         this.current_cycle_time = 0;
         return "Proceso " + this.p_pid + " finaliza su espera por I/O.";
+    }
+
+    _toZombie() {
+        this.burst_time = 0;
+        this.p_state = "zombie";
+        this.finish_time = this.sched.time;
+        return "Proceso " + this.p_pid + " finalizado en " + this.finish_time + " ut.";
+    }
+
+    _toSleep() {
+        this.p_state = "sleeping";
+        this.current_cycle_time = 0;
+        return "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
     }
 }
 

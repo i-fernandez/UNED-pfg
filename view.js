@@ -99,8 +99,10 @@ class View {
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
         addproc_div.classList.add('div-main');
+        addproc_div.style.display = "none";
         let addTitle = document.createElement('h1');
-        addTitle.id = 'addTitle';
+        //addTitle.id = 'addTitle';
+        addTitle.textContent = 'Añadir proceso';
         addTitle.classList.add('text');
         let formDiv = document.createElement('div');        
         formDiv.id = 'inputform_div'
@@ -115,7 +117,8 @@ class View {
         startButton.textContent = 'Simular';
         startButton.classList.add('startButton');
         startButton.addEventListener('click', () => {
-            this._hideAddProcess();
+            //this._hideAddProcess();
+            addproc_div.style.display = "none";
             this.summary_div.style.display = 'inherit';
             header_menu_div.style.display = 'inherit';
             summary_li.classList.add('states-menu-li-sel');
@@ -251,13 +254,13 @@ class View {
 
     _showSvr3Add() {
         this._hideSvr4Add();
-        document.getElementById('addTitle').textContent = "SVR3 : Agregar procesos";
+        //document.getElementById('addTitle').textContent = "SVR3 : Agregar procesos";
         document.getElementById('addForm_svr3').style.display = "inherit";
     }
 
     _showSvr4Add() {
         this._hideSvr3Add();
-        document.getElementById('addTitle').textContent = "SVR4 : Agregar procesos";
+        //document.getElementById('addTitle').textContent = "SVR4 : Agregar procesos";
         document.getElementById('addForm_svr4').style.display = "inherit";
     }
 
@@ -300,10 +303,6 @@ class View {
     _resetInput() {
         let items = document.getElementsByClassName('inputProcess');
         Array.prototype.forEach.call(items, function(i) {i.value = ''});
-    }
-
-    _hideAddProcess() {
-        document.getElementById('addproc_div').style.display = "none";
     }
 
     _showAddProcess() {

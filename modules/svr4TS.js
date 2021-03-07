@@ -5,17 +5,33 @@ class Svr4TS {
         this.name = "TimeSharing";
         this.p_pid = pid;
 
-        this.ts_globpri = pri;
-        this.ts_quantum = ts_dptbl(pri)[1];
-        this.ts_tqexp = ts_dptbl(pri)[2];
-        this.ts_slpret = ts_dptbl(pri)[3];
-        this.ts_maxwait = ts_dptbl(pri)[4];
-        this.ts_lwait = ts_dptbl(pri)[5];
+        // Tiempo de inicio del cuanto
+        this.startQuantum = 0;
 
+        // Prioridad global
+        this.ts_globpri = 0;
+        // Cuanto asignado a la prioridad
+        this.ts_quantum = 0;
+        // Valor ts_cpupri asignado cuando expira el cuanto
+        this.ts_tqexp = 0;
+        // Valor ts_cpupri asignado cuando vuelve a modo usuario despues de dormir
+        this.ts_slpret = 0;
+        // Segundos de espera a que el cuanto expire antes de usar ts_lwait
+        this.ts_maxwait = 0;
+        // Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait en usar su cuanto
+        this.ts_lwait = 0;
+        
+        this._readDptbl(pri);
+
+        // Tiempo restante del cuanto asignado
         this.ts_timeleft = this.ts_quantum;
-        this.ts_cpu_pri = pri;
+        // Parte de prioridad del sistema
+        this.ts_cpupri = pri;
+        // Parte de prioridad del usuario (nice)
         this.ts_upri = 0;
+        // Prioridad en modo usuario (cpu_pri+upri), menor de 59
         this.ts_umdpri = pri;
+        // Número de segundos desde que comenzó el cuanto
         this.ts_dispwait = 0;        
     }
 
@@ -33,7 +49,7 @@ class Svr4TS {
             ts_maxwait: this.ts_maxwait,
             ts_lwait: this.ts_lwait,
             ts_timeleft: this.ts_timeleft,
-            ts_cpu_pri: this.ts_cpu_pri,
+            ts_cpupri: this.ts_cpupri,
             ts_upri: this.ts_upri,
             ts_umdpri: this.ts_umdpri,
             ts_dispwait: this.ts_dispwait
@@ -41,19 +57,60 @@ class Svr4TS {
     }
 
     resetQuantum() {
-        this.ts_timeleft = this.ts_pquantum;
+        this.ts_timeleft = this.ts_quantum;
     }
 
-    runTick(pr, time, currentTime) {
+    _readDptbl(pri) {
+        this.ts_globpri = pri;
+        this.ts_quantum = ts_dptbl(pri)[1];
+        this.ts_tqexp = ts_dptbl(pri)[2];
+        this.ts_slpret = ts_dptbl(pri)[3];
+        this.ts_maxwait = ts_dptbl(pri)[4];
+        this.ts_lwait = ts_dptbl(pri)[5];
+    }
+
+    _setPri(pr) {
+        this.ts_umdpri = this.ts_cpupri + this.ts_upri;
+        if (this.ts_umdpri > 59)
+            this.ts_umdpri = 59;
+        
+        // Elimina el proceso de la cola actual
+        pr.sched.dequeueProcess(pr);
+        // Modifica la prioridad
+        pr.p_pri = pri;
+        // Encola el proceso de nuevo
+        pr.sched.setBackDQ(pr);
+    }
+
+    runTick(pr) {
+        let text = "";
         switch (pr.p_state) {
             case "running_kernel":
 
             case "running_user":
+                this.ts_timeleft -= pr.sched.TICK;
+                if (pr.current_cycle_time >= pr.cpu_burst) 
+                    text = pr._toSleep();
+
+                else if (this.ts_timeleft <= 0) {
+                    // cuanto expirado
+                    this.ts_timeleft = 0;
+                    this.ts_cpupri = ts_tqexp;
+                    this._setPri(pr);
+                    pr.roundRobin = true;
+                    text = "Cuanto del proceso " + this.p_pid + " expirado." + 
+                        " Nueva prioridad: " + this.ts_umdpri;
+                }
+                
+                break;
+
+            case "sleeping":
                 break;
 
             default:
                 break;
         }
+        return text;
 
     }
 
