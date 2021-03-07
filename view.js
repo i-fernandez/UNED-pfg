@@ -464,6 +464,7 @@ class View {
     // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
         let s_table = document.getElementById('state_table');
+        this._addBinaryRow(s_table, "kprunrun: ", state.kprunrun);
         let row_qs = s_table.insertRow();
         let td_t = document.createElement('td');
         td_t.classList.add('bold');

@@ -1,9 +1,10 @@
 
 
 class Svr4TS {
-    constructor(pri, pid) {
+    constructor(proc) {
         this.name = "TimeSharing";
-        this.p_pid = pid;
+        this.proc = proc;
+        //this.p_pid = pid;
 
         // Tiempo de inicio del cuanto
         this.startQuantum = 0;
@@ -21,16 +22,16 @@ class Svr4TS {
         // Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait en usar su cuanto
         this.ts_lwait = 0;
         
-        this._readDptbl(pri);
+        this._readDptbl(proc.p_pri);
 
         // Tiempo restante del cuanto asignado
         this.ts_timeleft = this.ts_quantum;
         // Parte de prioridad del sistema
-        this.ts_cpupri = pri;
+        this.ts_cpupri = proc.p_pri;
         // Parte de prioridad del usuario (nice)
         this.ts_upri = 0;
         // Prioridad en modo usuario (cpu_pri+upri), menor de 59
-        this.ts_umdpri = pri;
+        this.ts_umdpri = proc.p_pri;
         // Número de segundos desde que comenzó el cuanto
         this.ts_dispwait = 0;        
     }
@@ -41,7 +42,7 @@ class Svr4TS {
 
     getData() {
         return {
-            p_pid: this.p_pid,
+            p_pid: this.proc.p_pid,
             ts_globpri: this.ts_globpri,
             ts_quantum: this.ts_quantum,
             ts_tqexp: this.ts_tqexp,
@@ -58,8 +59,10 @@ class Svr4TS {
 
     resetQuantum() {
         this.ts_timeleft = this.ts_quantum;
+        //console.log("llamada a resetQuantum");
     }
 
+    /* se puede quitar el parametro */
     _readDptbl(pri) {
         this.ts_globpri = pri;
         this.ts_quantum = ts_dptbl(pri)[1];
@@ -69,38 +72,59 @@ class Svr4TS {
         this.ts_lwait = ts_dptbl(pri)[5];
     }
 
-    _setPri(pr) {
+    _setPri() {
         this.ts_umdpri = this.ts_cpupri + this.ts_upri;
         if (this.ts_umdpri > 59)
             this.ts_umdpri = 59;
         
         // Elimina el proceso de la cola actual
-        pr.sched.dequeueProcess(pr);
+        //this.proc.sched.dequeueProcess(this.proc);
         // Modifica la prioridad
-        pr.p_pri = pri;
+        this.proc.p_pri = this.ts_umdpri;
         // Encola el proceso de nuevo
-        pr.sched.setBackDQ(pr);
+        //this.proc.sched.setBackDQ(this.proc);
+        // Rellena valores tsdpent
+        this._readDptbl(this.ts_umdpri);
+        this.resetQuantum();
     }
 
-    runTick(pr) {
+    _quantumExpired() {
+        this.ts_cpupri = this.ts_tqexp;
+        //this._setPri();
+        this.ts_umdpri = this.ts_cpupri + this.ts_upri;
+        this.proc.p_pri = this.ts_umdpri;
+        this._readDptbl(this.ts_umdpri);
+        this.resetQuantum();
+
+        this.proc.sched.roundRobin();
+        return "Cuanto del proceso " + this.proc.p_pid + " expirado." + 
+                " Nueva prioridad: " + this.ts_umdpri;
+                
+    }
+
+
+    runTick() {
         let text = "";
-        switch (pr.p_state) {
+        switch (this.proc.p_state) {
             case "running_kernel":
 
             case "running_user":
-                this.ts_timeleft -= pr.sched.TICK;
-                if (pr.current_cycle_time >= pr.cpu_burst) 
-                    text = pr._toSleep();
-
-                else if (this.ts_timeleft <= 0) {
+                console.log("TICK time: " + this.proc.sched.time + " timeleft: "+this.ts_timeleft);
+                this.ts_timeleft -= this.proc.sched.TICK;
+                if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
+                    text = this.proc._toSleep();
+                } else if (this.ts_timeleft <= 0) {
+                    text = this._quantumExpired();
+                    /*
                     // cuanto expirado
-                    this.ts_timeleft = 0;
-                    this.ts_cpupri = ts_tqexp;
-                    this._setPri(pr);
-                    pr.roundRobin = true;
-                    text = "Cuanto del proceso " + this.p_pid + " expirado." + 
+                    this.ts_cpupri = this.ts_tqexp;
+                    this._setPri();
+                    text = "Cuanto del proceso " + this.proc.p_pid + " expirado." + 
                         " Nueva prioridad: " + this.ts_umdpri;
-                }
+                    this.proc.sched.roundRobin();
+                    */
+                
+                } 
                 
                 break;
 

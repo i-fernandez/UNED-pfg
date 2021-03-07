@@ -129,8 +129,9 @@ class Svr4Scheduler {
 
         if (this.inContextSwitch) 
             this._swtch();
-        else
-            this._roundRobin();
+        
+        //    else
+        //    this._roundRobin();
             
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
@@ -185,14 +186,14 @@ class Svr4Scheduler {
     }
 
     // Comprueba si round robin produce un cambio de contexto
-    _roundRobin() {
+    roundRobin() {
         let running = this._getRunningProcess();
-        if (typeof running !== 'undefined' && running.roundRobin){
+        //if (typeof running !== 'undefined' && running.roundRobin){
             if (this.dqactmap.find(item => item == running.p_pri))
                 this.inRoundRobin = true;
             else
                 running.resetQuantum();
-        }
+        //}
 
     }
 
@@ -300,9 +301,9 @@ class Svr4Process {
         this.current_cycle_time = 0;
         this.wait_time = 0;
         this.finish_time = 0;
-        this.roundRobin = false;
+        //this.roundRobin = false;
 
-        this.class = (pClass == "RealTime") ? new Svr4RT(pri, pid) : new Svr4TS(pri, pid);
+        this.class = (pClass == "RealTime") ? new Svr4RT(this) : new Svr4TS(this);
     }
 
     runTick() {
@@ -315,7 +316,7 @@ class Svr4Process {
                     text = this._toZombie();
                 else {
                     this.current_cycle_time += this.sched.TICK;
-                    text = this.class.runTick(this);
+                    text = this.class.runTick();
                 }        
                 break;
             case "sleeping":
@@ -323,7 +324,7 @@ class Svr4Process {
                 if (this.current_cycle_time >= this.io_burst)
                     text = this._fromSleep();
                 else
-                    text = this.class.runTick(this);
+                    text = this.class.runTick();
                 break;
             case "ready":
                 this.wait_time += this.sched.TICK;
