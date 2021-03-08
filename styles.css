@@ -134,7 +134,6 @@
 .pr_class_header {
     background: rgb(192, 190, 190);
 }
-
 .no-wrap {
     white-space: pre-wrap;
 }
@@ -153,6 +152,19 @@
     margin-right: 10%;
     float: right;
 }
+.row_summary td {
+    color: black;
+}
+.row_summary:hover {
+    cursor: default;
+    background: white;
+}
+.proc_table {
+    text-align: center;
+    border-radius: 6px;
+    border-spacing: 0px;
+}
+/* Formatos por tipo */
 Button:hover {
     border: 2px solid rgb(0, 103, 103);
     background: rgb(0, 42, 32);
@@ -162,16 +174,11 @@ button {
     width: 90px;
     height: 30px;
 }
-/*
-h1 {
-    color: rgb(0, 76, 48);
-    font-family: 'Times New Roman', Times, serif;
-}
-*/
 body {
     margin: 0px;
+    font-family: Arial, Helvetica, sans-serif
 }
-/* Clases por id */
+/* Formatos por id */
 #header_div {
     margin: 0px;
     height: 60px;
@@ -182,4 +189,13 @@ body {
     height: 36px;
     background: rgb(221, 221, 221);
 }
+#summary_table {
+    width: 500px;
+    background: rgb(221, 221, 221);
+}
+#summary_thead {
+    height: 30px;
+    background: rgb(0, 76, 48);
+    color: rgb(221, 221, 221);
 
+}

@@ -109,21 +109,11 @@ class Svr4TS {
             case "running_kernel":
 
             case "running_user":
-                console.log("TICK time: " + this.proc.sched.time + " timeleft: "+this.ts_timeleft);
                 this.ts_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
                     text = this.proc._toSleep();
                 } else if (this.ts_timeleft <= 0) {
                     text = this._quantumExpired();
-                    /*
-                    // cuanto expirado
-                    this.ts_cpupri = this.ts_tqexp;
-                    this._setPri();
-                    text = "Cuanto del proceso " + this.proc.p_pid + " expirado." + 
-                        " Nueva prioridad: " + this.ts_umdpri;
-                    this.proc.sched.roundRobin();
-                    */
-                
                 } 
                 
                 break;

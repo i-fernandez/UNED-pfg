@@ -108,6 +108,7 @@ class View {
         formDiv.id = 'inputform_div'
         let addTable = document.createElement('table');
         addTable.id = 'addTable';
+        addTable.classList.add('proc_table');
         let start_div = document.createElement('div');
         start_div.id = 'states_div';
         start_div.classList.add('high_margin','div-states');
@@ -370,6 +371,7 @@ class View {
         pTable_div.classList.add('div-states');
         let pTable = document.createElement('table');
         pTable.id = 'pTable';
+        pTable.classList.add('proc_table');
         pTable_div.appendChild(pTable);
 
         //let lineR = document.createElement('hr');
@@ -379,6 +381,7 @@ class View {
         rtTable_div.classList.add('div-states');
         let rtTable = document.createElement('table');
         rtTable.id = "rtTable";
+        rtTable.classList.add('proc_table');
         rtTable_div.appendChild(rtTable);
 
         //let lineS = document.createElement('hr');
@@ -388,6 +391,7 @@ class View {
         tsTable_div.classList.add('div-states');
         let tsTable = document.createElement('table');
         tsTable.id = "tsTable";
+        tsTable.classList.add('proc_table');
         tsTable_div.appendChild(tsTable);
 
         //let lineE = document.createElement('hr');
@@ -610,8 +614,11 @@ class View {
     _createSummaryTable(domElement, data) {
         if (data.length > 0) {
             let table = document.createElement('table');
+            table.id = 'summary_table';
+            table.classList.add('proc_table');
             // Head
             let thead = table.createTHead();
+            thead.id = 'summary_thead';
             let head_row = thead.insertRow();
             let th_1 = document.createElement('th');
             th_1.appendChild(document.createTextNode('pid'));
@@ -626,6 +633,7 @@ class View {
             let tbody = table.createTBody();
             data.forEach(pr => {
                 let row = tbody.insertRow();
+                row.classList.add('row_summary');
                 for (let item in pr) {
                     let tb = document.createElement('td');
                     tb.appendChild(document.createTextNode(pr[item]));
