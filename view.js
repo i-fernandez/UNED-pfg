@@ -567,19 +567,19 @@ class View {
     _setRowClass(row, pr) {
         switch (pr.p_state) {
             case "running_user":
-                row.classList.add('pr_run_user');
+                row.classList.add('pr_run_user', 'row_ptable');
                 break;
             case "running_kernel":
-                row.classList.add('pr_run_kernel');
+                row.classList.add('pr_run_kernel', 'row_ptable');
                 break;
             case "sleeping":
-                row.classList.add('pr_sleeping');
+                row.classList.add('pr_sleeping', 'row_ptable');
                 break;
             case "zombie":
-                row.classList.add('pr_zombie');
+                row.classList.add('pr_zombie', 'row_ptable');
                 break;
             default:
-                row.classList.add('pr_ready');
+                row.classList.add('pr_ready', 'row_ptable');
         }
     }
 
@@ -594,6 +594,7 @@ class View {
             let data = Object.keys(pTable[0]);
             for (let key of data) {
                 let th = document.createElement('th');
+                th.classList.add('th_ptable');
                 let text = document.createTextNode(key);
                 th.appendChild(text);
                 row.appendChild(th);

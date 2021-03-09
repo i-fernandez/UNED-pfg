@@ -116,20 +116,34 @@
 }
 /* Tablas de procesos */
 .pr_zombie {
-    background: rgb(54, 52, 52);
-    color: white;
+    /* background: rgb(54, 52, 52); */
+    color:  rgb(51, 49, 49);
 }
 .pr_sleeping {
-    background: rgb(138, 191, 241);
+    /* background: rgb(138, 191, 241);*/
+    color: rgb(41, 137, 226);
 }
 .pr_run_user {
-    background: rgb(168, 240, 139);
+    /* background: rgb(168, 240, 139);*/
+    color: rgb(75, 187, 31);
 }
 .pr_run_kernel {
-    background: rgb(74, 211, 20);
+    /* background: rgb(74, 211, 20);*/
+    color: rgb(45, 129, 12);
 }
 .pr_ready {
-    background: rgb(236, 116, 116);
+    /* background: rgb(236, 116, 116); */
+    color: rgb(235, 74, 74);
+}
+.row_ptable td {
+    background: white;
+}
+.row_ptable:hover {
+    cursor: default;
+    font-weight: bold;
+}
+.th_ptable {
+    padding-left: 10px;
 }
 .pr_class_header {
     background: rgb(192, 190, 190);
@@ -196,6 +210,6 @@ body {
 #summary_thead {
     height: 30px;
     background: rgb(0, 76, 48);
-    color: rgb(221, 221, 221);
+    color: white;
 
 }

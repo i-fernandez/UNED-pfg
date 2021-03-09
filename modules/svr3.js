@@ -21,6 +21,8 @@ class Svr3Scheduler {
         this.inContextSwitch = false;
         this.inRoundRobin = false;
         this.journal = [];  
+        this.running = "";
+        this.nextRunning = "";
     }
 
     
@@ -67,6 +69,14 @@ class Svr3Scheduler {
         }
     }
 
+    // Muestra el proximo proceso para ejecutarse, sin desencolarlo
+    _getNextProcess() {
+        let queue = this.qs.find(item => item.priority == this.whichqs[0]);
+        if (queue) {
+            return queue.front();
+        }
+    }
+
     
     getPTable() {
         let pTable = [];
@@ -78,8 +88,9 @@ class Svr3Scheduler {
     start() {
         this.journal.push("Inicio de la ejecucion");
         let pr = this._dequeueProcess();
+        this.running = pr;
         pr.p_state = "running_user";
-        this.journal.push("Proceso " + pr.p_pid + " seleccionado para ejecucion");
+        this.journal.push("Proceso " + pr.p_pid + " cargado para ejecucion");
         this._sendState();
     }
 
@@ -93,6 +104,9 @@ class Svr3Scheduler {
             if (out)
                 this.journal.push(out);
         });
+        // Actualiza el proceso en ejecucion
+        if (this.running.p_state != "running_user" && this.running.p_state != "running_kernel")
+            this.running = "";
 
         // Encola procesos que finalizaron IO
         sleeping_pr.forEach(pr => {
@@ -114,6 +128,9 @@ class Svr3Scheduler {
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
     
+        // BORRAR:
+        this.journal.push("Running process: " + this.running.p_pid);
+
         this._sendState();
     }
 
@@ -167,10 +184,14 @@ class Svr3Scheduler {
 
     // Inicio de cambio de contexto
     _startSwtch() {
-        let running = this._getRunningProcess();
+        //let running = this._getRunningProcess();
         // No hay ningun proceso en ejecucion 
-        if (typeof running === 'undefined' && this.whichqs.length > 0) {
-            this.journal.push("Ningun proceso en ejecucion - llamada a rutina swtch");
+        //if (typeof running === 'undefined' && this.whichqs.length > 0) {
+        if (!(this.running) && this.whichqs.length > 0) {
+            // Aqui ya se elige el proximo proceso a ejecutar
+            let n = this._getNextProcess();
+            this.journal.push("Ningun proceso en ejecucion. Rutina swtch selecciona proceso " + 
+                n.p_pid + " para ejecutarse.");
             this.inContextSwitch = true;
         } 
         // Proceso encolado con mayor prioridad y actual no esta en modo kernel
@@ -181,14 +202,18 @@ class Svr3Scheduler {
             this.journal.push("CPU expropiada debido a proceso "+this.qs[0].front().p_pid);
             this.inContextSwitch = true;
             running.p_state = "ready";
+            this.running = "";
             this._enqueueProcess(running);
         }
         // Round robin
         else if (this.inRoundRobin) {
-            this.journal.push("CPU expropiada debido a rutina roundrobin");
+            let n = this._getNextProcess();
+            this.journal.push("CPU expropiada debido a rutina roundrobin. Proceso " + 
+                n.p_pid + " seleccionado para ejecutarse");
             this.inContextSwitch = true;
             this.inRoundRobin = false;
             running.p_state = "ready";
+            this.running = "";
             this._enqueueProcess(running);
         }
     }
@@ -207,8 +232,9 @@ class Svr3Scheduler {
             next_pr.p_state = "running_kernel";
         else
             next_pr.p_state = "running_user";
+        this.running = next_pr;
         this.nextRoundRobin = this.QUANTUM;
-        this.journal.push("Proceso " + next_pr.p_pid + " Seleccionado para ejecucion");
+        this.journal.push("Proceso " + next_pr.p_pid + " cargado para su ejecucion");
     }
 
     // Aplica decay y recalcula prioridades para cada proceso
@@ -244,8 +270,13 @@ class Svr3Scheduler {
 
     // Comprueba si round robin produce cambio de contexto
     _roundRobin() {
+        /*
         let running = this._getRunningProcess();
         if (typeof running !== 'undefined' && this.whichqs[0] == Math.floor(running.p_pri/4)) 
+            this.inRoundRobin = true;
+        */
+
+        if (this.running && this.whichqs[0] == Math.floor(this.running.p_pri/4)) 
             this.inRoundRobin = true;
     }
 
@@ -274,8 +305,6 @@ class Svr3Process {
         this.wait_time = 0;
         this.current_cycle_time = 0;
         this.finish_time = 0;
-        
-        //this.text = "";
     }
 
     calcPriority() {
