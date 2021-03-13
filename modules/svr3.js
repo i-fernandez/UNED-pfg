@@ -312,7 +312,7 @@ class Svr3Process {
         this.current_cycle_time = 0;
         this.finish_time = 0;
 
-        this.kernelCount = 0;
+        this.kernelCount = 2;  // numero de Ticks en modo nucleo
     }
 
     calcPriority() {
@@ -417,19 +417,15 @@ class Svr3Process {
     }
 
     _fromSysCall() {
-        if (this.kernelCount < 2) {
-            this.kernelCount ++;
+        if (this.kernelCount > 1) {
+            this.kernelCount--;
         }
         else {
-            this.kernelCount = 0;
+            this.kernelCount = 2;
             this.p_pri = this.p_usrpri;
             this.p_state = "running_user";
-            return "Proceso " + this.p_pid + " finaliza llamada al sistema";
-
-        }
-
-
-        
+            return "Proceso " + this.p_pid + " finaliza llamada al sistema.";
+        } 
     }
 
     _toZombie(currentTime) {

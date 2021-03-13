@@ -99,6 +99,11 @@
 .array-queue:hover .tooltip-text {
     visibility: visible;
 }
+.priorityQueueNumber {
+    border: solid 1px black;
+    padding-left: 25px;
+    padding-right: 25px;
+}
 .div-main {
     margin-left: 5%;
 }
@@ -114,7 +119,7 @@
 .high_margin {
     margin-left: 200px;
 }
-/* Tablas de procesos */
+/* procesos */
 .pr_zombie {
     /* background: rgb(54, 52, 52); */
     color:  rgb(51, 49, 49);
@@ -143,8 +148,8 @@
     font-weight: bold;
 }
 .th_ptable {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 .pr_class_header {
     background: rgb(192, 190, 190);
@@ -163,26 +168,11 @@
 .bold {
     font-weight: bold;
 }
-.image-right{
+.image-right {
     margin-right: 10%;
     float: right;
 }
-
-/* Apuntar a plain_table */
-/*
-.row_summary td {
-    color: black;
-}
-.row_summary:hover {
-    cursor: default;
-    background: white;
-}
-.proc_table {
-    text-align: center;
-    border-radius: 6px;
-    border-spacing: 0px;
-}
-*/
+/* tablas */
 .plain_table {
     margin-top: 20px;
     text-align: center;
@@ -203,7 +193,7 @@
     background: white;
 }
 /* Formatos por tipo */
-Button:hover {
+button:hover {
     border: 2px solid rgb(0, 103, 103);
     background: rgb(0, 42, 32);
     cursor: pointer;
@@ -227,16 +217,7 @@ body {
     height: 36px;
     background: rgb(221, 221, 221);
 }
-/* Apuntat a plain_table */
-
 #summary_table {
     width: 500px;
-    /*background: rgb(221, 221, 221);*/
 }
-/*
-#summary_thead {
-    height: 30px;
-    background: rgb(0, 76, 48);
-    color: white;
-}
-*/
+

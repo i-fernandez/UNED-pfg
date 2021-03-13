@@ -248,8 +248,8 @@ class View {
         addButton_svr4.classList.add('startButton');
         document.getElementById('inputform_div').appendChild(addForm_svr4);
         this._append(addForm_svr4, 
-            [inputBurst_svr4, inputCPU_svr4, inputIO_svr4, 
-            classSel, inputPriority_svr4, addButton_svr4]
+            [classSel, inputPriority_svr4, inputBurst_svr4, inputCPU_svr4, 
+            inputIO_svr4, addButton_svr4]
         );
     }
 
@@ -463,6 +463,10 @@ class View {
         td_t.appendChild(document.createTextNode("qs:"));
         td_t.classList.add('top');
         let td_d = document.createElement('td');
+        // TODO: los numeros de cola deben corresponder con 
+        //   su prioridad: [0-3, 4-7, ...]
+        // El numero de cola con recuadro, y la conexion entre procesos
+        //   con un jpg de dos flechas
         this._fillPriorityQueue(td_d, state.qs);
         this._append(row_qs, [td_t, td_d]);
     }
@@ -581,7 +585,7 @@ class View {
     // Muestra la tabla de procesos en la vista Añadir proceso (SVR3)
     _createAddTable(domElement, pTable) {
         this._clearChilds(domElement);
-        if (pTable.length > 0) {
+        //if (pTable.length > 0) {
             // Table head
             let thead = domElement.createTHead();
             thead.classList.add('plain_table-th');
@@ -606,7 +610,7 @@ class View {
                     row.appendChild(tb)
                 }
             });
-        }
+        //}
     }
 
 
@@ -699,26 +703,35 @@ class View {
     _fillPriorityQueue(domElement, data) {
         let table = document.createElement('table');
         data.forEach(item => {
+            // Crear un div por proceso y otro por flecha
             let listaProc = "";
             item.items.forEach(pr => {listaProc += pr.p_pid + " <--> ";});
+
+
             let row = table.insertRow();
             let td_t = document.createElement('td');
             td_t.appendChild(document.createTextNode(item.priority));
+            td_t.classList.add('priorityQueueNumber');
             let td_a = document.createElement('td');
-            td_a.appendChild(document.createTextNode(" --> "));
+
+            let bi_arrow = document.createElement('img');
+            bi_arrow.src = './resources/bi_arrow_15.png';
+            td_a.appendChild(bi_arrow);
             let td_p = document.createElement('td');
+
+            // Aqui van los div de proceso
             td_p.appendChild(document.createTextNode(listaProc.slice(0, -6)));
+            
             this._append(row, [td_t, td_a, td_p]);
         });
         domElement.appendChild(table);
     }
 
     pTableChanged(pTable) {
-        if(pTable.length > 0) 
+        if(pTable.length > 0) {
             document.getElementById('states_div').style.display = "block";
-        
-        this._createAddTable(document.getElementById('addTable'), pTable);
-        //this._displayProcessTable(pTable, document.getElementById('addTable'));
+            this._createAddTable(document.getElementById('addTable'), pTable);
+        }
     }
 
     

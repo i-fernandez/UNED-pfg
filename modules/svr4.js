@@ -188,13 +188,10 @@ class Svr4Scheduler {
     // Comprueba si round robin produce un cambio de contexto
     roundRobin() {
         let running = this._getRunningProcess();
-        //if (typeof running !== 'undefined' && running.roundRobin){
-            if (this.dqactmap.find(item => item == running.p_pri))
-                this.inRoundRobin = true;
-            else
-                running.resetQuantum();
-        //}
-
+        if (this.dqactmap.find(item => item == running.p_pri))
+            this.inRoundRobin = true;
+        else
+            running.resetQuantum();
     }
 
     // Reencola procesos ready cuya prioridad ha cambiado
@@ -301,7 +298,9 @@ class Svr4Process {
         this.current_cycle_time = 0;
         this.wait_time = 0;
         this.finish_time = 0;
-        //this.roundRobin = false;
+        
+        
+        this.kernelCount = 0;    // numero de Ticks en modo nucleo
 
         this.class = (pClass == "RealTime") ? new Svr4RT(this) : new Svr4TS(this);
     }
@@ -310,6 +309,7 @@ class Svr4Process {
         let text = "";
         switch (this.p_state) {
             case "running_kernel":
+                text = this._fromSysCall();
             case "running_user":
                 this.execution -= this.sched.TICK;
                 if (this.execution <= 0)
@@ -321,10 +321,7 @@ class Svr4Process {
                 break;
             case "sleeping":
                 this.current_cycle_time += this.sched.TICK;
-                if (this.current_cycle_time >= this.io_burst)
-                    text = this._fromSleep();
-                else
-                    text = this.class.runTick();
+                text = this.class.runTick();
                 break;
             case "ready":
                 this.wait_time += this.sched.TICK;
@@ -339,7 +336,11 @@ class Svr4Process {
     }
 
     startRun() {
-        this.p_state = "running_user";
+        if (this.kernelCount  > 0)
+            this.p_state = "running_kernel";
+        else
+            this.p_state = "running_user";
+
         this.roundRobin = false;
         this.resetQuantum();
     }
@@ -370,7 +371,7 @@ class Svr4Process {
             execution: this.execution,
             cpu_burst: this.cpu_burst,
             io_burst: this.io_burst,
-            current_cycle_time: this.current_cycle_time,
+            //current_cycle_time: this.current_cycle_time,
             wait_time: this.wait_time,
         };
     }
@@ -394,6 +395,18 @@ class Svr4Process {
         return "Proceso " + this.p_pid + " finaliza su espera por I/O.";
     }
 
+    _fromSysCall() {
+        if (this.kernelCount > 1) {
+            this.kernelCount--;
+        }
+        else {
+            this.kernelCount = 2;
+            this.p_state = "running_user";
+            this.class._fromSysCall();
+            return "Proceso " + this.p_pid + " finaliza llamada al sistema.";
+        } 
+    }
+
     _toZombie() {
         this.execution = 0;
         this.p_state = "zombie";
@@ -401,11 +414,11 @@ class Svr4Process {
         return "Proceso " + this.p_pid + " finalizado en " + this.finish_time + " ut.";
     }
 
-    _toSleep() {
-        this.p_state = "sleeping";
-        this.current_cycle_time = 0;
-        return "Proceso " + this.p_pid + " finaliza su ciclo de CPU.";
-    }
+
+
+    
+        
+      
 }
 
 

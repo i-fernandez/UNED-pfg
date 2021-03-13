@@ -46,16 +46,38 @@ class Svr4RT {
             case "running_user":
                 this.rt_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) 
-                    text = this.proc._toSleep();
+                    text = this._toSleep();
                 else if (this.rt_timeleft <= 0) 
                     this.proc.sched.roundRobin();
                 break;
 
+            case "sleeping":
+                if (this.current_cycle_time >= this.io_burst)
+                    text = this._fromSleep();
+                break;
             default:
                 break;
         }
         return text;
     }
+
+    _toSleep() {
+        this.p_state = "sleeping";
+        this.current_cycle_time = 0;
+        this.kernelCount = 2;
+        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU.";
+    }
+
+    _fromSleep() {
+        this.p_state = "ready";
+        this.current_cycle_time = 0;
+        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O.";
+    }
+
+    // En esta clase no se hace nada especial al volver a modo usuario
+    fromSysCall() {}
+
+
 }
 
 /* Devuelve el valor de cuanto correspondiente a la prioridad */

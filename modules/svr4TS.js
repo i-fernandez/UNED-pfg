@@ -111,7 +111,7 @@ class Svr4TS {
             case "running_user":
                 this.ts_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
-                    text = this.proc._toSleep();
+                    text = this._toSleep();
                 } else if (this.ts_timeleft <= 0) {
                     text = this._quantumExpired();
                 } 
@@ -119,6 +119,8 @@ class Svr4TS {
                 break;
 
             case "sleeping":
+                if (this.current_cycle_time >= this.io_burst)
+                    text = this._fromSleep();
                 break;
 
             default:
@@ -126,6 +128,27 @@ class Svr4TS {
         }
         return text;
 
+    }
+
+    _toSleep() {
+        this.p_state = "sleeping";
+        this.current_cycle_time = 0;
+        this.p_pri = Math.random() * (100 - 60) + 60;
+        this.proc.p_pri = this.p_pri;
+        this.kernelCount = 2;
+        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU.";
+    }
+
+    _fromSleep() {
+        this.p_state = "ready";
+        this.current_cycle_time = 0;
+        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O."+
+        " Prioridad temporalmente aumentada a " + this.p_pri;
+    }
+
+    fromSysCall() {
+        this.p_pri = this.ts_umdpri;
+        this.proc.p_pri = this.p_pri;
     }
 
 }
