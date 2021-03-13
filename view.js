@@ -108,7 +108,7 @@ class View {
         formDiv.id = 'inputform_div'
         let addTable = document.createElement('table');
         addTable.id = 'addTable';
-        addTable.classList.add('proc_table');
+        addTable.classList.add('plain_table');
         let start_div = document.createElement('div');
         start_div.id = 'states_div';
         start_div.classList.add('high_margin','div-states');
@@ -280,7 +280,7 @@ class View {
 
     _getSvr3Input() {
         let data = {
-            burst: parseInt(document.getElementById('inputBurst_svr3').value, 10),
+            execution: parseInt(document.getElementById('inputBurst_svr3').value, 10),
             cpu_burst: parseInt(document.getElementById('inputCPU_svr3').value, 10),
             io_burst: parseInt(document.getElementById('inputIO_svr3').value, 10),
             pri: parseInt(document.getElementById('inputPriority_svr3').value, 10)
@@ -292,7 +292,7 @@ class View {
         let pc = "RealTime"
         if (document.getElementById('class_sel').value == 2) {pc = "TimeSharing";}
         let data = {
-            burst: parseInt(document.getElementById('inputBurst_svr4').value, 10),
+            execution: parseInt(document.getElementById('inputBurst_svr4').value, 10),
             cpu_burst: parseInt(document.getElementById('inputCPU_svr4').value, 10),
             io_burst: parseInt(document.getElementById('inputIO_svr4').value, 10),
             pClass: pc,
@@ -444,14 +444,7 @@ class View {
     // Elementos para mostrar un estado de SVR3
     _showSvr3State(state) {
         let s_table = document.getElementById('state_table');
-        let row_qs = s_table.insertRow();
-        let td_t = document.createElement('td');
-        td_t.classList.add('bold');
-        td_t.appendChild(document.createTextNode("qs:"));
-        td_t.classList.add('top');
-        let td_d = document.createElement('td');
-        this._fillPriorityQueue(td_d, state.qs);
-        this._append(row_qs, [td_t, td_d]);
+        // whichqs
         let row_wq = s_table.insertRow();
         let td_w = document.createElement('td');
         td_w.classList.add('bold');
@@ -463,12 +456,37 @@ class View {
         td_a.appendChild(aq_table);
         this._showArrayQueue(state.whichqs, aq_table, "", 0, 31);   
         this._append(row_wq, [td_w, td_a]); 
+        // qs
+        let row_qs = s_table.insertRow();
+        let td_t = document.createElement('td');
+        td_t.classList.add('bold');
+        td_t.appendChild(document.createTextNode("qs:"));
+        td_t.classList.add('top');
+        let td_d = document.createElement('td');
+        this._fillPriorityQueue(td_d, state.qs);
+        this._append(row_qs, [td_t, td_d]);
     }
 
     // Elementos para mostrar un estado de SVR4
     _showSvr4State(state) {
         let s_table = document.getElementById('state_table');
+        // kprunrun
         this._addBinaryRow(s_table, "kprunrun: ", state.kprunrun);
+        //dqactmap
+        let row_wq = s_table.insertRow();
+        let td_w = document.createElement('td');
+        td_w.classList.add('bold');
+        td_w.appendChild(document.createTextNode("dqactmap: "));
+        td_w.classList.add('top');
+        let td_a = document.createElement('td');
+        // Tabla para datos de dqactmap
+        let aq_table = document.createElement('table');
+        td_a.appendChild(aq_table);
+        this._showArrayQueue(state.dqactmap, aq_table, "TimeSharing: ", 0, 59);
+        this._showArrayQueue(state.dqactmap, aq_table, "Kernel: ", 60, 99);
+        this._showArrayQueue(state.dqactmap, aq_table, "RealTime: ", 100, 159);
+        this._append(row_wq, [td_w, td_a]);
+        // dispq
         let row_qs = s_table.insertRow();
         let td_t = document.createElement('td');
         td_t.classList.add('bold');
@@ -477,19 +495,7 @@ class View {
         let td_d = document.createElement('td');
         this._fillPriorityQueue(td_d, state.dispq);
         this._append(row_qs, [td_t, td_d]);
-        let row_wq = s_table.insertRow();
-        let td_w = document.createElement('td');
-        td_w.classList.add('bold');
-        td_w.appendChild(document.createTextNode("dqactmap: "));
-        td_w.classList.add('top');
-        let td_a = document.createElement('td');
-        // Tabla para datos de whichqs
-        let aq_table = document.createElement('table');
-        td_a.appendChild(aq_table);
-        this._showArrayQueue(state.dqactmap, aq_table, "TimeSharing: ", 0, 59);
-        this._showArrayQueue(state.dqactmap, aq_table, "Kernel: ", 60, 99);
-        this._showArrayQueue(state.dqactmap, aq_table, "RealTime: ", 100, 159);
-        this._append(row_wq, [td_w, td_a]);
+
     }
 
 
@@ -534,6 +540,73 @@ class View {
             });
         }
 
+    }
+
+    // Muestra la tabla resumen
+    _createSummaryTable(domElement, data) {
+        if (data.length > 0) {
+            let table = document.createElement('table');
+            table.id = 'summary_table';
+            table.classList.add('plain_table');
+            // Head
+            let thead = table.createTHead();
+            //thead.id = 'summary_thead';
+            thead.classList.add('plain_table-th');
+            let head_row = thead.insertRow();
+            let th_1 = document.createElement('th');
+            th_1.appendChild(document.createTextNode('pid'));
+            head_row.appendChild(th_1);
+            let th_2 = document.createElement('th');
+            th_2.appendChild(document.createTextNode('tiempo de espera'));
+            head_row.appendChild(th_2);
+            let th_3 = document.createElement('th');
+            th_3.appendChild(document.createTextNode('tiempo de ejecución'));
+            head_row.appendChild(th_3);
+            // Body
+            let tbody = table.createTBody();
+            data.forEach(pr => {
+                let row = tbody.insertRow();
+                //row.classList.add('row_summary');
+                row.classList.add('plain_table-row');
+                for (let item in pr) {
+                    let tb = document.createElement('td');
+                    tb.appendChild(document.createTextNode(pr[item]));
+                    row.appendChild(tb);
+                }
+            });
+            domElement.appendChild(table);
+        }
+    }
+
+    // Muestra la tabla de procesos en la vista Añadir proceso (SVR3)
+    _createAddTable(domElement, pTable) {
+        this._clearChilds(domElement);
+        if (pTable.length > 0) {
+            // Table head
+            let thead = domElement.createTHead();
+            thead.classList.add('plain_table-th');
+            let row = thead.insertRow();
+            let data = Object.keys(pTable[0]);
+            // TODO: falta añadir las descripciones en un campo span
+            for (let key of data) {
+                let th = document.createElement('th');
+                th.classList.add('th_ptable');
+                let text = document.createTextNode(key);
+                th.appendChild(text);
+                row.appendChild(th);
+            }
+            // Table Data
+            let tbody = domElement.createTBody();
+            pTable.forEach(pr => {
+                let row = tbody.insertRow();
+                row.classList.add('plain_table-row');
+                for (let item in pr) {
+                    let tb = document.createElement('td');
+                    tb.appendChild(document.createTextNode(pr[item]));
+                    row.appendChild(tb)
+                }
+            });
+        }
     }
 
 
@@ -612,39 +685,6 @@ class View {
         }
     }
 
-    _createSummaryTable(domElement, data) {
-        if (data.length > 0) {
-            let table = document.createElement('table');
-            table.id = 'summary_table';
-            table.classList.add('proc_table');
-            // Head
-            let thead = table.createTHead();
-            thead.id = 'summary_thead';
-            let head_row = thead.insertRow();
-            let th_1 = document.createElement('th');
-            th_1.appendChild(document.createTextNode('pid'));
-            head_row.appendChild(th_1);
-            let th_2 = document.createElement('th');
-            th_2.appendChild(document.createTextNode('tiempo de espera'));
-            head_row.appendChild(th_2);
-            let th_3 = document.createElement('th');
-            th_3.appendChild(document.createTextNode('tiempo de ejecución'));
-            head_row.appendChild(th_3);
-            // Body
-            let tbody = table.createTBody();
-            data.forEach(pr => {
-                let row = tbody.insertRow();
-                row.classList.add('row_summary');
-                for (let item in pr) {
-                    let tb = document.createElement('td');
-                    tb.appendChild(document.createTextNode(pr[item]));
-                    row.appendChild(tb);
-                }
-            });
-            domElement.appendChild(table);
-        }
-        
-    }
 
     _addBinaryRow(table, text, data) {
         let row = table.insertRow();
@@ -677,7 +717,8 @@ class View {
         if(pTable.length > 0) 
             document.getElementById('states_div').style.display = "block";
         
-        this._displayProcessTable(pTable, document.getElementById('addTable'));
+        this._createAddTable(document.getElementById('addTable'), pTable);
+        //this._displayProcessTable(pTable, document.getElementById('addTable'));
     }
 
     

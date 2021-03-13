@@ -28,7 +28,7 @@ class Svr3Scheduler {
     
     addProcess(data) {
         let pr = new Svr3Process(
-            this.processTable.length+1, data.burst, data.cpu_burst, data.io_burst, data.pri);
+            this.processTable.length+1, data.execution, data.cpu_burst, data.io_burst, data.pri);
         this.processTable.push(pr);
         this._enqueueProcess(pr);
 
@@ -292,7 +292,7 @@ class Svr3Scheduler {
 }
 
 class Svr3Process {
-    constructor(pid, burst, cpu_burst, io_burst, pri) {
+    constructor(pid, execution, cpu_burst, io_burst, pri) {
         // constantes
         this.PUSER = 50;
         this.PRIORITIES = [10, 20, 21, 25, 28, 29, 30, 35 ,40];
@@ -305,7 +305,7 @@ class Svr3Process {
         this.p_nice = 20;
         this.p_wchan = -1;
 
-        this.burst_time = burst;
+        this.execution = execution;
         this.cpu_burst = cpu_burst;
         this.io_burst = io_burst;
         this.wait_time = 0;
@@ -335,10 +335,10 @@ class Svr3Process {
             case "running_user":
                 if (this.p_cpu < 127)   
                     this.p_cpu++;
-                if (this.burst_time <= time) 
+                if (this.execution <= time) 
                     text = this._toZombie(currentTime);
                 else {
-                    this.burst_time -= time;
+                    this.execution -= time;
                     this.current_cycle_time += time;
                     if (this.current_cycle_time >= this.cpu_burst)
                         text = this._toSleep();
@@ -366,11 +366,10 @@ class Svr3Process {
     getData() {
         return {
             p_pid: this.p_pid,
-            p_state: this.p_state,
-            burst_time: this.burst_time,
+            p_pri: this.p_pri,
+            execution: this.execution,
             cpu_burst: this.cpu_burst,
-            io_burst: this.io_burst,
-            p_pri: this.p_pri
+            io_burst: this.io_burst
         };
     }
 
@@ -379,7 +378,7 @@ class Svr3Process {
         return {
             p_pid: this.p_pid,
             p_state: this.p_state,
-            burst_time: this.burst_time,
+            execution: this.execution,
             cpu_burst: this.cpu_burst,
             io_burst: this.io_burst,
             p_pri: this.p_pri,
@@ -434,7 +433,7 @@ class Svr3Process {
     }
 
     _toZombie(currentTime) {
-        this.burst_time = 0;
+        this.execution = 0;
         this.p_state = "zombie";
         this.finish_time = currentTime;
         return "Proceso " + this.p_pid + " finalizado en " + currentTime + " ut.";

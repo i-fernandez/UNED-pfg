@@ -27,7 +27,7 @@ class Svr4Scheduler {
 
     addProcess(data) {
         let pr = new Svr4Process(
-            this, this.processTable.length+1, data.burst, data.cpu_burst, 
+            this, this.processTable.length+1, data.execution, data.cpu_burst, 
             data.io_burst, data.pClass, data.pri
         );
         this.processTable.push(pr);
@@ -289,13 +289,13 @@ class Svr4Scheduler {
 
 
 class Svr4Process {
-    constructor(sched, pid, burst, cpu_burst, io_burst, pClass, pri) {
+    constructor(sched, pid, execution, cpu_burst, io_burst, pClass, pri) {
         this.sched = sched;
         this.p_pid = pid;
         this.p_state = "ready";
         this.p_pri = pri;
 
-        this.burst_time = burst;
+        this.execution = execution;
         this.cpu_burst = cpu_burst;
         this.io_burst = io_burst;
         this.current_cycle_time = 0;
@@ -311,8 +311,8 @@ class Svr4Process {
         switch (this.p_state) {
             case "running_kernel":
             case "running_user":
-                this.burst_time -= this.sched.TICK;
-                if (this.burst_time <= 0)
+                this.execution -= this.sched.TICK;
+                if (this.execution <= 0)
                     text = this._toZombie();
                 else {
                     this.current_cycle_time += this.sched.TICK;
@@ -352,10 +352,9 @@ class Svr4Process {
     getData() {
         return {
             p_pid: this.p_pid,
-            p_state: this.p_state,
             p_pri: this.p_pri,
             class: this.class.name,
-            burst_time: this.burst_time,
+            execution: this.execution,
             cpu_burst: this.cpu_burst,
             io_burst: this.io_burst
         };
@@ -368,7 +367,7 @@ class Svr4Process {
             p_state: this.p_state,
             p_pri: this.p_pri,
             class: this.class.name,
-            burst_time: this.burst_time,
+            execution: this.execution,
             cpu_burst: this.cpu_burst,
             io_burst: this.io_burst,
             current_cycle_time: this.current_cycle_time,
@@ -396,7 +395,7 @@ class Svr4Process {
     }
 
     _toZombie() {
-        this.burst_time = 0;
+        this.execution = 0;
         this.p_state = "zombie";
         this.finish_time = this.sched.time;
         return "Proceso " + this.p_pid + " finalizado en " + this.finish_time + " ut.";

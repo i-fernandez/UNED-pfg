@@ -144,6 +144,7 @@
 }
 .th_ptable {
     padding-left: 10px;
+    padding-right: 10px;
 }
 .pr_class_header {
     background: rgb(192, 190, 190);
@@ -166,6 +167,9 @@
     margin-right: 10%;
     float: right;
 }
+
+/* Apuntar a plain_table */
+/*
 .row_summary td {
     color: black;
 }
@@ -177,6 +181,26 @@
     text-align: center;
     border-radius: 6px;
     border-spacing: 0px;
+}
+*/
+.plain_table {
+    margin-top: 20px;
+    text-align: center;
+    border-radius: 6px;
+    border-spacing: 0px;
+    background: rgb(221, 221, 221);
+}
+.plain_table-th {
+    height: 30px;
+    background: rgb(0, 76, 48);
+    color: white;
+}
+.plain_table-row td {
+    color: black;
+}
+.plain_table-row:hover {
+    cursor: default;
+    background: white;
 }
 /* Formatos por tipo */
 Button:hover {
@@ -203,13 +227,16 @@ body {
     height: 36px;
     background: rgb(221, 221, 221);
 }
+/* Apuntat a plain_table */
+
 #summary_table {
     width: 500px;
-    background: rgb(221, 221, 221);
+    /*background: rgb(221, 221, 221);*/
 }
+/*
 #summary_thead {
     height: 30px;
     background: rgb(0, 76, 48);
     color: white;
-
 }
+*/
