@@ -371,7 +371,7 @@ class View {
         pTable_div.classList.add('div-states');
         let pTable = document.createElement('table');
         pTable.id = 'pTable';
-        pTable.classList.add('proc_table');
+        pTable.classList.add('colored_table');
         pTable_div.appendChild(pTable);
 
         //let lineR = document.createElement('hr');
@@ -463,11 +463,7 @@ class View {
         td_t.appendChild(document.createTextNode("qs:"));
         td_t.classList.add('top');
         let td_d = document.createElement('td');
-        // TODO: los numeros de cola deben corresponder con 
-        //   su prioridad: [0-3, 4-7, ...]
-        // El numero de cola con recuadro, y la conexion entre procesos
-        //   con un jpg de dos flechas
-        this._fillPriorityQueue(td_d, state.qs);
+        this._fillPriorityQueue(td_d, state.qs, "SVR3");
         this._append(row_qs, [td_t, td_d]);
     }
 
@@ -497,7 +493,7 @@ class View {
         td_t.appendChild(document.createTextNode("dispq:"));
         td_t.classList.add('top');
         let td_d = document.createElement('td');
-        this._fillPriorityQueue(td_d, state.dispq);
+        this._fillPriorityQueue(td_d, state.dispq, "SVR4");
         this._append(row_qs, [td_t, td_d]);
 
     }
@@ -585,32 +581,31 @@ class View {
     // Muestra la tabla de procesos en la vista Añadir proceso (SVR3)
     _createAddTable(domElement, pTable) {
         this._clearChilds(domElement);
-        //if (pTable.length > 0) {
-            // Table head
-            let thead = domElement.createTHead();
-            thead.classList.add('plain_table-th');
-            let row = thead.insertRow();
-            let data = Object.keys(pTable[0]);
-            // TODO: falta añadir las descripciones en un campo span
-            for (let key of data) {
-                let th = document.createElement('th');
-                th.classList.add('th_ptable');
-                let text = document.createTextNode(key);
-                th.appendChild(text);
-                row.appendChild(th);
+        // Table head
+        let thead = domElement.createTHead();
+        thead.classList.add('plain_table-th');
+        let row = thead.insertRow();
+        let data = Object.keys(pTable[0]);
+        // TODO: falta añadir las descripciones en un campo span
+        for (let key of data) {
+            let th = document.createElement('th');
+            th.classList.add('th_ptable');
+            let text = document.createTextNode(key);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+        // Table Data
+        let tbody = domElement.createTBody();
+        pTable.forEach(pr => {
+            let row = tbody.insertRow();
+            row.classList.add('plain_table-row');
+            for (let item in pr) {
+                let tb = document.createElement('td');
+                tb.appendChild(document.createTextNode(pr[item]));
+                row.appendChild(tb)
             }
-            // Table Data
-            let tbody = domElement.createTBody();
-            pTable.forEach(pr => {
-                let row = tbody.insertRow();
-                row.classList.add('plain_table-row');
-                for (let item in pr) {
-                    let tb = document.createElement('td');
-                    tb.appendChild(document.createTextNode(pr[item]));
-                    row.appendChild(tb)
-                }
-            });
-        //}
+        });
+        
     }
 
 
@@ -664,9 +659,9 @@ class View {
     _displayProcessTable(pTable, domElement) {
         this._clearChilds(domElement)
         if (pTable.length > 0) {
-            let thead = domElement.createTHead();
-            let tbody = domElement.createTBody();
             // Table head
+            let thead = domElement.createTHead();
+            thead.classList.add('plain_table-th');
             let row = thead.insertRow();
             let data = Object.keys(pTable[0]);
             for (let key of data) {
@@ -677,6 +672,7 @@ class View {
                 row.appendChild(th);
             }
             // Table Data
+            let tbody = domElement.createTBody();
             pTable.forEach(pr => {
                 let row = tbody.insertRow();
                 this._setRowClass(row, pr);
@@ -700,29 +696,35 @@ class View {
         this._append(row, [td_t, td_d]);
     }
 
-    _fillPriorityQueue(domElement, data) {
+    _fillPriorityQueue(domElement, data, name) {
         let table = document.createElement('table');
+        let img_path = './resources/bi_arrow_15.png';
+
         data.forEach(item => {
-            // Crear un div por proceso y otro por flecha
-            let listaProc = "";
-            item.items.forEach(pr => {listaProc += pr.p_pid + " <--> ";});
-
-
             let row = table.insertRow();
+            // Cola
             let td_t = document.createElement('td');
-            td_t.appendChild(document.createTextNode(item.priority));
+            let pri = item.priority;
+            if (name == "SVR3") 
+                pri = item.priority*4 + " - " + ((item.priority*4)+4);
+            
+            td_t.appendChild(document.createTextNode(pri));
             td_t.classList.add('priorityQueueNumber');
             let td_a = document.createElement('td');
-
-            let bi_arrow = document.createElement('img');
-            bi_arrow.src = './resources/bi_arrow_15.png';
-            td_a.appendChild(bi_arrow);
-            let td_p = document.createElement('td');
-
-            // Aqui van los div de proceso
-            td_p.appendChild(document.createTextNode(listaProc.slice(0, -6)));
-            
-            this._append(row, [td_t, td_a, td_p]);
+            item.items.forEach(pr => {
+                // Flecha
+                let da = document.createElement('div');
+                da.classList.add('priorityQueue_div');
+                let bi_arrow = document.createElement('img');
+                bi_arrow.src = img_path;
+                da.appendChild(bi_arrow);
+                // PID
+                let dt = document.createElement('div');
+                dt.classList.add('priorityQueue_div');
+                dt.appendChild(document.createTextNode(pr.p_pid));
+                this._append(td_a, [da, dt]);
+            });
+            this._append(row, [td_t, td_a]);
         });
         domElement.appendChild(table);
     }

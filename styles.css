@@ -101,8 +101,13 @@
 }
 .priorityQueueNumber {
     border: solid 1px black;
+    text-align: center;
     padding-left: 25px;
     padding-right: 25px;
+}
+.priorityQueue_div {
+    display: inline-block;
+    margin-left: 15px;
 }
 .div-main {
     margin-left: 5%;
@@ -118,38 +123,6 @@
 }
 .high_margin {
     margin-left: 200px;
-}
-/* procesos */
-.pr_zombie {
-    /* background: rgb(54, 52, 52); */
-    color:  rgb(51, 49, 49);
-}
-.pr_sleeping {
-    /* background: rgb(138, 191, 241);*/
-    color: rgb(41, 137, 226);
-}
-.pr_run_user {
-    /* background: rgb(168, 240, 139);*/
-    color: rgb(75, 187, 31);
-}
-.pr_run_kernel {
-    /* background: rgb(74, 211, 20);*/
-    color: rgb(45, 129, 12);
-}
-.pr_ready {
-    /* background: rgb(236, 116, 116); */
-    color: rgb(235, 74, 74);
-}
-.row_ptable td {
-    background: white;
-}
-.row_ptable:hover {
-    cursor: default;
-    font-weight: bold;
-}
-.th_ptable {
-    padding-left: 15px;
-    padding-right: 15px;
 }
 .pr_class_header {
     background: rgb(192, 190, 190);
@@ -192,6 +165,41 @@
     cursor: default;
     background: white;
 }
+.th_ptable {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.colored_table {
+    margin-top: 20px;
+    text-align: center;
+    border-radius: 6px;
+    border-spacing: 0px;
+    background: white;
+}
+.row_ptable td {
+    background: white;
+}
+.row_ptable:hover {
+    cursor: default;
+    font-style: italic;
+}
+/* procesos */
+.pr_zombie {
+    color:  rgb(51, 49, 49);
+}
+.pr_sleeping {
+    color: rgb(24, 124, 218);
+}
+.pr_run_user {
+    color: rgb(76, 172, 38);
+}
+.pr_run_kernel {
+    color: rgb(45, 129, 12);
+}
+.pr_ready {
+    color: rgb(207, 50, 50);
+}
+
 /* Formatos por tipo */
 button:hover {
     border: 2px solid rgb(0, 103, 103);
