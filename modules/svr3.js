@@ -22,7 +22,6 @@ class Svr3Scheduler {
         this.inRoundRobin = false;
         this.journal = [];  
         this.running = "";
-        this.nextRunning = "";
     }
 
     
@@ -196,12 +195,12 @@ class Svr3Scheduler {
 
         // No hay ningun proceso en ejecucion 
         if (!(this.running) && this.whichqs.length > 0) {
-            this.journal.push("Ningun proceso en ejecucion. Rutina swtch selecciona proceso " + 
-                n.p_pid + " para ejecutarse.");
+            this.journal.push("Rutina swtch selecciona proceso " + n.p_pid + " para su ejecición.");
             this.inContextSwitch = true;
         } 
         // Proceso encolado con mayor prioridad
         else if (this.running && this.whichqs[0] < Math.floor(this.running.p_pri/4)) {
+        //else if (this.running && n.p_pri < this.running.p_pri) {
             if (this.running.p_state == "running_kernel") {
                 // Proceso con llamada al sistema
                 this.runrun = true;

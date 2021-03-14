@@ -2,15 +2,11 @@
 class Svr4RT {
     constructor(proc) {
         this.name = "RealTime"
-        this.proc = proc;
-        //this.p_pid = pid;
-        
-
+        this.proc = proc;      
         // Prioridad global
         this.rt_glopri = proc.p_pri;
         // Cuanto asociado a la prioridad
         this.rt_quantum = rt_dptbl(proc.p_pri);
-        
         // Cuanto asignado
         this.rt_pquantum = this.rt_quantum;
         // Tiempo restante del cuanto
@@ -52,8 +48,7 @@ class Svr4RT {
                 break;
 
             case "sleeping":
-                if (this.current_cycle_time >= this.io_burst)
-                    text = this._fromSleep();
+                text = this._fromSleep();
                 break;
             default:
                 break;
@@ -62,16 +57,14 @@ class Svr4RT {
     }
 
     _toSleep() {
-        this.p_state = "sleeping";
-        this.current_cycle_time = 0;
-        this.kernelCount = 2;
-        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU.";
+        this.proc.p_state = "sleeping";
+        this.proc.current_cycle_time = 0;
+        this.proc.kernelCount = 2;
+        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU. ";
     }
 
     _fromSleep() {
-        this.p_state = "ready";
-        this.current_cycle_time = 0;
-        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O.";
+        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O. ";
     }
 
     // En esta clase no se hace nada especial al volver a modo usuario
