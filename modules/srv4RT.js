@@ -22,11 +22,11 @@ class Svr4RT {
     getData() {
         return {
             p_pid: this.proc.p_pid,
-            rt_glopri: this.rt_glopri,
-            rt_quantum: this.rt_pquantum,
             rt_pquantum: this.rt_pquantum,
             rt_timeleft: this.rt_timeleft,
-            rt_pri: this.rt_pri
+            rt_pri: this.rt_pri,
+            rt_glopri: this.rt_glopri,
+            rt_quantum: this.rt_pquantum
         };
     }
 

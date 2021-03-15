@@ -419,7 +419,7 @@ class View {
         this._clearChilds(s_table);
         this._addBinaryRow(s_table, "Time: ", state.time + " ut.");
         this._addBinaryRow(s_table, "runrun: ", state.runrun);
-        this._displayProcessTable(state.pTable, document.getElementById('pTable'));
+        this._displayProcessTable(state.pTable, data.info, document.getElementById('pTable'));
 
         // Eventos
         let events = document.getElementById('events');
@@ -436,8 +436,8 @@ class View {
             this._showSvr4State(state);
             let rtt = document.getElementById('rtTable');
             let tst = document.getElementById('tsTable');
-            this._showSvr4ClassDepent(data.rt_data.rt, rtt, "rtdpent", "2", "rtproc", "3");
-            this._showSvr4ClassDepent(data.ts_data.ts, tst, "tsdpent", "6", "tsproc", "5");
+            this._showSvr4ClassDepent(data.rt_data.rt, rtt, "rtdpent", "2", "rtproc", "3", state.pTable);
+            this._showSvr4ClassDepent(data.ts_data.ts, tst, "tsdpent", "6", "tsproc", "5", state.pTable);
         }    
     }
    
@@ -500,7 +500,7 @@ class View {
 
 
     // Muestra los datos dependientes de la clase 
-    _showSvr4ClassDepent(state, domElement, dpent, n_dpent, proc, n_proc) {
+    _showSvr4ClassDepent(state, domElement, dpent, n_dpent, proc, n_proc, pTable) {
         this._clearChilds(domElement);
         if (state.length > 0) {
             let thead = domElement.createTHead();
@@ -532,6 +532,12 @@ class View {
             // Table data
             state.forEach(pr => {
                 let r = tbody.insertRow();
+                // formato de la fila
+                pTable.forEach(p => {
+                    if (p.p_pid == pr.p_pid)
+                        this._setRowClass(r, p.p_state);
+
+                });
                 for (let item in pr) {
                     let td = document.createElement('td');
                     td.appendChild(document.createTextNode(pr[item]));
@@ -636,8 +642,8 @@ class View {
         }
     }
 
-    _setRowClass(row, pr) {
-        switch (pr.p_state) {
+    _setRowClass(row, state) {
+        switch (state) {
             case "running_user":
                 row.classList.add('pr_run_user', 'row_ptable');
                 break;
@@ -656,7 +662,7 @@ class View {
     }
 
 
-    _displayProcessTable(pTable, domElement) {
+    _displayProcessTable(pTable, info, domElement) {
         this._clearChilds(domElement)
         if (pTable.length > 0) {
             // Table head
@@ -669,13 +675,17 @@ class View {
                 th.classList.add('th_ptable');
                 let text = document.createTextNode(key);
                 th.appendChild(text);
+
+                // span
+                
+
                 row.appendChild(th);
             }
             // Table Data
             let tbody = domElement.createTBody();
             pTable.forEach(pr => {
                 let row = tbody.insertRow();
-                this._setRowClass(row, pr);
+                this._setRowClass(row, pr.p_state);
                 for (let item in pr) {
                     let tb = document.createElement('td');
                     tb.appendChild(document.createTextNode(pr[item]));

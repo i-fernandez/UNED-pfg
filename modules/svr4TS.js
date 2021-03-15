@@ -34,6 +34,8 @@ class Svr4TS {
         this.ts_umdpri = proc.p_pri;
         // Número de segundos desde que comenzó el cuanto
         this.ts_dispwait = 0;        
+        // Número de ut desde que comenzo el cuanto
+        this.wait = 0;
     }
 
     getPriority() {
@@ -43,25 +45,32 @@ class Svr4TS {
     getData() {
         return {
             p_pid: this.proc.p_pid,
+            ts_timeleft: this.ts_timeleft,
+            ts_cpupri: this.ts_cpupri,
+            ts_upri: this.ts_upri,
+            ts_umdpri: this.ts_umdpri,
+            ts_dispwait: this.ts_dispwait,
             ts_globpri: this.ts_globpri,
             ts_quantum: this.ts_quantum,
             ts_tqexp: this.ts_tqexp,
             ts_slpret: this.ts_slpret,
             ts_maxwait: this.ts_maxwait,
-            ts_lwait: this.ts_lwait,
-            ts_timeleft: this.ts_timeleft,
-            ts_cpupri: this.ts_cpupri,
-            ts_upri: this.ts_upri,
-            ts_umdpri: this.ts_umdpri,
-            ts_dispwait: this.ts_dispwait
+            ts_lwait: this.ts_lwait
         }
     }
 
     resetQuantum() {
         this.ts_timeleft = this.ts_quantum;
+        this.wait = 0;
+        this.ts_dispwait = 0;
     }
 
-    /* se puede quitar el parametro */
+    _updateQuantum() {
+        this.wait += this.proc.sched.TICK * this.proc.sched.time;
+        this.ts_dispwait = Math.floor(this.wait / 1000);
+    }
+
+    
     _readDptbl(pri) {
         this.ts_globpri = pri;
         this.ts_quantum = ts_dptbl(pri)[1];
@@ -75,30 +84,22 @@ class Svr4TS {
         this.ts_umdpri = this.ts_cpupri + this.ts_upri;
         if (this.ts_umdpri > 59)
             this.ts_umdpri = 59;
-        
-        // Elimina el proceso de la cola actual
-        //this.proc.sched.dequeueProcess(this.proc);
-        // Modifica la prioridad
+
         this.proc.p_pri = this.ts_umdpri;
-        // Encola el proceso de nuevo
-        //this.proc.sched.setBackDQ(this.proc);
-        // Rellena valores tsdpent
         this._readDptbl(this.ts_umdpri);
         this.resetQuantum();
     }
 
     _quantumExpired() {
-        this.ts_cpupri = this.ts_tqexp;
-        //this._setPri();
-        this.ts_umdpri = this.ts_cpupri + this.ts_upri;
-        this.proc.p_pri = this.ts_umdpri;
-        this._readDptbl(this.ts_umdpri);
-        this.resetQuantum();
-
+        if (this.ts_dispwait >= this.ts_maxwait)
+            this.ts_cpupri = this.ts_lwait;            
+        else 
+            this.ts_cpupri = this.ts_tqexp;
+        
+        this._setPri();
         this.proc.sched.roundRobin();
         return "Cuanto del proceso " + this.proc.p_pid + " expirado." + 
-                " Nueva prioridad: " + this.ts_umdpri;
-                
+                " Nueva prioridad: " + this.ts_umdpri;           
     }
 
 
@@ -108,15 +109,17 @@ class Svr4TS {
             case "running_kernel":
 
             case "running_user":
+                this._updateQuantum();
                 this.ts_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
                     text = this._toSleep();
                 } else if (this.ts_timeleft <= 0) {
                     text = this._quantumExpired();
-                } 
+                }
                 break;
 
             case "sleeping":
+                this._updateQuantum();
                 text = this._fromSleep();
                 break;
 
@@ -129,22 +132,20 @@ class Svr4TS {
     _toSleep() {
         this.proc.p_state = "sleeping";
         this.proc.current_cycle_time = 0;
-        this.p_pri = Math.floor(Math.random() * (100 - 60) + 60);
-        this.proc.p_pri = this.p_pri;
+        this.proc.p_pri = Math.floor(Math.random() * (100 - 60) + 60);
         this.proc.kernelCount = 2;
         return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU.";
     }
 
     _fromSleep() {
         return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O."+
-        " Prioridad temporalmente aumentada a " + this.p_pri + ". ";
+        " Prioridad temporalmente aumentada a " + this.proc.p_pri + ". ";
     }
 
     fromSysCall() {
-        this.p_pri = this.ts_umdpri;
-        this.proc.p_pri = this.p_pri;
+        this.ts_cpupri = this.ts_slpret;
+        this._setPri();
     }
-
 }
 
 

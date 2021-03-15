@@ -176,14 +176,15 @@ class Svr3Scheduler {
 
             this.stateManager.pushState({
                 name: this.name,
-                state : {
+                state: {
                     time: this.time, 
                     journal: this.journal, 
                     pTable: pTable,
                     qs: _qs,
                     whichqs: Array.from(this.whichqs),
                     runrun: this.runrun
-                }
+                },
+                info: this.processTable[0].getInfo()
             });
             this.journal = [];
         }
@@ -386,6 +387,23 @@ class Svr3Process {
             p_nice: this.p_nice,
             wait_time: this.wait_time,
             p_wchan: this.p_wchan
+        };
+    }
+
+    // Datos para la informacion de cada campo en estados
+    getInfo() {
+        return {
+            p_pid: "PID del proceso",
+            p_state: "Estado actual",
+            execution: "Tiempo restante hasta finalización",
+            cpu_burst: "Duración del ciclo de CPU",
+            io_burst: "Duración del ciclo de IO",
+            p_pri: "Prioridad actual",
+            p_usrpri: "Prioridad en modo usuario",
+            p_cpu: "Tics de uso de CPU",
+            p_nice: "Factor de amabilidad",
+            wait_time: "Tiempo de espera acumulado",
+            p_wchan: "Dirección de dormir"
         };
     }
 

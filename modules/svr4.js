@@ -141,7 +141,7 @@ class Svr4Scheduler {
         this._startSwtch();
 
         // Encola procesos cuya prioridad ha cambiado
-        this._reQueue();
+        //this._reQueue();
 
         this._sendState();
 
@@ -201,7 +201,6 @@ class Svr4Scheduler {
 
     // Comprueba si round robin produce un cambio de contexto
     roundRobin() {
-        //let running = this._getRunningProcess();
         if (this.dqactmap.find(item => item == this.running.p_pri))
             this.inRoundRobin = true;
         else
@@ -298,17 +297,12 @@ class Svr4Scheduler {
                     kprunrun: this.kprunrun
                 },
                 rt_data: {rt},
-                ts_data: {ts}
+                ts_data: {ts},
+                info: this.processTable[0].getInfo()
             });
             this.journal = [];
         }
     }
-
-    /*
-    _getRunningProcess() {
-        return this.processTable.filter(pr => pr.p_state.indexOf("running") != -1)[0];
-    }
-    */
 }
 
 
@@ -355,7 +349,7 @@ class Svr4Process {
                 if (this.current_cycle_time >= this.io_burst) {
                     this.p_state = "ready";
                     this.current_cycle_time = 0;
-                    text += this._fromSleep();
+                    text += this.class.runTick()
                 }
                 break;
             case "ready":
@@ -406,8 +400,21 @@ class Svr4Process {
             execution: this.execution,
             cpu_burst: this.cpu_burst,
             io_burst: this.io_burst,
-            //current_cycle_time: this.current_cycle_time,
-            wait_time: this.wait_time,
+            wait_time: this.wait_time
+        };
+    }
+
+    // Datos para la informacion de cada campo en estados
+    getInfo() {
+        return {
+            p_pid: "pid",
+            p_state: "estado",
+            p_pri: "pri",
+            class: "class",
+            execution: "execution",
+            cpu_burst: "cpu",
+            io_burst: "io",
+            wait_time: "wait"
         };
     }
 
@@ -422,12 +429,6 @@ class Svr4Process {
 
     getClassData() {
         return this.class.getData();
-    }
-
-    _fromSleep() {
-        this.p_state = "ready";
-        this.current_cycle_time = 0;
-        return "Proceso " + this.p_pid + " finaliza su espera por I/O. ";
     }
 
     _fromSysCall() {
