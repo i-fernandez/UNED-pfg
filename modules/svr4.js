@@ -278,11 +278,15 @@ class Svr4Scheduler {
             // Datos de la clase
             let rt = [];
             let ts = [];
+            let rt_info = "";
+            let ts_info = "";
             notFinished.filter(pr => pr.class.name == "RealTime").forEach(pr => {
                 rt.push(pr.getClassData());
+                rt_info = pr.getClassInfo();
             });
             notFinished.filter(pr => pr.class.name == "TimeSharing").forEach(pr => {
                 ts.push(pr.getClassData());
+                ts_info = pr.getClassInfo();
             });
 
             this.stateManager.pushState({
@@ -298,6 +302,8 @@ class Svr4Scheduler {
                 },
                 rt_data: {rt},
                 ts_data: {ts},
+                rt_info: rt_info,
+                ts_info: ts_info,
                 info: this.processTable[0].getInfo()
             });
             this.journal = [];
@@ -407,15 +413,19 @@ class Svr4Process {
     // Datos para la informacion de cada campo en estados
     getInfo() {
         return {
-            p_pid: "pid",
-            p_state: "estado",
-            p_pri: "pri",
-            class: "class",
-            execution: "execution",
-            cpu_burst: "cpu",
-            io_burst: "io",
-            wait_time: "wait"
+            p_pid: "PID del proceso",
+            p_state: "Estado actual",
+            p_pri: "Prioridad actual",
+            class: "Clase del proceso",
+            execution: "Tiempo restante hasta finalización",
+            cpu_burst: "Duración del ciclo de CPU",
+            io_burst: "Duración del ciclo de IO",
+            wait_time: "Tiempo de espera acumulado"  
         };
+    }
+
+    getClassInfo() {
+        return this.class.getInfo();
     }
 
     /* Datos para la vista resumen */

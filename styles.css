@@ -169,6 +169,35 @@
     padding-left: 15px;
     padding-right: 15px;
 }
+.th_classTable {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.th_tooltip {
+    /*
+    padding-left: 15px;
+    padding-right: 15px;
+    */
+    position: relative;
+}
+.th_tooltip:hover .th_tooltip_text {
+    display: block;
+}
+.th_tooltip_text {
+    background-color: rgb(184, 245, 176);
+    color: black;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 6px;
+    font-size: 12px;
+    display: none;
+    padding-left: 5px;
+    padding-right: 5px;
+    top: -120%;
+    left: -40%;
+    position: absolute;
+    z-index: 10;
+}
 .colored_table {
     margin-top: 20px;
     text-align: center;
@@ -176,6 +205,23 @@
     border-spacing: 0px;
     background: white;
 }
+/*
+Tabla de clase
+.classTable {
+    margin-top: 20px;
+    text-align: center;
+    border-radius: 6px;
+    background: white;
+}
+Cabecera principal tabla de clases
+.main_classTable_th {
+
+}
+Cabecera secundaria tabla de clases
+.sub_classTable_th {
+
+}
+*/
 .row_ptable td {
     background: white;
 }

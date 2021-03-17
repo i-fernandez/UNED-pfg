@@ -59,6 +59,23 @@ class Svr4TS {
         }
     }
 
+    getInfo() {
+        return {
+            p_pid: "PID del proceso",
+            ts_timeleft: "Tiempo restante del cuanto",
+            ts_cpupri: "Parte de prioridad del sistema",
+            ts_upri: "Parte de prioridad del usuario",
+            ts_umdpri: "Prioridad en modo usuario",
+            ts_dispwait: "Segundos desde que comenzo el cuanto",
+            ts_globpri: "Prioridad global",
+            ts_quantum: "Cuanto asignado a la prioridad",
+            ts_tqexp: "Prioridad de sistema asignada cuando expira el cuanto",
+            ts_slpret: "Prioridad del sistema al volver a modo usuario despues de dormir",
+            ts_maxwait: "Segundos de espera a que el cuanto finalice antes de usar ts_lwait",
+            ts_lwait: "Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait segundos en finalizar su cuanto"
+        }
+    }
+
     resetQuantum() {
         this.ts_timeleft = this.ts_quantum;
         this.wait = 0;

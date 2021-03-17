@@ -30,6 +30,17 @@ class Svr4RT {
         };
     }
 
+    getInfo() {
+        return {
+            p_pid: "PID del proceso",
+            rt_pquantum: "Cuanto asignado",
+            rt_timeleft: "Tiempo restante del cuanto",
+            rt_pri: "Prioridad actual",
+            rt_glopri: "Prioridad global",
+            rt_quantum: "Cuanto asignado a la prioridad"
+        }
+    }
+
     resetQuantum() {
         this.rt_timeleft = this.rt_pquantum;
     }

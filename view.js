@@ -255,13 +255,11 @@ class View {
 
     _showSvr3Add() {
         this._hideSvr4Add();
-        //document.getElementById('addTitle').textContent = "SVR3 : Agregar procesos";
         document.getElementById('addForm_svr3').style.display = "inherit";
     }
 
     _showSvr4Add() {
         this._hideSvr3Add();
-        //document.getElementById('addTitle').textContent = "SVR4 : Agregar procesos";
         document.getElementById('addForm_svr4').style.display = "inherit";
     }
 
@@ -327,7 +325,7 @@ class View {
         let data_table = document.createElement('table');
         this._addBinaryRow(data_table, "Número de procesos: ", data.n_proc);
         this._addBinaryRow(data_table, "Tiempo de ejecución: ", data.t_time + " ut.");
-        this._addBinaryRow(data_table, "Tiempo medio de espera: ", data.wait);
+        this._addBinaryRow(data_table, "Tiempo medio de espera: ", data.wait + " ut.");
         this._addBinaryRow(data_table, "Número de cambios de contexto: ", data.cswitch);
         data_div.appendChild(data_table);
         let table_div = document.createElement('div');
@@ -353,50 +351,31 @@ class View {
             this.nextStateEvent.trigger();
         });
         this._append(navigation_div, [prev, next]);
-
-        //let statesTitle = document.createElement('h1');;
-        //statesTitle.textContent = "Simulacion";
-        //statesTitle.classList.add('text');
-
         let state_div = document.createElement('div');
         state_div.classList.add('div-states');
         let state_table = document.createElement('table');
         state_table.id = 'state_table';
         state_div.appendChild(state_table);
-
-        //let lineP = document.createElement('hr');
-        //lineP.classList.add('separator-line');
-
         let pTable_div = document.createElement('div');
         pTable_div.classList.add('div-states');
         let pTable = document.createElement('table');
         pTable.id = 'pTable';
         pTable.classList.add('colored_table');
         pTable_div.appendChild(pTable);
-
-        //let lineR = document.createElement('hr');
-        //lineR.classList.add('separator-line');
-
         let rtTable_div = document.createElement('div');
         rtTable_div.classList.add('div-states');
         let rtTable = document.createElement('table');
         rtTable.id = "rtTable";
-        rtTable.classList.add('proc_table');
+        // TODO: cambiar a .classtable
+        rtTable.classList.add('colored_table');
         rtTable_div.appendChild(rtTable);
-
-        //let lineS = document.createElement('hr');
-        //lineS.classList.add('separator-line');
-
         let tsTable_div = document.createElement('div');
         tsTable_div.classList.add('div-states');
         let tsTable = document.createElement('table');
         tsTable.id = "tsTable";
-        tsTable.classList.add('proc_table');
+        // TODO: cambiar a .classtable
+        tsTable.classList.add('colored_table');
         tsTable_div.appendChild(tsTable);
-
-        //let lineE = document.createElement('hr');
-        //lineE.classList.add('separator-line');
-
         let events_div = document.createElement('div');
         events_div.classList.add('div-states');
         let text = document.createElement('p');
@@ -408,8 +387,7 @@ class View {
         this._append(this.states_div,
             [navigation_div, state_div, pTable_div,
             rtTable_div, tsTable_div, events_div]
-        );
-        
+        ); 
     }
 
     // Elementos para mostrar un estado (comunes)
@@ -436,8 +414,8 @@ class View {
             this._showSvr4State(state);
             let rtt = document.getElementById('rtTable');
             let tst = document.getElementById('tsTable');
-            this._showSvr4ClassDepent(data.rt_data.rt, rtt, "rtdpent", "2", "rtproc", "3", state.pTable);
-            this._showSvr4ClassDepent(data.ts_data.ts, tst, "tsdpent", "6", "tsproc", "5", state.pTable);
+            this._showSvr4ClassDepent(data.rt_data.rt, data.rt_info, rtt, "rtdpent", "2", "rtproc", "3", state.pTable);
+            this._showSvr4ClassDepent(data.ts_data.ts, data.ts_info, tst, "tsdpent", "6", "tsproc", "5", state.pTable);
         }    
     }
    
@@ -500,7 +478,7 @@ class View {
 
 
     // Muestra los datos dependientes de la clase 
-    _showSvr4ClassDepent(state, domElement, dpent, n_dpent, proc, n_proc, pTable) {
+    _showSvr4ClassDepent(state, info, domElement, dpent, n_dpent, proc, n_proc, pTable) {
         this._clearChilds(domElement);
         if (state.length > 0) {
             let thead = domElement.createTHead();
@@ -508,6 +486,7 @@ class View {
 
             // Table head
             let row = thead.insertRow();
+            // TODO: cambiar
             row.classList.add('pr_class_header');
             row.appendChild(document.createElement('th'));
             let dp = document.createElement('th');
@@ -525,8 +504,13 @@ class View {
             let data = Object.keys(state[0]);
             for (let key of data) {
                 let td = document.createElement('td');
+                td.classList.add('th_tooltip', 'th_classTable');
                 td.appendChild(document.createTextNode(key));
-                row1.appendChild(td);
+                let sp = document.createElement('span');
+                sp.classList.add('th_tooltip_text');
+                sp.textContent = info[key];
+                td.appendChild(sp);
+                row1.appendChild(td); 
             }
 
             // Table data
@@ -672,13 +656,12 @@ class View {
             let data = Object.keys(pTable[0]);
             for (let key of data) {
                 let th = document.createElement('th');
-                th.classList.add('th_ptable');
-                let text = document.createTextNode(key);
-                th.appendChild(text);
-
-                // span
-                
-
+                th.classList.add('th_tooltip', 'th_ptable');
+                th.appendChild(document.createTextNode(key));
+                let sp = document.createElement('span');
+                sp.classList.add('th_tooltip_text');
+                sp.textContent = info[key];
+                th.appendChild(sp);
                 row.appendChild(th);
             }
             // Table Data
