@@ -366,15 +366,13 @@ class View {
         rtTable_div.classList.add('div-states');
         let rtTable = document.createElement('table');
         rtTable.id = "rtTable";
-        // TODO: cambiar a .classtable
-        rtTable.classList.add('colored_table');
+        rtTable.classList.add('classTable');
         rtTable_div.appendChild(rtTable);
         let tsTable_div = document.createElement('div');
         tsTable_div.classList.add('div-states');
         let tsTable = document.createElement('table');
         tsTable.id = "tsTable";
-        // TODO: cambiar a .classtable
-        tsTable.classList.add('colored_table');
+        tsTable.classList.add('classTable');
         tsTable_div.appendChild(tsTable);
         let events_div = document.createElement('div');
         events_div.classList.add('div-states');
@@ -414,8 +412,10 @@ class View {
             this._showSvr4State(state);
             let rtt = document.getElementById('rtTable');
             let tst = document.getElementById('tsTable');
-            this._showSvr4ClassDepent(data.rt_data.rt, data.rt_info, rtt, "rtdpent", "2", "rtproc", "3", state.pTable);
-            this._showSvr4ClassDepent(data.ts_data.ts, data.ts_info, tst, "tsdpent", "6", "tsproc", "5", state.pTable);
+            //this._showSvr4ClassDepent(data.rt_data.rt, data.rt_info, rtt, "rtdpent", "2", "rtproc", "3", state.pTable);
+            //this._showSvr4ClassDepent(data.ts_data.ts, data.ts_info, tst, "tsdpent", "6", "tsproc", "5", state.pTable);
+            this._showSvr4ClassDepent(data.rt_data.rt, data.rt_info, rtt, state.pTable);
+            this._showSvr4ClassDepent(data.ts_data.ts, data.ts_info, tst, state.pTable);
         }    
     }
    
@@ -478,39 +478,39 @@ class View {
 
 
     // Muestra los datos dependientes de la clase 
-    _showSvr4ClassDepent(state, info, domElement, dpent, n_dpent, proc, n_proc, pTable) {
+    _showSvr4ClassDepent(state, info, domElement, pTable) {
         this._clearChilds(domElement);
         if (state.length > 0) {
-            let thead = domElement.createTHead();
             let tbody = domElement.createTBody();
-
-            // Table head
-            let row = thead.insertRow();
-            // TODO: cambiar
-            row.classList.add('pr_class_header');
-            row.appendChild(document.createElement('th'));
-            let dp = document.createElement('th');
-            dp.appendChild(document.createTextNode(dpent));
-            dp.colSpan = n_dpent;
-            row.appendChild(dp);
-            let pr = document.createElement('th');
-            pr.appendChild(document.createTextNode(proc));
-            pr.colSpan = n_proc;
-            row.appendChild(pr);
-
-            // First row
+            // Table heads
             let row1 = tbody.insertRow();
-            row1.classList.add('bold');
-            let data = Object.keys(state[0]);
-            for (let key of data) {
-                let td = document.createElement('td');
-                td.classList.add('th_tooltip', 'th_classTable');
-                td.appendChild(document.createTextNode(key));
-                let sp = document.createElement('span');
-                sp.classList.add('th_tooltip_text');
-                sp.textContent = info[key];
-                td.appendChild(sp);
-                row1.appendChild(td); 
+            row1.classList.add('main_classTable_row');
+            let row2 = tbody.insertRow();
+            row2.classList.add('sub_classTable_row');
+            for (let key of Object.keys(state[0])) {
+                let td1 = document.createElement('td');
+                td1.classList.add('main_classTable_th');
+                td1.colSpan = Object.keys(state[0][key]).length;
+                if (td1.colSpan > 1) {
+                    let c = 0;
+                    for (let subkey of Object.keys(state[0][key])) {
+                        c++;
+                        let td2 = document.createElement('td');
+                        td2.classList.add('th_tooltip','sub_classTable_th');
+                        if (c == td1.colSpan)
+                            td2.classList.add('rightBorder_td');
+                        td2.appendChild(document.createTextNode(subkey));
+                        let sp = document.createElement('span');
+                        sp.classList.add('th_tooltip_text');
+                        sp.textContent = info[subkey];
+                        td2.appendChild(sp);
+                        row2.appendChild(td2)
+                    }
+                }
+                if (key == 'p_pid')
+                    td1.rowSpan = 2;
+                td1.appendChild(document.createTextNode(key));
+                row1.appendChild(td1);
             }
 
             // Table data
@@ -520,16 +520,27 @@ class View {
                 pTable.forEach(p => {
                     if (p.p_pid == pr.p_pid)
                         this._setRowClass(r, p.p_state);
-
                 });
                 for (let item in pr) {
-                    let td = document.createElement('td');
-                    td.appendChild(document.createTextNode(pr[item]));
-                    r.appendChild(td);
+                    if (Object.keys(pr[item]).length == 0) {
+                        let td = document.createElement('td');
+                        td.classList.add('rightBorder_td');
+                        td.appendChild(document.createTextNode(pr[item]));
+                        r.appendChild(td);
+                    } else {
+                        let c = 0;
+                        for (let key of Object.keys(pr[item])) {
+                            c++;
+                            let td = document.createElement('td');
+                            td.appendChild(document.createTextNode(pr[item][key]));
+                            if (c == Object.keys(pr[item]).length) 
+                                td.classList.add('rightBorder_td');
+                            r.appendChild(td);
+                        }
+                    }
                 }
             });
         }
-
     }
 
     // Muestra la tabla resumen
@@ -556,7 +567,6 @@ class View {
             let tbody = table.createTBody();
             data.forEach(pr => {
                 let row = tbody.insertRow();
-                //row.classList.add('row_summary');
                 row.classList.add('plain_table-row');
                 for (let item in pr) {
                     let tb = document.createElement('td');

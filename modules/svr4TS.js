@@ -45,23 +45,26 @@ class Svr4TS {
     getData() {
         return {
             p_pid: this.proc.p_pid,
-            ts_timeleft: this.ts_timeleft,
-            ts_cpupri: this.ts_cpupri,
-            ts_upri: this.ts_upri,
-            ts_umdpri: this.ts_umdpri,
-            ts_dispwait: this.ts_dispwait,
-            ts_globpri: this.ts_globpri,
-            ts_quantum: this.ts_quantum,
-            ts_tqexp: this.ts_tqexp,
-            ts_slpret: this.ts_slpret,
-            ts_maxwait: this.ts_maxwait,
-            ts_lwait: this.ts_lwait
+            tsproc: {
+                ts_timeleft: this.ts_timeleft,
+                ts_cpupri: this.ts_cpupri,
+                ts_upri: this.ts_upri,
+                ts_umdpri: this.ts_umdpri,
+                ts_dispwait: this.ts_dispwait
+            },
+            tsdpent: {
+                ts_globpri: this.ts_globpri,
+                ts_quantum: this.ts_quantum,
+                ts_tqexp: this.ts_tqexp,
+                ts_slpret: this.ts_slpret,
+                ts_maxwait: this.ts_maxwait,
+                ts_lwait: this.ts_lwait
+            }
         }
     }
 
     getInfo() {
         return {
-            p_pid: "PID del proceso",
             ts_timeleft: "Tiempo restante del cuanto",
             ts_cpupri: "Parte de prioridad del sistema",
             ts_upri: "Parte de prioridad del usuario",
