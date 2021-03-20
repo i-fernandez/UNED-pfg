@@ -56,17 +56,45 @@
 .states-menu-li-sel {
     border-bottom: 3px solid rgb(0, 76, 48);
 }
+.event_li {
+    list-style-type: disclosure-closed;
+    margin-left: 15px;
+}
 .inputProcess {
     width: 90px;
     margin: 10px;
     display: inline;
 }
-.startButton {
-    margin: 20px;
-    background: rgb(0, 128, 128);
-    color: white;
-    border: 2px solid rgb(0, 103, 103);
+/* Prueba: datos de entrada */
+.input_table {
+    border-spacing: 0px;
+    margin-right: 10px;
 }
+.inputText_td {
+    height: 30px;
+    width: 90px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    background: rgb(0, 128, 128);
+    border: solid 1px rgb(0, 128, 128);
+    color: white;
+}
+.inputValue_td {
+    height: 30px;
+    width: 70px;
+    border: solid 1px rgb(0, 128, 128);
+    background: white;
+    color: rgb(0, 128, 128);
+    
+}
+.inputValue_input {
+    width: inherit;
+    border: 0px;
+    text-align: center;
+}
+
+
 .array-queue {
     margin: 1px;
     width: 10px;
@@ -116,10 +144,10 @@
     text-align: center;
 }
 .div-states {
-    margin-top: 15px;
+    margin-top: 5px;
 }
 .div-nav {
-    margin-left: 10%;
+    margin-left: 15%;
 }
 .high_margin {
     margin-left: 200px;
@@ -132,15 +160,20 @@
     color: rgb(48, 48, 48);
     margin: 20px;
 }
-.top {
-    vertical-align: top;
-}
-.bold {
-    font-weight: bold;
-}
 .image-right {
     margin-right: 10%;
     float: right;
+}
+.state-left {
+    vertical-align: top;
+    white-space: pre;
+    font-weight: bold;
+    padding-top: 10px;
+}
+.state-right {
+    vertical-align: top;
+    padding-left: 10px;
+    padding-top: 10px;
 }
 /* tablas */
 .plain_table {
@@ -189,7 +222,6 @@
     width: 150%;
 }
 .colored_table {
-    margin-top: 20px;
     text-align: center;
     border-radius: 6px;
     border-spacing: 0px;
@@ -199,7 +231,6 @@
 
  /*Tabla de clase */
 .classTable {
-    margin-top: 20px;
     text-align: center;
     border-radius: 6px;
     border-spacing: 0px;
@@ -255,18 +286,27 @@
 
 /* Formatos por tipo */
 button:hover {
-    border: 2px solid rgb(0, 103, 103);
-    background: rgb(0, 42, 32);
+    background: rgb(0, 76, 48);
     cursor: pointer;
 }
 button {
     width: 90px;
     height: 30px;
+    margin-right: 20px;
+    border: 2px solid rgb(0, 76, 48);
+    border-radius: 6px;
+    background: rgb(0, 128, 128);
+    color: white;
 }
 body {
     margin: 0px;
     font-family: Arial, Helvetica, sans-serif
 }
+/*
+form {
+    display: inline-flex;
+}
+*/
 /* Formatos por id */
 #header_div {
     margin: 0px;

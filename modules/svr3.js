@@ -85,11 +85,11 @@ class Svr3Scheduler {
     
 
     start() {
-        this.journal.push("Inicio de la ejecucion");
+        this.journal.push("Inicio de la ejecucion.");
         let pr = this._dequeueProcess();
         this.running = pr;
         pr.p_state = "running_user";
-        this.journal.push("Proceso " + pr.p_pid + " cargado para ejecucion");
+        this.journal.push("Proceso " + pr.p_pid + " cargado para ejecucion.");
         this._sendState();
     }
 
