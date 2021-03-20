@@ -71,7 +71,7 @@
     margin-right: 10px;
 }
 .inputText_td {
-    height: 30px;
+    height: 35px;
     width: 90px;
     margin: 0px;
     padding: 0px;
@@ -81,8 +81,8 @@
     color: white;
 }
 .inputValue_td {
-    height: 30px;
-    width: 70px;
+    height: 35px;
+    width: 80px;
     border: solid 1px rgb(0, 128, 128);
     background: white;
     color: rgb(0, 128, 128);
@@ -90,6 +90,7 @@
 }
 .inputValue_input {
     width: inherit;
+    height: inherit;
     border: 0px;
     text-align: center;
 }
@@ -291,8 +292,9 @@ button:hover {
 }
 button {
     width: 90px;
-    height: 30px;
+    height: 35px;
     margin-right: 20px;
+    margin-left: 10px;
     border: 2px solid rgb(0, 76, 48);
     border-radius: 6px;
     background: rgb(0, 128, 128);
@@ -302,11 +304,10 @@ body {
     margin: 0px;
     font-family: Arial, Helvetica, sans-serif
 }
-/*
-form {
-    display: inline-flex;
+select {
+    height: inherit;
+    border: white;
 }
-*/
 /* Formatos por id */
 #header_div {
     margin: 0px;

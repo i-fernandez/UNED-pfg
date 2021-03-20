@@ -94,6 +94,15 @@ class View {
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
         this._append(init_div, [title, description]);
+
+        /* PRUEBA CANVAS */
+        let cv = document.createElement('canvas');
+        cv.id = 'timeline_canvas';
+        cv.width = 600;
+        cv.height = 200;
+        init_div.appendChild(cv);
+        this._createChart(cv);
+
         // Añadir proceso
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
@@ -108,7 +117,7 @@ class View {
         addTable.id = 'addTable';
         addTable.classList.add('plain_table');
         let start_div = document.createElement('div');
-        start_div.id = 'states_div';
+        start_div.id = 'start_div';
         start_div.classList.add('high_margin','div-states');
         start_div.style.display = 'none';
 
@@ -147,6 +156,7 @@ class View {
         addForm_svr3.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
+            console.log("reset input");
             this._resetInput();
         });
         let inputPriority_svr3 = this._addInput(addForm_svr3, 'Prioridad');
@@ -162,8 +172,8 @@ class View {
         inputIO_svr3.id = 'inputIO_svr3';
         let addButton_svr3 = document.createElement('button');
         addButton_svr3.textContent = 'Agregar';
-        document.getElementById('inputform_div').appendChild(addForm_svr3);
         addForm_svr3.appendChild(addButton_svr3);
+        document.getElementById('inputform_div').appendChild(addForm_svr3);
     }
 
     _createSvr4Add() {
@@ -174,39 +184,17 @@ class View {
             this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
             this._resetInput();
         });
-        let inputPriority_svr4 = document.createElement('input');
-        inputPriority_svr4.id = 'inputPriority_svr4';
-        inputPriority_svr4.type = 'number';
-        inputPriority_svr4.placeholder = 'prioridad';
-        inputPriority_svr4.classList.add('inputProcess');
-        inputPriority_svr4.required = true;
-        inputPriority_svr4.min = 100;
-        inputPriority_svr4.max = 159;
-        let inputBurst_svr4 = document.createElement('input');
-        inputBurst_svr4.id = 'inputBurst_svr4';
-        inputBurst_svr4.type = 'number';
-        inputBurst_svr4.placeholder = 't. ejecucion';
-        inputBurst_svr4.classList.add('inputProcess');
-        inputBurst_svr4.required = true;
-        let inputCPU_svr4 = document.createElement('input');
-        inputCPU_svr4.id = 'inputCPU_svr4';
-        inputCPU_svr4.type = 'number';
-        inputCPU_svr4.placeholder = 'ciclo cpu';
-        inputCPU_svr4.classList.add('inputProcess');
-        inputCPU_svr4.required = true;
-        let inputIO_svr4 = document.createElement('input');
-        inputIO_svr4.id = 'inputIO_svr4';
-        inputIO_svr4.type = 'number';
-        inputIO_svr4.placeholder = 'ciclo io';
-        inputIO_svr4.classList.add('inputProcess');
-        inputIO_svr4.required = true;
+        // Selector de clase
+        let cs_table = this._createInputAddTable(addForm_svr4, 'Clase');
         let classSel = document.createElement('select');
         classSel.id = 'class_sel';
         classSel.addEventListener('change', event => {
             if (classSel.value == 1) {
+                inputPriority_svr4.placeholder = '100-159';
                 inputPriority_svr4.min = 100;
                 inputPriority_svr4.max = 159;
             } else if (classSel.value ==  2) {
+                inputPriority_svr4.placeholder = '0-59';
                 inputPriority_svr4.min = 0;
                 inputPriority_svr4.max = 59;
             }
@@ -218,13 +206,24 @@ class View {
         option_ts.value = '2';
         option_ts.innerHTML = 'Time Sharing';
         this._append(classSel, [option_rt, option_ts]);
+        cs_table.appendChild(classSel);
+        // Campos numericos
+        let inputPriority_svr4 = this._addInput(addForm_svr4, 'Prioridad');
+        inputPriority_svr4.id = 'inputPriority_svr4';
+        inputPriority_svr4.placeholder = '100-159';
+        inputPriority_svr4.min = 100;
+        inputPriority_svr4.max = 159;
+        let inputBurst_svr4 = this._addInput(addForm_svr4, 'T. ejecución');
+        inputBurst_svr4.id = 'inputBurst_svr4';
+        let inputCPU_svr4 = this._addInput(addForm_svr4, 'Ciclo CPU');
+        inputCPU_svr4.id = 'inputCPU_svr4';
+        let inputIO_svr4 = this._addInput(addForm_svr4, 'Ciclo IO');
+        inputIO_svr4.id = 'inputIO_svr4';
+        // Boton
         let addButton_svr4 = document.createElement('button');
         addButton_svr4.textContent = 'Agregar';
+        addForm_svr4.appendChild(addButton_svr4);
         document.getElementById('inputform_div').appendChild(addForm_svr4);
-        this._append(addForm_svr4, 
-            [classSel, inputPriority_svr4, inputBurst_svr4, inputCPU_svr4, 
-            inputIO_svr4, addButton_svr4]
-        );
     }
 
     _showSvr3Add() {
@@ -272,12 +271,13 @@ class View {
     }
 
     _resetInput() {
-        let items = document.getElementsByClassName('inputProcess');
+        let items = document.getElementsByClassName('inputValue_input');
         Array.prototype.forEach.call(items, function(i) {i.value = ''});
     }
 
     _showAddProcess() {
         document.getElementById('addproc_div').style.display = 'inherit';
+        document.getElementById('start_div').style.display = 'none';
         this.states_div.style.display = 'none';
     }
     
@@ -557,6 +557,17 @@ class View {
 
     // Crea un objeto para añadir datos numericos y lo devuelve
     _addInput(domElement, text) {
+        let item = this._createInputAddTable(domElement, text);
+        let input = document.createElement('input');
+        input.classList.add('inputValue_input');
+        input.type = 'number';
+        input.required = true;
+        input.placeholder = 0;
+        item.appendChild(input);
+        return input;
+    }
+
+    _createInputAddTable(domElement, text) {
         let table = document.createElement('table');
         table.classList.add('input_table');
         let row = table.insertRow();
@@ -565,15 +576,9 @@ class View {
         tda.appendChild(document.createTextNode(text));
         let tdb = document.createElement('td');
         tdb.classList.add('inputValue_td');
-        let input = document.createElement('input');
-        input.classList.add('inputValue_input');
-        input.type = 'number';
-        input.required = true;
-        input.placeholder = 0;
-        tdb.appendChild(input);
         this._append(row, [tda, tdb]);
         domElement.appendChild(table);
-        return input;
+        return tdb;
     }
 
 
@@ -716,7 +721,7 @@ class View {
 
     pTableChanged(pTable) {
         if(pTable.length > 0) {
-            document.getElementById('states_div').style.display = 'block';
+            document.getElementById('start_div').style.display = 'block';
             this._createAddTable(document.getElementById('addTable'), pTable);
         }
     }
@@ -735,6 +740,123 @@ class View {
         while (domElement.firstChild) {
             domElement.removeChild(domElement.firstChild);
         }
+    }
+
+    /* PRUEBA CANVAS */
+    _createChart (canvas){
+        new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: ['0', '1', '2', '3', '4', '5'],
+                datasets: [
+                    {
+                    label: 'pid 1',
+                    data: [1, 2, 3, 1, 0],
+                    borderColor: 'rgb(45, 129, 12)',
+                    pointBackgroundColor: 'rgb(45, 129, 12)',
+                    borderWidth: 3,
+                    fill: false,
+                    steppedLine: true
+                },
+                {
+                    label: 'pid 2',
+                    data: [0, 3, 2, 1, 0],
+                    borderColor: 'rgb(207, 50, 50)',
+                    pointBackgroundColor: 'rgb(207, 50, 50)',
+                    borderWidth: 3,
+                    fill: false,
+                    steppedLine: true
+
+                },
+                {
+                    label: 'pid 3',
+                    data: [1, 1, 3, 2, 0],
+                    borderColor: ['rgb(24, 124, 218)'],
+                    pointBackgroundColor: 'rgb(24, 124, 218)',
+                    borderWidth: 3,
+                    fill: false,
+                    steppedLine: true
+
+                }
+            ]
+            },
+            options: {
+                
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data){
+                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            let state = '';
+                            switch (tooltipItem.yLabel) {
+                                case 0:
+                                    state = 'terminated';
+                                    break;
+                                case 1:
+                                    state = 'zombie';
+                                    break;
+                                case 2: 
+                                    state = 'ready';
+                                    break;
+                                case 3:
+                                    state = 'sleeping';
+                                    break;
+                                case 4:
+                                    state = 'runngin_user';
+                                    break;
+                                case 5:
+                                    state = 'running_kernel';
+                                    break;
+                                default:
+                                    state = tooltipItem.yLabel;
+                            };
+                            return label + ": " + state;   
+                        },
+                        title: function(tooltipItems, data) {
+                            return tooltipItems[0].xLabel + " ut.";
+
+                        }
+
+                    }
+                },
+                
+                
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 5,
+                            sampleSize: 1,
+                            callback: function(value) {
+                                switch (value) {
+                                    case 0:
+                                        return "terminated";
+                                    case 1:
+                                        return "zombie";
+                                    case 2: 
+                                        return "ready";
+                                    case 3:
+                                        return "sleeping";
+                                    case 4:
+                                        return "runngin_user";
+                                    case 5:
+                                        return "running_kernel";
+                                    default:
+                                        return "";
+                                };
+                            }
+                        }
+                    }],
+                    xAxes:[{
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' ut.';
+                            }
+                        }
+                    }]
+                }
+            }
+        });
     }
 
 }
