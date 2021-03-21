@@ -1,4 +1,5 @@
 import Event from './event.js';
+import Graphics from './modules/graphics.js';
 
 class View {
     constructor() {
@@ -9,8 +10,7 @@ class View {
         this.addSVR4ProcessEvent = new Event();
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
-        this.previousStateEvent = new Event();
-        
+        this.previousStateEvent = new Event();   
     }
 
     /* Añadir proceso */
@@ -35,22 +35,36 @@ class View {
         summary_li.addEventListener('click', event => {
             summary_li.classList.add('states-menu-li-sel');
             states_li.classList.remove('states-menu-li-sel');
+            progress_li.classList.remove('states-menu-li-sel');
             this.summary_div.style.display = 'inherit';
+            this.progress_div.style.display = 'none';
             this.states_div.style.display = 'none';
         });
-
+        let progress_li = document.createElement('li');
+        progress_li.textContent = 'PROGRESO';
+        progress_li.classList.add('states-menu-li');
+        progress_li.addEventListener('click', event => {
+            progress_li.classList.add('states-menu-li-sel');
+            summary_li.classList.remove('states-menu-li-sel');
+            states_li.classList.remove('states-menu-li-sel');
+            this.progress_div.style.display = 'inherit';
+            this.states_div.style.display = 'none';
+            this.summary_div.style.display = 'none';
+        });
         let states_li = document.createElement('li');
         states_li.textContent = 'ESTADOS';
         states_li.classList.add('states-menu-li');
         states_li.addEventListener('click', event => {
             states_li.classList.add('states-menu-li-sel');
             summary_li.classList.remove('states-menu-li-sel');
+            progress_li.classList.remove('states-menu-li-sel');
             this.states_div.style.display = 'inherit';
+            this.progress_div.style.display = 'none';
             this.summary_div.style.display = 'none';
         });
         
         header_menu_div.appendChild(nav_menu);
-        this._append(nav_menu, [summary_li, states_li]);
+        this._append(nav_menu, [summary_li, progress_li, states_li]);
 
 
         let sch_selector = document.createElement('ul');
@@ -66,6 +80,7 @@ class View {
             header_menu_div.style.display = 'none';
             this.states_div.style.display = 'none';
             this.summary_div.style.display = 'none';
+            this.progress_div.style.display = 'none';
             this._showSvr3Add();
             this.newSVR3Event.trigger();
         });
@@ -80,6 +95,7 @@ class View {
             header_menu_div.style.display = 'none';
             this.states_div.style.display = 'none';
             this.summary_div.style.display = 'none';
+            this.progress_div.style.display = 'none';
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
@@ -94,15 +110,6 @@ class View {
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
         this._append(init_div, [title, description]);
-
-        /* PRUEBA CANVAS */
-        let cv = document.createElement('canvas');
-        cv.id = 'timeline_canvas';
-        cv.width = 600;
-        cv.height = 200;
-        init_div.appendChild(cv);
-        this._createChart(cv);
-
         // Añadir proceso
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
@@ -128,6 +135,7 @@ class View {
             this.summary_div.style.display = 'inherit';
             header_menu_div.style.display = 'inherit';
             summary_li.classList.add('states-menu-li-sel');
+            progress_li.classList.remove('states-menu-li-sel');
             states_li.classList.remove('states-menu-li-sel');
             this.startSimulationEvent.trigger();
         });
@@ -136,13 +144,18 @@ class View {
         this.states_div = document.createElement('div');
         this.states_div.classList.add('div-main');
         this.states_div.style.display = 'none';
+
+        this.progress_div = document.createElement('div');
+        this.progress_div.classList.add('div-main');
+        this.progress_div.style.display = 'none';
+
         this.summary_div = document.createElement('div');
         this.summary_div.classList.add('div-main');
         this.summary_div.style.display = 'none';
         this._createStates();
         this._append(document.body, 
             [header_div, header_menu_div, init_div, addproc_div, 
-            this.summary_div, this.states_div]
+            this.summary_div, this.progress_div, this.states_div]
         );
         this._createSvr3Add();
         this._createSvr4Add();
@@ -156,7 +169,6 @@ class View {
         addForm_svr3.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
-            console.log("reset input");
             this._resetInput();
         });
         let inputPriority_svr3 = this._addInput(addForm_svr3, 'Prioridad');
@@ -306,6 +318,16 @@ class View {
         this._append(this.summary_div, [title_div, data_div, table_div]);
     }
 
+
+    createProgress(time) {
+        this._clearChilds(this.progress_div);
+        let cv = document.createElement('canvas');
+        cv.width = 1000;
+        cv.height = 200;
+        this.progress_div.appendChild(cv);
+        new Graphics().drawLineChart(cv, time);
+    }
+
     _createStates() {
         // Botones navegation
         let navigation_div = document.createElement('div');
@@ -330,6 +352,7 @@ class View {
         this._append(this.states_div,[navigation_div, state_div]
         ); 
     }
+
 
     // Elementos para mostrar un estado (comunes)
     showState(data) {
@@ -742,46 +765,68 @@ class View {
         }
     }
 
+    
+
     /* PRUEBA CANVAS */
-    _createChart (canvas){
+    /*
+    _getLineData() {
+        return {
+            time: [0, 1, 2, 3, 4, 5, 6],
+            pids: {
+                1: [2, 4, 5, 3, 4, 1, 0],
+                2: [4, 2, 2, 4, 1, 0, 0],
+                3: [2, 2, 2, 2, 2, 4, 4],
+                4: [0, 0, 2, 1, 3, 2, 2],
+                5: [2, 2, 3, 3, 3, 2, 1]
+            }
+        }
+    }
+    */
+
+    // TODO: aumentar los colores
+    /*
+    _getColor() {
+        let colors = [
+            'RGB(239, 134, 119)',
+            'RGB(160, 231, 125)',
+            'RGB(130, 182, 217)',
+            'RGB(255, 219, 148)'
+        ];
+        let i = this.colorIndex % colors.length;
+        this.colorIndex++;
+        return colors[i];
+    }
+    */
+    
+
+
+    /*
+    _createChart (canvas, prData){
+        let params = [];
+        let n_pid = 0;
+        Object.keys(prData.pids).forEach(pid => {
+            let color = this._getColor();
+            let dataset = {
+                label: n_pid+1,
+                data: prData["pids"][n_pid],
+                borderWidth: 3,
+                fill: false,
+                steppedLine: true,
+                borderColor: color,
+                backgroundColor: color
+            }
+            params.push(dataset);
+            n_pid++;
+        });
+
+        
         new Chart(canvas, {
             type: 'line',
             data: {
-                labels: ['0', '1', '2', '3', '4', '5'],
-                datasets: [
-                    {
-                    label: 'pid 1',
-                    data: [1, 2, 3, 1, 0],
-                    borderColor: 'rgb(45, 129, 12)',
-                    pointBackgroundColor: 'rgb(45, 129, 12)',
-                    borderWidth: 3,
-                    fill: false,
-                    steppedLine: true
-                },
-                {
-                    label: 'pid 2',
-                    data: [0, 3, 2, 1, 0],
-                    borderColor: 'rgb(207, 50, 50)',
-                    pointBackgroundColor: 'rgb(207, 50, 50)',
-                    borderWidth: 3,
-                    fill: false,
-                    steppedLine: true
-
-                },
-                {
-                    label: 'pid 3',
-                    data: [1, 1, 3, 2, 0],
-                    borderColor: ['rgb(24, 124, 218)'],
-                    pointBackgroundColor: 'rgb(24, 124, 218)',
-                    borderWidth: 3,
-                    fill: false,
-                    steppedLine: true
-
-                }
-            ]
+                labels: prData.time,
+                datasets: params
             },
-            options: {
-                
+            options: {    
                 tooltips: {
                     callbacks: {
                         label: function(tooltipItem, data){
@@ -789,16 +834,16 @@ class View {
                             let state = '';
                             switch (tooltipItem.yLabel) {
                                 case 0:
-                                    state = 'terminated';
+                                    state = 'finished';
                                     break;
                                 case 1:
                                     state = 'zombie';
                                     break;
                                 case 2: 
-                                    state = 'ready';
+                                    state = 'sleeping';
                                     break;
                                 case 3:
-                                    state = 'sleeping';
+                                    state = 'ready';
                                     break;
                                 case 4:
                                     state = 'runngin_user';
@@ -812,13 +857,11 @@ class View {
                             return label + ": " + state;   
                         },
                         title: function(tooltipItems, data) {
-                            return tooltipItems[0].xLabel + " ut.";
+                            return tooltipItems[0].xLabel + ' ut.';
 
                         }
-
                     }
                 },
-                
                 
                 scales: {
                     yAxes: [{
@@ -830,19 +873,19 @@ class View {
                             callback: function(value) {
                                 switch (value) {
                                     case 0:
-                                        return "terminated";
+                                        return 'finished';
                                     case 1:
-                                        return "zombie";
+                                        return 'zombie';
                                     case 2: 
-                                        return "ready";
+                                        return 'sleeping';
                                     case 3:
-                                        return "sleeping";
+                                        return 'ready';
                                     case 4:
-                                        return "runngin_user";
+                                        return 'runngin_user';
                                     case 5:
-                                        return "running_kernel";
+                                        return 'running_kernel';
                                     default:
-                                        return "";
+                                        return '';
                                 };
                             }
                         }
@@ -857,7 +900,9 @@ class View {
                 }
             }
         });
+        
     }
+    */
 
 }
 

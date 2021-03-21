@@ -2,6 +2,7 @@ class StateManager {
     constructor() {
         this.currentState = 0;
         this.states = [];
+        this.timeSeries = [];
     }
 
     getNextState() {
@@ -20,6 +21,14 @@ class StateManager {
 
     pushState(state) {
         this.states.push(state);
+    }
+
+    pushTime(timeData) {
+        this.timeSeries.push(timeData);
+    }
+
+    getTimeSeries() {
+        return this.timeSeries;
     }
 
 }

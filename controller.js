@@ -41,6 +41,7 @@ class Controller {
 
         this.model.startVisualizationEvent.addListener(data => {
             this.view.createSummary(data.summary);
+            this.view.createProgress(data.time);
             this.view.showState(data.state);
         });
 

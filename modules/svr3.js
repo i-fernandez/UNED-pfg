@@ -163,6 +163,12 @@ class Svr3Scheduler {
     }
 
     _sendState() {
+        // Timeline
+        let timeData = [this.time];
+        this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
+        this.stateManager.pushTime(timeData);
+
+        // Estado
         if (this.isFinished())
             this.journal.push("Ejecución finalizada.");
 
@@ -413,6 +419,26 @@ class Svr3Process {
             p_pid: this.p_pid,
             wait_time: this.wait_time,
             ex_time: this.finish_time
+        }
+    }
+
+    /* Representacion numerica del estado */
+    getStateNumber() {
+        switch (this.p_state) {
+            case 'running_kernel':
+                return 5;
+            case 'running_user':
+                return 4;
+            case 'ready':
+                return 3;
+            case 'sleeping':
+                return 2;
+            case 'zombie':
+                return 1;
+            case 'finished':
+                return 0;
+            default:
+                return -1;
         }
     }
 

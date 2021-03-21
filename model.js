@@ -30,25 +30,6 @@ class Simulation {
         this.pTableChangedEvent.trigger(this.scheduler.getPTable());
     }
 
-    /*
-    startSimulation() {
-        this.scheduler.start();
-
-        // Genera todos los estados
-        while (!(this.scheduler.isFinished())) 
-            this.scheduler.nextTick();
-            
-
-        this.getSummary();
-            
-        if (this.scheduler.isFinished())
-            console.log("Algoritmo finalizado");
-         
-        
-        // Visualiza el primer estado
-        this.startVisualizationEvent.trigger(this.stateManager.states[0]);
-
-    }*/
 
     startSimulation() { 
         // Genera todos los estados
@@ -59,7 +40,8 @@ class Simulation {
         // Lanza el evento con el resumen y el primer estado
         let data = {
             summary: this.scheduler.getSummary(),
-            state: this.stateManager.states[0]
+            state: this.stateManager.states[0],
+            time: this.stateManager.getTimeSeries()
         }
         this.startVisualizationEvent.trigger(data);
     }
