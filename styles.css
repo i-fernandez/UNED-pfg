@@ -140,6 +140,7 @@
 }
 .div-main {
     margin-left: 5%;
+    margin-right: 5%;
 }
 .div-center {
     text-align: center;
@@ -322,4 +323,8 @@ select {
 #summary_table {
     width: 500px;
 }
+#chart_div {
+    width: 600px;
+    height: 400px;
+ }
 

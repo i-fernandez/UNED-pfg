@@ -8,7 +8,7 @@ class Svr4Scheduler {
         this.CONTEXT_SWITCH = 10;
         this.TICK = 10;
 
-        this.name = "SVR4";
+        this.name = 'SVR4';
         this.stateManager = stateManager;
         this.time = 0;
         this.dqactmap = [];
@@ -20,7 +20,7 @@ class Svr4Scheduler {
         this.inContextSwitch = false;
         this.inRoundRobin = false;
         this.journal = [];
-        this.running = "";
+        this.running = '';
     }
 
     addProcess(data) {
@@ -99,11 +99,11 @@ class Svr4Scheduler {
     }
 
     start() {
-        this.journal.push("Inicio de la ejecucion");
+        this.journal.push('Inicio de la ejecucion');
         let pr = this.dequeueProcess();
         this.running = pr;
         pr.startRun();
-        this.journal.push("Proceso " + pr.p_pid + " cargado para ejecucion");
+        this.journal.push(`Proceso ${pr.p_pid} cargado para ejecucion.`);
         this._sendState();
     }
 
@@ -115,7 +115,7 @@ class Svr4Scheduler {
 
     nextTick() {
         this.time += this.TICK;
-        let sleeping_pr  = this.processTable.filter(pr => pr.p_state == "sleeping");
+        let sleeping_pr  = this.processTable.filter(pr => pr.p_state == 'sleeping');
 
         // Actualiza los procesos
         this.processTable.forEach (pr => {
@@ -124,8 +124,8 @@ class Svr4Scheduler {
                 this.journal.push(out);
         });
         // Actualiza el proceso en ejecucion
-        if (this.running.p_state != "running_user" && this.running.p_state != "running_kernel")
-            this.running = "";  
+        if (this.running.p_state != 'running_user' && this.running.p_state != 'running_kernel')
+            this.running = '';  
 
         if (this.inContextSwitch)
             // Finaliza el cambio de contexto
@@ -133,15 +133,12 @@ class Svr4Scheduler {
 
         // Encola procesos que finalizaron IO
         sleeping_pr.forEach(pr => {
-            if (pr.p_state != "sleeping") 
+            if (pr.p_state != 'sleeping') 
                 this.setBackDQ(pr);
         });
                     
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
-
-        // Encola procesos cuya prioridad ha cambiado
-        //this._reQueue();
 
         this._sendState();
 
@@ -159,42 +156,36 @@ class Svr4Scheduler {
         this.contextSwitchCount++;
         next_pr.startRun();
         this.running = next_pr;
-        this.journal.push("Proceso " + next_pr.p_pid + " cargado para ejecucion. ");
+        this.journal.push(`Proceso ${next_pr.p_pid} cargado para ejecucion.`);
     }
 
     _startSwtch() {
-        //let running = this._getRunningProcess();
         let n = this._getNextProcess();
         // No hay ningun proceso en ejecucion 
         if (!(this.running) && this.dqactmap.length > 0) {
-        //if (typeof running === 'undefined' && this.dqactmap.length > 0) {
-            this.journal.push("Rutina swtch selecciona al proceso " + n.p_pid + " para su ejecución. ");
+            this.journal.push(`Rutina swtch selecciona al proceso ${n.p_pid} para su ejecución.`);
             this.inContextSwitch = true;
         }
-        // Proceso encolado con mayor prioridad y actual no esta en modo kernel
-        //else if (typeof running !== 'undefined' && 
-        //    this.dqactmap[this.dqactmap.length-1] > running.p_pri &&
-        // 
         else if (this.running && this.dqactmap[this.dqactmap.length-1] >this.running.p_pri){
-            if (this.running.p_state == "running_kernel") {
+            if (this.running.p_state == 'running_kernel') {
                 // Proceso con llamada al sistema
                 this.runrun = true;
-                this.journal.push("Proceso " + n.p_pid + " encolado con mayor prioridad. " + 
-                    "Esperando finalizacion de llamada al sistema.")
+                this.journal.push(`Proceso ${n.p_pid} encolado con mayor prioridad.
+                    Esperando finalizacion de llamada al sistema.`)
             } else {
-                this.journal.push("CPU expropiada debido a proceso " + 
-                    this.dispq[this.dispq.length-1].front().p_pid);
+                this.journal.push(`CPU expropiada debido a proceso  
+                    ${this.dispq[this.dispq.length-1].front().p_pid}`);
                 this.inContextSwitch = true;
-                this.running.p_state = "ready";
+                this.running.p_state = 'ready';
                 this._setFrontDQ(this.running);
             }
         }    
         // Round robin
         else if (this.inRoundRobin) {
-            this.journal.push("CPU expropiada debido a rutina roundrobin. ");
+            this.journal.push('CPU expropiada debido a rutina roundrobin. ');
             this.inRoundRobin = false;
             this.inContextSwitch = true;
-            this.running.p_state = "ready";
+            this.running.p_state = 'ready';
             this.setBackDQ(this.running);
         }
     }
@@ -207,41 +198,14 @@ class Svr4Scheduler {
             this.running.resetQuantum();
     }
 
-    /*
-    // Reencola procesos ready cuya prioridad ha cambiado
-    _reQueue() {
-        
-        let procesos = this.processTable.filter(pr => pr.p_state == "ready" && pr.changePriority == "true");
-        procesos.forEach(pr => {
-            console.log("_reQueue:  WTF");
-
-            pr.changePriority = false;
-            // Elimina el  proceso de la cola actual
-            // Hay que buscar en todas las colas
-            let queue = this.qs.find(item => item.priority == pr.p_pri);
-            if (queue) {
-                queue.remove(pr);
-                if (queue.isEmpty()) {
-                    this.dqactmap.pop();
-                    this.dispq.pop();
-                }
-            }
-
-            // Encola el proceso de nuevo
-            this.setBackDQ(pr);
-            console.log(this.time + " : Proceso " + pr.p_pid + " reencolado: " + pr.p_pri);
-        });
-    }
-    */
-
     isFinished() {
         // GUARDA
         if (this.time > 50000) {
-            console.log("Alcanzado tiempo máximo de ejecución");
+            console.log('Alcanzado tiempo máximo de ejecución');
             return true;
         }
 
-        let procesos = this.processTable.filter(pr => pr.p_state != "finished");
+        let procesos = this.processTable.filter(pr => pr.p_state != 'finished');
         return (procesos.length === 0);
     }
 
@@ -262,12 +226,18 @@ class Svr4Scheduler {
     }
 
     _sendState() {
+        // Timeline
+        let timeData = [this.time];
+        this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
+        this.stateManager.pushTime(timeData);
+
+        // Estado
         if (this.isFinished())
-            this.journal.push("Ejecución finalizada.");
+            this.journal.push('Ejecución finalizada.');
 
         if (this.journal.length > 0) {
             let pTable = [];
-            let notFinished = this.processTable.filter(pr => pr.p_state != "finished");
+            let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
             notFinished.forEach(pr => {
                 pTable.push(pr.getFullData());
             });
@@ -278,13 +248,13 @@ class Svr4Scheduler {
             // Datos de la clase
             let rt = [];
             let ts = [];
-            let rt_info = "";
-            let ts_info = "";
-            notFinished.filter(pr => pr.class.name == "RealTime").forEach(pr => {
+            let rt_info = '';
+            let ts_info = '';
+            notFinished.filter(pr => pr.class.name == 'RealTime').forEach(pr => {
                 rt.push(pr.getClassData());
                 rt_info = pr.getClassInfo();
             });
-            notFinished.filter(pr => pr.class.name == "TimeSharing").forEach(pr => {
+            notFinished.filter(pr => pr.class.name == 'TimeSharing').forEach(pr => {
                 ts.push(pr.getClassData());
                 ts_info = pr.getClassInfo();
             });
@@ -316,7 +286,7 @@ class Svr4Process {
     constructor(sched, pid, execution, cpu_burst, io_burst, pClass, pri) {
         this.sched = sched;
         this.p_pid = pid;
-        this.p_state = "ready";
+        this.p_state = 'ready';
         this.p_pri = pri;
         this.execution = execution;
         this.cpu_burst = cpu_burst;
@@ -325,23 +295,23 @@ class Svr4Process {
         this.wait_time = 0;
         this.finish_time = 0;    // tiempo de finalización  
         this.kernelCount = 0;    // numero de Ticks en modo nucleo
-        this.class = (pClass == "RealTime") ? new Svr4RT(this) : new Svr4TS(this);
+        this.class = (pClass == 'RealTime') ? new Svr4RT(this) : new Svr4TS(this);
     }
 
     runTick() {
-        let text = "";
+        let text = '';
         switch (this.p_state) {
-            case "running_kernel":
+            case 'running_kernel':
                 if (this.kernelCount > 1) {
                     this.kernelCount--;
                 }
                 else {
                     this.kernelCount = 2;
-                    this.p_state = "running_user";
+                    this.p_state = 'running_user';
                     this.class.fromSysCall();
-                    text += "Proceso " + this.p_pid + " finaliza llamada al sistema. ";
+                    text += `Proceso ${this.p_pid} finaliza llamada al sistema. `;
                 } 
-            case "running_user":
+            case 'running_user':
                 this.execution -= this.sched.TICK;
                 if (this.execution <= 0)
                     text += this._toZombie();
@@ -350,19 +320,19 @@ class Svr4Process {
                     text += this.class.runTick();
                 }        
                 break;
-            case "sleeping":
+            case 'sleeping':
                 this.current_cycle_time += this.sched.TICK;
                 if (this.current_cycle_time >= this.io_burst) {
-                    this.p_state = "ready";
-                    this.current_cycle_time = 0;
                     text += this.class.runTick()
+                    this.p_state = 'ready';
+                    this.current_cycle_time = 0;
                 }
                 break;
-            case "ready":
+            case 'ready':
                 this.wait_time += this.sched.TICK;
                 break;
-            case "zombie":
-                this.p_state = "finished";
+            case 'zombie':
+                this.p_state = 'finished';
                 break;
             default:
                 break;
@@ -372,9 +342,9 @@ class Svr4Process {
 
     startRun() {
         if (this.kernelCount  > 0)
-            this.p_state = "running_kernel";
+            this.p_state = 'running_kernel';
         else
-            this.p_state = "running_user";
+            this.p_state = 'running_user';
 
         this.roundRobin = false;
         this.resetQuantum();
@@ -413,14 +383,14 @@ class Svr4Process {
     // Datos para la informacion de cada campo en estados
     getInfo() {
         return {
-            p_pid: "PID del proceso",
-            p_state: "Estado actual",
-            p_pri: "Prioridad actual",
-            class: "Clase del proceso",
-            execution: "Tiempo restante hasta finalización",
-            cpu_burst: "Duración del ciclo de CPU",
-            io_burst: "Duración del ciclo de IO",
-            wait_time: "Tiempo de espera acumulado"  
+            p_pid: 'PID del proceso',
+            p_state: 'Estado actual',
+            p_pri: 'Prioridad actual',
+            class: 'Clase del proceso',
+            execution: 'Tiempo restante hasta finalización',
+            cpu_burst: 'Duración del ciclo de CPU',
+            io_burst: 'Duración del ciclo de IO',
+            wait_time: 'Tiempo de espera acumulado'  
         };
     }
 
@@ -441,23 +411,47 @@ class Svr4Process {
         return this.class.getData();
     }
 
+    /* Representacion numerica del estado */
+    getStateNumber() {
+        switch (this.p_state) {
+            case 'running_kernel':
+                return 5;
+            case 'running_user':
+                return 4;
+            case 'ready':
+                return 3;
+            case 'sleeping':
+                return 2;
+            case 'zombie':
+                return 1;
+            case 'finished':
+                return 0;
+            default:
+                return -1;
+        }
+    }
+
+
+
+    /*
     _fromSysCall() {
         if (this.kernelCount > 1) {
             this.kernelCount--;
         }
         else {
             this.kernelCount = 2;
-            this.p_state = "running_user";
+            this.p_state = 'running_user';
             this.class.fromSysCall();
-            return "Proceso " + this.p_pid + " finaliza llamada al sistema. ";
+            return `Proceso ${this.p_pid} finaliza llamada al sistema. `;
         } 
     }
+    */
 
     _toZombie() {
         this.execution = 0;
-        this.p_state = "zombie";
+        this.p_state = 'zombie';
         this.finish_time = this.sched.time;
-        return "Proceso " + this.p_pid + " finalizado en " + this.finish_time + " ut. ";
+        return `Proceso ${this.p_pid} finalizado en ${this.finish_time} ut. `;
     }    
 }
 

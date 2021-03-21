@@ -1,7 +1,7 @@
 
 class Svr4RT {
     constructor(proc) {
-        this.name = "RealTime"
+        this.name = 'RealTime'
         this.proc = proc;      
         // Prioridad global
         this.rt_glopri = proc.p_pri;
@@ -36,11 +36,11 @@ class Svr4RT {
 
     getInfo() {
         return {
-            rt_pquantum: "Cuanto asignado",
-            rt_timeleft: "Tiempo restante del cuanto",
-            rt_pri: "Prioridad actual",
-            rt_glopri: "Prioridad global",
-            rt_quantum: "Cuanto asignado a la prioridad"
+            rt_pquantum: 'Cuanto asignado',
+            rt_timeleft: 'Tiempo restante del cuanto',
+            rt_pri: 'Prioridad actual',
+            rt_glopri: 'Prioridad global',
+            rt_quantum: 'Cuanto asignado a la prioridad'
         }
     }
 
@@ -50,20 +50,20 @@ class Svr4RT {
     }
 
     runTick() {
-        let text = "";
+        let text = '';
         switch (this.proc.p_state) {
-            case "running_kernel":
+            case 'running_kernel':
 
-            case "running_user":
+            case 'running_user':
                 this.rt_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) 
-                    text = this._toSleep();
+                    text += this._toSleep();
                 else if (this.rt_timeleft <= 0) 
                     this.proc.sched.roundRobin();
                 break;
 
-            case "sleeping":
-                text = this._fromSleep();
+            case 'sleeping':
+                text += this._fromSleep();
                 break;
             default:
                 break;
@@ -72,14 +72,14 @@ class Svr4RT {
     }
 
     _toSleep() {
-        this.proc.p_state = "sleeping";
+        this.proc.p_state = 'sleeping';
         this.proc.current_cycle_time = 0;
         this.proc.kernelCount = 2;
-        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU. ";
+        return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
     }
 
     _fromSleep() {
-        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O. ";
+        return `Proceso ${this.proc.p_pid} finaliza su espera por I/O. `;
     }
 
     // En esta clase no se hace nada especial al volver a modo usuario

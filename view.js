@@ -308,14 +308,26 @@ class View {
         data_div.classList.add('div-states');
         let data_table = document.createElement('table');
         this._addBinaryRowText(data_table, 'Número de procesos: ', data.n_proc);
-        this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', data.t_time + ' ut.');
-        this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', data.wait + ' ut.');
+        this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
+        this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
         this._addBinaryRowText(data_table, 'Número de cambios de contexto: ', data.cswitch);
         data_div.appendChild(data_table);
         let table_div = document.createElement('div');
         table_div.classList.add('div-states');
         this._createSummaryTable(table_div, data.proc_data);
         this._append(this.summary_div, [title_div, data_div, table_div]);
+
+        let chart_div = document.createElement('div');
+        chart_div.classList.add('div-states');
+        chart_div.id = 'chart_div';
+        this.summary_div.appendChild(chart_div);
+        let cv = document.createElement('canvas');
+        cv.width = 600;
+        cv.height = 400;
+        chart_div.width = 600;
+        chart_div.head_row = 400;
+        chart_div.appendChild(cv);
+        new Graphics().drawBarChart(cv)
     }
 
 
@@ -359,7 +371,7 @@ class View {
         let state = data.state;
         let s_table = document.getElementById('state_table');
         this._clearChilds(s_table);
-        this._addBinaryRowText(s_table, 'Time: ', state.time + ' ut.');
+        this._addBinaryRowText(s_table, 'Time: ', `${state.time} ut.`);
         // runrun
         let rr_td = this._addBinaryRow(s_table, 'runrun: ');
         let rr_div = document.createElement('div');
@@ -719,7 +731,7 @@ class View {
             let td_t = document.createElement('td');
             let pri = item.priority;
             if (name == 'SVR3') 
-                pri = item.priority*4 + ' - ' + ((item.priority*4)+4);
+                pri = `${item.priority*4} - ${((item.priority*4)+4)}`;
             
             td_t.appendChild(document.createTextNode(pri));
             td_t.classList.add('priorityQueueNumber');
@@ -749,7 +761,6 @@ class View {
         }
     }
 
-    
     // Añade varios elementos al padre
     _append(parent, elements) {
         elements.forEach(item => {
@@ -757,153 +768,12 @@ class View {
         });
     }
 
-
     // Elimina los elementos de una tabla
     _clearChilds(domElement) {
         while (domElement.firstChild) {
             domElement.removeChild(domElement.firstChild);
         }
     }
-
-    
-
-    /* PRUEBA CANVAS */
-    /*
-    _getLineData() {
-        return {
-            time: [0, 1, 2, 3, 4, 5, 6],
-            pids: {
-                1: [2, 4, 5, 3, 4, 1, 0],
-                2: [4, 2, 2, 4, 1, 0, 0],
-                3: [2, 2, 2, 2, 2, 4, 4],
-                4: [0, 0, 2, 1, 3, 2, 2],
-                5: [2, 2, 3, 3, 3, 2, 1]
-            }
-        }
-    }
-    */
-
-    // TODO: aumentar los colores
-    /*
-    _getColor() {
-        let colors = [
-            'RGB(239, 134, 119)',
-            'RGB(160, 231, 125)',
-            'RGB(130, 182, 217)',
-            'RGB(255, 219, 148)'
-        ];
-        let i = this.colorIndex % colors.length;
-        this.colorIndex++;
-        return colors[i];
-    }
-    */
-    
-
-
-    /*
-    _createChart (canvas, prData){
-        let params = [];
-        let n_pid = 0;
-        Object.keys(prData.pids).forEach(pid => {
-            let color = this._getColor();
-            let dataset = {
-                label: n_pid+1,
-                data: prData["pids"][n_pid],
-                borderWidth: 3,
-                fill: false,
-                steppedLine: true,
-                borderColor: color,
-                backgroundColor: color
-            }
-            params.push(dataset);
-            n_pid++;
-        });
-
-        
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: prData.time,
-                datasets: params
-            },
-            options: {    
-                tooltips: {
-                    callbacks: {
-                        label: function(tooltipItem, data){
-                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
-                            let state = '';
-                            switch (tooltipItem.yLabel) {
-                                case 0:
-                                    state = 'finished';
-                                    break;
-                                case 1:
-                                    state = 'zombie';
-                                    break;
-                                case 2: 
-                                    state = 'sleeping';
-                                    break;
-                                case 3:
-                                    state = 'ready';
-                                    break;
-                                case 4:
-                                    state = 'runngin_user';
-                                    break;
-                                case 5:
-                                    state = 'running_kernel';
-                                    break;
-                                default:
-                                    state = tooltipItem.yLabel;
-                            };
-                            return label + ": " + state;   
-                        },
-                        title: function(tooltipItems, data) {
-                            return tooltipItems[0].xLabel + ' ut.';
-
-                        }
-                    }
-                },
-                
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 5,
-                            sampleSize: 1,
-                            callback: function(value) {
-                                switch (value) {
-                                    case 0:
-                                        return 'finished';
-                                    case 1:
-                                        return 'zombie';
-                                    case 2: 
-                                        return 'sleeping';
-                                    case 3:
-                                        return 'ready';
-                                    case 4:
-                                        return 'runngin_user';
-                                    case 5:
-                                        return 'running_kernel';
-                                    default:
-                                        return '';
-                                };
-                            }
-                        }
-                    }],
-                    xAxes:[{
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' ut.';
-                            }
-                        }
-                    }]
-                }
-            }
-        });
-        
-    }
-    */
-
 }
 
 export default View;

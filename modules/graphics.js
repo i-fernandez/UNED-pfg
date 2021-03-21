@@ -14,7 +14,7 @@ class Graphics {
         Object.keys(prData.pids).forEach(pid => {
             let color = this._getColor();
             let dataset = {
-                label: n_pid+1,
+                label: `pid ${n_pid + 1}`,
                 data: prData["pids"][n_pid],
                 borderWidth: 3,
                 fill: false,
@@ -60,10 +60,10 @@ class Graphics {
                                 default:
                                     state = tooltipItem.yLabel;
                             };
-                            return label + ": " + state;   
+                            return `${label}: ${state}`;   
                         },
                         title: function(tooltipItems, data) {
-                            return tooltipItems[0].xLabel + ' ut.';
+                            return `${tooltipItems[0].xLabel} ut.`;
 
                         }
                     }
@@ -97,7 +97,7 @@ class Graphics {
                     }],
                     xAxes:[{
                         ticks: {
-                            callback: function(value) {return value+' ut.';}
+                            callback: function(value) {return `${value} ut.`;}
                         }
                     }]
                 }
@@ -106,7 +106,40 @@ class Graphics {
     }
 
     // Dibuja un grafico de barras
-    drawBarChart() {
+    drawBarChart(canvas) {
+
+        let barData = {
+            //labels: ['pid 1', 'pid 2', 'pid 3', 'pid 4'],
+            labels: ['pid 1'],
+            datasets: [{
+                label: 'Tiempo de espera',
+                data: [10],
+                //data: [10, 20, 30, 15],
+                backgroundColor: 'RGB(239, 134, 119)',
+            }, {
+                label: 'Tiempo de ejecución',
+                //data: [100, 150, 130, 90],
+                data: [100],
+                backgroundColor: 'RGB(160, 231, 125)',
+            }]
+        };
+
+     
+
+        new Chart(canvas, {
+            type: 'bar',
+            data: barData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true
+                    }],
+                    yAxes: [{
+                        stacked: true
+                    }]
+                }
+            }
+        });
 
     }
 

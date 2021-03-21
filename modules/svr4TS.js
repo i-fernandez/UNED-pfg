@@ -2,7 +2,7 @@
 
 class Svr4TS {
     constructor(proc) {
-        this.name = "TimeSharing";
+        this.name = 'TimeSharing';
         this.proc = proc;
         //this.p_pid = pid;
 
@@ -65,17 +65,17 @@ class Svr4TS {
 
     getInfo() {
         return {
-            ts_timeleft: "Tiempo restante del cuanto",
-            ts_cpupri: "Parte de prioridad del sistema",
-            ts_upri: "Parte de prioridad del usuario",
-            ts_umdpri: "Prioridad en modo usuario",
-            ts_dispwait: "Segundos desde que comenzo el cuanto",
-            ts_globpri: "Prioridad global",
-            ts_quantum: "Cuanto asignado a la prioridad",
-            ts_tqexp: "Prioridad de sistema asignada cuando expira el cuanto",
-            ts_slpret: "Prioridad del sistema al volver a modo usuario despues de dormir",
-            ts_maxwait: "Segundos de espera a que el cuanto finalice antes de usar ts_lwait",
-            ts_lwait: "Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait segundos en finalizar su cuanto"
+            ts_timeleft: 'Tiempo restante del cuanto',
+            ts_cpupri: 'Parte de prioridad del sistema',
+            ts_upri: 'Parte de prioridad del usuario',
+            ts_umdpri: 'Prioridad en modo usuario',
+            ts_dispwait: 'Segundos desde que comenzo el cuanto',
+            ts_globpri: 'Prioridad global',
+            ts_quantum: 'Cuanto asignado a la prioridad',
+            ts_tqexp: 'Prioridad de sistema asignada cuando expira el cuanto',
+            ts_slpret: 'Prioridad del sistema al volver a modo usuario despues de dormir',
+            ts_maxwait: 'Segundos de espera a que el cuanto finalice antes de usar ts_lwait',
+            ts_lwait: 'Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait segundos en finalizar su cuanto'
         }
     }
 
@@ -118,29 +118,29 @@ class Svr4TS {
         
         this._setPri();
         this.proc.sched.roundRobin();
-        return "Cuanto del proceso " + this.proc.p_pid + " expirado." + 
-                " Nueva prioridad: " + this.ts_umdpri;           
+        return `Cuanto del proceso ${this.proc.p_pid} expirado. 
+            Nueva prioridad: ${this.ts_umdpri}`;           
     }
 
 
     runTick() {
-        let text = "";
+        let text = '';
         switch (this.proc.p_state) {
-            case "running_kernel":
+            case 'running_kernel':
 
-            case "running_user":
+            case 'running_user':
                 this._updateQuantum();
                 this.ts_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
-                    text = this._toSleep();
+                    text += this._toSleep();
                 } else if (this.ts_timeleft <= 0) {
-                    text = this._quantumExpired();
+                    text += this._quantumExpired();
                 }
                 break;
 
-            case "sleeping":
+            case 'sleeping':
                 this._updateQuantum();
-                text = this._fromSleep();
+                text += this._fromSleep();
                 break;
 
             default:
@@ -150,16 +150,16 @@ class Svr4TS {
     }
 
     _toSleep() {
-        this.proc.p_state = "sleeping";
+        this.proc.p_state = 'sleeping';
         this.proc.current_cycle_time = 0;
         this.proc.p_pri = Math.floor(Math.random() * (100 - 60) + 60);
         this.proc.kernelCount = 2;
-        return "Proceso " + this.proc.p_pid + " finaliza su ciclo de CPU.";
+        return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
     }
 
     _fromSleep() {
-        return "Proceso " + this.proc.p_pid + " finaliza su espera por I/O."+
-        " Prioridad temporalmente aumentada a " + this.proc.p_pri + ". ";
+        return `Proceso ${this.proc.p_pid} finaliza su espera por I/O.
+            Prioridad temporalmente aumentada a ${this.proc.p_pri}. `;
     }
 
     fromSysCall() {
