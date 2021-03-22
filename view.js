@@ -314,7 +314,7 @@ class View {
         data_div.appendChild(data_table);
         let table_div = document.createElement('div');
         table_div.classList.add('div-states');
-        this._createSummaryTable(table_div, data.proc_data);
+        //this._createSummaryTable(table_div, data.proc_data);
         this._append(this.summary_div, [title_div, data_div, table_div]);
 
         let chart_div = document.createElement('div');
@@ -327,7 +327,7 @@ class View {
         chart_div.width = 600;
         chart_div.head_row = 400;
         chart_div.appendChild(cv);
-        new Graphics().drawBarChart(cv)
+        new Graphics().drawBarChart(cv, data.chart);
     }
 
 
@@ -525,6 +525,7 @@ class View {
     }
 
     // Muestra la tabla resumen
+    /*
     _createSummaryTable(domElement, data) {
         if (data.length > 0) {
             let table = document.createElement('table');
@@ -557,6 +558,7 @@ class View {
             domElement.appendChild(table);
         }
     }
+    */
 
     // Muestra la tabla de procesos en la vista Añadir proceso
     _createAddTable(domElement, pTable) {

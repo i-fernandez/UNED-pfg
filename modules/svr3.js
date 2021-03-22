@@ -150,15 +150,26 @@ class Svr3Scheduler {
         let n_proc = this.processTable.length;
         let t_wait = 0;
         this.processTable.forEach(pr => t_wait += pr.wait_time);
-        let table = [];
-        this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
+        //let table = [];
+        //this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
+        // Grafica
+        let pids = [];
+        let tiempos = [];
+        this.processTable.forEach(pr => {
+            pids.push(pr.p_pid);
+            tiempos.push(pr.getSummaryData());
+        });
 
         return {
-            n_proc : n_proc,
-            t_time : this.time,
-            wait : Math.floor(t_wait / n_proc),
-            cswitch : this.contextSwitchCount,
-            proc_data: table
+            n_proc: n_proc,
+            t_time: this.time,
+            wait: Math.floor(t_wait / n_proc),
+            cswitch: this.contextSwitchCount,
+            //proc_data: table
+            chart: {
+                pids: pids,
+                time: tiempos
+            }
         }
     }
 
@@ -312,7 +323,9 @@ class Svr3Process {
         this.current_cycle_time = 0;
         this.finish_time = 0;
 
-        this.kernelCount = 2;  // numero de Ticks en modo nucleo
+        this.run_usr = 0;
+        this.run_ker = 0;
+        this.kernelCount = 0;  // numero de Ticks en modo nucleo
     }
 
     calcPriority() {
@@ -331,8 +344,10 @@ class Svr3Process {
         let text = '';
         switch (this.p_state) {
             case 'running_kernel':
+                this.run_ker += time;
                 text = this._fromSysCall();
             case 'running_user':
+                this.run_usr += time;
                 if (this.p_cpu < 127)   
                     this.p_cpu++;
                 if (this.execution <= time) 
@@ -409,11 +424,7 @@ class Svr3Process {
 
     /* Datos para la vista resumen */
     getSummaryData() {
-        return {
-            p_pid: this.p_pid,
-            wait_time: this.wait_time,
-            ex_time: this.finish_time
-        }
+        return [this.wait_time, this.run_usr-this.run_ker, this.run_ker];
     }
 
     /* Representacion numerica del estado */
@@ -439,6 +450,7 @@ class Svr3Process {
     _toSleep() {
         this.p_state = 'sleeping';
         this.current_cycle_time = 0;
+        this.kernelCount = 2;
         this.p_wchan = this.PRIORITIES[Math.floor(Math.random() * this.PRIORITIES.length)]
         return `Proceso ${this.p_pid} finaliza su ciclo de CPU.
             Direccion de dormir: ${this.p_wchan}`;
@@ -468,7 +480,7 @@ class Svr3Process {
     _toZombie(currentTime) {
         this.execution = 0;
         this.p_state = 'zombie';
-        this.finish_time = currentTime;
+        //this.finish_time = currentTime;
         return `Proceso ${this.p_pid} finalizado en ${currentTime} ut.`;
     }
 }

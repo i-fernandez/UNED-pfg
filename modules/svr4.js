@@ -213,15 +213,22 @@ class Svr4Scheduler {
         let n_proc = this.processTable.length;
         let t_wait = 0;
         this.processTable.forEach(pr => t_wait += pr.wait_time);
-        let table = [];
-        this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
-
+        // Grafica
+        let pids = [];
+        let tiempos = [];
+        this.processTable.forEach(pr => {
+            pids.push(pr.p_pid);
+            tiempos.push(pr.getSummaryData());
+        });
         return {
             n_proc : n_proc,
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
             cswitch : this.contextSwitchCount,
-            proc_data: table
+            chart: {
+                pids: pids,
+                time: tiempos
+            }
         }
     }
 
@@ -293,6 +300,8 @@ class Svr4Process {
         this.io_burst = io_burst;
         this.current_cycle_time = 0;
         this.wait_time = 0;
+        this.run_usr = 0;
+        this.run_ker = 0;
         this.finish_time = 0;    // tiempo de finalización  
         this.kernelCount = 0;    // numero de Ticks en modo nucleo
         this.class = (pClass == 'RealTime') ? new Svr4RT(this) : new Svr4TS(this);
@@ -302,6 +311,7 @@ class Svr4Process {
         let text = '';
         switch (this.p_state) {
             case 'running_kernel':
+                this.run_ker += this.sched.TICK;
                 if (this.kernelCount > 1) {
                     this.kernelCount--;
                 }
@@ -312,6 +322,7 @@ class Svr4Process {
                     text += `Proceso ${this.p_pid} finaliza llamada al sistema. `;
                 } 
             case 'running_user':
+                this.run_usr += this.sched.TICK;
                 this.execution -= this.sched.TICK;
                 if (this.execution <= 0)
                     text += this._toZombie();
@@ -400,11 +411,7 @@ class Svr4Process {
 
     /* Datos para la vista resumen */
     getSummaryData() {
-        return {
-            p_pid: this.p_pid,
-            wait_time: this.wait_time,
-            ex_time: this.finish_time
-        }
+        return [this.wait_time, this.run_usr-this.run_ker, this.run_ker];
     }
 
     getClassData() {
@@ -431,27 +438,11 @@ class Svr4Process {
         }
     }
 
-
-
-    /*
-    _fromSysCall() {
-        if (this.kernelCount > 1) {
-            this.kernelCount--;
-        }
-        else {
-            this.kernelCount = 2;
-            this.p_state = 'running_user';
-            this.class.fromSysCall();
-            return `Proceso ${this.p_pid} finaliza llamada al sistema. `;
-        } 
-    }
-    */
-
     _toZombie() {
         this.execution = 0;
         this.p_state = 'zombie';
-        this.finish_time = this.sched.time;
-        return `Proceso ${this.p_pid} finalizado en ${this.finish_time} ut. `;
+        //this.finish_time = this.sched.time;
+        return `Proceso ${this.p_pid} finalizado en ${this.sched.time} ut. `;
     }    
 }
 

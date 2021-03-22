@@ -52,7 +52,7 @@ class Graphics {
                                     state = 'ready';
                                     break;
                                 case 4:
-                                    state = 'runngin_user';
+                                    state = 'running_user';
                                     break;
                                 case 5:
                                     state = 'running_kernel';
@@ -64,7 +64,6 @@ class Graphics {
                         },
                         title: function(tooltipItems, data) {
                             return `${tooltipItems[0].xLabel} ut.`;
-
                         }
                     }
                 },
@@ -86,7 +85,7 @@ class Graphics {
                                     case 3:
                                         return 'ready';
                                     case 4:
-                                        return 'runngin_user';
+                                        return 'running_user';
                                     case 5:
                                         return 'running_kernel';
                                     default:
@@ -106,35 +105,60 @@ class Graphics {
     }
 
     // Dibuja un grafico de barras
-    drawBarChart(canvas) {
+    drawBarChart(canvas, proc_data) {
+        let labels = [];
+        let wait = [];
+        let run_user = [];
+        let run_kernel = [];
+        proc_data.pids.forEach(pid => {labels.push(`pid ${pid}`)});
+        proc_data.time.forEach(proc => {
+            wait.push(proc[0]);
+            run_user.push(proc[1]);
+            run_kernel.push(proc[2]);
+        });
+
 
         let barData = {
-            //labels: ['pid 1', 'pid 2', 'pid 3', 'pid 4'],
-            labels: ['pid 1'],
+            labels: labels,
             datasets: [{
                 label: 'Tiempo de espera',
-                data: [10],
-                //data: [10, 20, 30, 15],
+                data: wait,
                 backgroundColor: 'RGB(239, 134, 119)',
             }, {
-                label: 'Tiempo de ejecución',
-                //data: [100, 150, 130, 90],
-                data: [100],
+                label: 'Tiempo de ejecución modo usuario',
+                data: run_user,
                 backgroundColor: 'RGB(160, 231, 125)',
+            }, {
+                label: 'Tiempo de ejecución modo núcleo',
+                data: run_kernel,
+                backgroundColor: 'RGB(85, 125, 65)',
             }]
         };
-
-     
 
         new Chart(canvas, {
             type: 'bar',
             data: barData,
             options: {
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            return `${label}: ${tooltipItem.yLabel} ut.`
+                        },
+                        title: function(tooltipItems, data) {
+                            return `${tooltipItems[0].xLabel}`;
+                        }
+                    }
+                },
                 scales: {
                     xAxes: [{
                         stacked: true
                     }],
                     yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {return `${value} ut.`}
+                        },
                         stacked: true
                     }]
                 }
@@ -167,7 +191,10 @@ class Graphics {
             'RGB(239, 134, 119)',
             'RGB(160, 231, 125)',
             'RGB(130, 182, 217)',
-            'RGB(255, 219, 148)'
+            'RGB(255, 219, 148)',
+            'RGB(225, 150, 220)',
+            'RGB(170, 215, 220)',
+            'RGB(190, 170, 235)'
         ];
         let i = this.colorIndex % colors.length;
         this.colorIndex++;
