@@ -121,20 +121,37 @@ class Graphics {
         let barData = {
             labels: labels,
             datasets: [{
-                label: 'Tiempo de espera',
+                label: 'En espera',
                 data: wait,
                 backgroundColor: 'RGB(239, 134, 119)',
             }, {
-                label: 'Tiempo de ejecución modo usuario',
+                label: 'Ejecución en modo usuario',
                 data: run_user,
                 backgroundColor: 'RGB(160, 231, 125)',
             }, {
-                label: 'Tiempo de ejecución modo núcleo',
+                label: 'Ejecución en modo núcleo',
                 data: run_kernel,
                 backgroundColor: 'RGB(85, 125, 65)',
             }]
         };
 
+        /*
+        let canvas = document.createElement('canvas');
+        // Tamaño del grafico
+        div.height = 400;
+        canvas.height = 400;
+        if (labels.length > 1) {
+            div.width = labels.length * 100;
+            canvas.width = labels.length * 100;
+            console.log(`canvas: ${canvas.width} `);
+        } else {
+            div.width = 150;
+            canvas.width = 150;
+            console.log(`canvas: 150 `);
+        }
+        div.appendChild(canvas);
+        */
+        
         new Chart(canvas, {
             type: 'bar',
             data: barData,
@@ -185,7 +202,7 @@ class Graphics {
         return {time: time, pids: pids}
     }
 
-    // Genera el siguiente color
+    // Genera los colores de forma ciclica
     _getColor() {
         let colors = [
             'RGB(239, 134, 119)',

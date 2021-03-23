@@ -141,6 +141,7 @@
 .div-main {
     margin-left: 5%;
     margin-right: 5%;
+    margin-top: 15px;
 }
 .div-center {
     text-align: center;
@@ -323,8 +324,13 @@ select {
 #summary_table {
     width: 500px;
 }
-#chart_div {
-    width: 600px;
-    height: 400px;
+
+#barChart_td {
+    /*position: relative;*/
+    height: 450px;
+    width: 500px;
+    /*width: 30vw;*/
+    /*margin-top: 15px;*/
  }
+ 
 

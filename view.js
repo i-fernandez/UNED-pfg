@@ -311,23 +311,30 @@ class View {
         this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
         this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
         this._addBinaryRowText(data_table, 'Número de cambios de contexto: ', data.cswitch);
-        data_div.appendChild(data_table);
-        let table_div = document.createElement('div');
-        table_div.classList.add('div-states');
-        //this._createSummaryTable(table_div, data.proc_data);
-        this._append(this.summary_div, [title_div, data_div, table_div]);
 
-        let chart_div = document.createElement('div');
-        chart_div.classList.add('div-states');
-        chart_div.id = 'chart_div';
-        this.summary_div.appendChild(chart_div);
+        let tiempos_td = this._addBinaryRow(data_table, 'Tiempos por proceso: ');
+        tiempos_td.id = 'barChart_td';
+
+        data_div.appendChild(data_table);
+        
+        //let table_div = document.createElement('div');
+        //table_div.classList.add('div-states');
+        //this._createSummaryTable(table_div, data.proc_data);
+        //this._append(this.summary_div, [title_div, data_div, table_div]);
+
+        //let chart_div = document.createElement('div');
+        //chart_div.classList.add('div-states');
+        //let chart_title = document.createElement('p');
+        //chart_title.textContent = 'Tiempos por proceso:';
+
+
         let cv = document.createElement('canvas');
-        cv.width = 600;
-        cv.height = 400;
-        chart_div.width = 600;
-        chart_div.head_row = 400;
-        chart_div.appendChild(cv);
-        new Graphics().drawBarChart(cv, data.chart);
+        tiempos_td.appendChild(cv);
+        //this.summary_div.appendChild(chart_div);
+
+        this._append(this.summary_div, [title_div, data_div/*, chart_div*/]);
+
+        new Graphics().drawBarChart(cv.getContext('2d'), data.chart);
     }
 
 
