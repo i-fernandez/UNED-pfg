@@ -268,7 +268,12 @@ class View {
             io_burst: parseInt(document.getElementById('inputIO_svr3').value, 10),
             pri: parseInt(document.getElementById('inputPriority_svr3').value, 10)
         }
-        return data;
+
+        /* Convierte a JSON */
+        return JSON.stringify(data);
+
+
+        //return data;
     }
 
     _getSvr4Input() {
@@ -281,7 +286,11 @@ class View {
             pClass: pc,
             pri: parseInt(document.getElementById('inputPriority_svr4').value, 10)
         }
-        return data;
+
+        /* Convierte a JSON */
+        return JSON.stringify(data);
+
+        //return data;
     }
 
     _resetInput() {
@@ -751,9 +760,10 @@ class View {
     }
 
     pTableChanged(pTable) {
-        if(pTable.length > 0) {
+        let table = JSON.parse(pTable);
+        if(table.length > 0) {
             document.getElementById('start_div').style.display = 'block';
-            this._createAddTable(document.getElementById('addTable'), pTable);
+            this._createAddTable(document.getElementById('addTable'), table);
         }
     }
 

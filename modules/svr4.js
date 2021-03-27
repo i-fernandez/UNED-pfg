@@ -23,6 +23,7 @@ class Svr4Scheduler {
         this.running = '';
     }
 
+    /* Añade un nuevo proceso en el sistema */
     addProcess(data) {
         let pr = new Svr4Process(
             this, this.processTable.length+1, data.execution, data.cpu_burst, 
@@ -32,7 +33,7 @@ class Svr4Scheduler {
         this.setBackDQ(pr);
     }
 
-    // Añade un proceso al inicio de la cola (proceso expropiado)
+    /* Añade un proceso al inicio de la cola (proceso expropiado) */
     _setFrontDQ(process) {
         let qn = process.p_pri;
         this._setDqactmap(qn);
@@ -45,7 +46,7 @@ class Svr4Scheduler {
         this._sortDispq();
     }
 
-    // Añade un proceso al final de la cola (nuevo proceso)
+    /* Añade un proceso al final de la cola (nuevo proceso) */
     setBackDQ(process) {
         let qn = process.p_pri;
         this._setDqactmap(qn);
@@ -65,7 +66,7 @@ class Svr4Scheduler {
         this.dqactmap.sort(function(a, b) { return a - b;});
     }
 
-    // Ordena el array disqp
+    /* Ordena el array disqp */
     _sortDispq () {
         this.dispq.sort(function (a, b) {
             if (a.priority > b.priority)
@@ -76,7 +77,7 @@ class Svr4Scheduler {
         });
     }
 
-    // Elige un proceso para ser planificado y lo desencola
+    /* Elige un proceso para ser planificado y lo desencola */
     dequeueProcess() {
         let qn = this.dqactmap[this.dqactmap.length-1];
         let queue = this.dispq.find(item => item.priority == qn);
@@ -90,7 +91,7 @@ class Svr4Scheduler {
         }
     }
 
-    // Muestra el proximo proceso para ejecutarse, sin desencolarlo
+    /* Muestra el proximo proceso para ejecutarse, sin desencolarlo */
     _getNextProcess() {
         let queue = this.dispq.find(item => item.priority == this.dqactmap[this.dqactmap.length-1]);
         if (queue) {
@@ -98,6 +99,7 @@ class Svr4Scheduler {
         }
     }
 
+    /* Comienza la ejecución */
     start() {
         this.journal.push('Inicio de la ejecucion');
         let pr = this.dequeueProcess();
@@ -107,12 +109,14 @@ class Svr4Scheduler {
         this._sendState();
     }
 
+    /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
         let pTable = [];
         this.processTable.forEach(pr => {pTable.push(pr.getData());});
-        return pTable;
+        return JSON.stringify(pTable);
     }
 
+    /* Ejecuta un tick de reloj */
     nextTick() {
         this.time += this.TICK;
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == 'sleeping');
@@ -190,7 +194,7 @@ class Svr4Scheduler {
         }
     }
 
-    // Comprueba si round robin produce un cambio de contexto
+    /* Comprueba si round robin produce un cambio de contexto */
     roundRobin() {
         if (this.dqactmap.find(item => item == this.running.p_pri))
             this.inRoundRobin = true;
@@ -198,6 +202,7 @@ class Svr4Scheduler {
             this.running.resetQuantum();
     }
 
+    /* Comprueba si ha finalizado la ejecucion */
     isFinished() {
         // GUARDA
         if (this.time > 50000) {

@@ -24,7 +24,7 @@ class Svr3Scheduler {
         this.running = '';
     }
 
-    
+    /* Añade un nuevo proceso en el sistema */
     addProcess(data) {
         let pr = new Svr3Process(
             this.processTable.length+1, data.execution, data.cpu_burst, data.io_burst, data.pri);
@@ -33,7 +33,7 @@ class Svr3Scheduler {
 
     }
 
-    // Añade un proceso a la cola, modifica qs y whichqs (y los ordena)
+    /* Añade un proceso a la cola, modifica qs y whichqs (y los ordena) */
     _enqueueProcess(process) {
         let qn = Math.floor(process.p_pri / 4);
         if (!(this.whichqs.includes(qn))) {
@@ -54,7 +54,7 @@ class Svr3Scheduler {
         });
     }
 
-    // Elige un proceso para ser planificado y lo desencola
+    /* Elige un proceso para ser planificado y lo desencola */
     _dequeueProcess() {
         let qn = this.whichqs[0];
         let queue = this.qs.find(item => item.priority == qn);
@@ -68,7 +68,7 @@ class Svr3Scheduler {
         }
     }
 
-    // Muestra el proximo proceso para ejecutarse, sin desencolarlo
+    /* Muestra el proximo proceso para ejecutarse, sin desencolarlo */
     _getNextProcess() {
         let queue = this.qs.find(item => item.priority == this.whichqs[0]);
         if (queue) {
@@ -76,14 +76,14 @@ class Svr3Scheduler {
         }
     }
 
-    
+    /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
         let pTable = [];
         this.processTable.forEach(pr => {pTable.push(pr.getData());});
-        return pTable;
+        return JSON.stringify(pTable);
     }
     
-
+    /* Comienza la ejecución */
     start() {
         this.journal.push('Inicio de la ejecucion.');
         let pr = this._dequeueProcess();
@@ -93,6 +93,7 @@ class Svr3Scheduler {
         this._sendState();
     }
 
+    /* Ejecuta un tick de reloj */
     nextTick() {
         this.time += this.TICK;
         this.nextRoundRobin -= this.TICK;
@@ -134,6 +135,7 @@ class Svr3Scheduler {
         this._sendState();
     }
 
+    /* Comprueba si ha finalizado la ejecucion */
     isFinished() {
         // GUARDA
         if (this.time > 50000) {

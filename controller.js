@@ -39,10 +39,24 @@ class Controller {
             this.view.pTableChanged(pTable);
         });
 
+        /*
         this.model.startVisualizationEvent.addListener(data => {
             this.view.createSummary(data.summary);
             this.view.createProgress(data.time);
             this.view.showState(data.state);
+        });
+        */
+
+        this.model.createSummaryEvent.addListener(data => {
+            this.view.createSummary(data);
+        });
+
+        this.model.createTimelineEvent.addListener(data => {
+            this.view.createProgress(data);
+        });
+
+        this.model.createStatesEvent.addListener(data => {
+            this.view.showState(data);
         });
 
         this.model.sendStateEvent.addListener(data => {
