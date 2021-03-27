@@ -65,8 +65,8 @@ class View {
         
         header_menu_div.appendChild(nav_menu);
         this._append(nav_menu, [summary_li, progress_li, states_li]);
-
-
+        
+        /* Selector de algoritmo */
         let sch_selector = document.createElement('ul');
         sch_selector.classList.add('header-menu-ul-center');
         let sel_svr3 = document.createElement('li');
@@ -101,7 +101,8 @@ class View {
         });
         this._append(sch_selector, [sel_svr3, sel_svr4]);
         header_div.appendChild(sch_selector);
-        // Bienvenida inicial
+
+        /* Bienvenida inicial */
         let init_div = document.createElement('div');
         init_div.classList.add('div-main');
         let title = document.createElement('h1');
@@ -110,7 +111,8 @@ class View {
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
         this._append(init_div, [title, description]);
-        // Añadir proceso
+
+        /* Añadir proceso */
         let addproc_div = document.createElement('div');
         addproc_div.id = 'addproc_div';
         addproc_div.classList.add('div-main');
@@ -196,7 +198,7 @@ class View {
             this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
             this._resetInput();
         });
-        // Selector de clase
+        /* Selector de clase */
         let cs_table = this._createInputAddTable(addForm_svr4, 'Clase');
         let classSel = document.createElement('select');
         classSel.id = 'class_sel';
@@ -312,32 +314,18 @@ class View {
         this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
         this._addBinaryRowText(data_table, 'Número de cambios de contexto: ', data.cswitch);
 
+        /* Grafico de barras */
         let tiempos_td = this._addBinaryRow(data_table, 'Tiempos por proceso: ');
         tiempos_td.id = 'barChart_td';
-
         data_div.appendChild(data_table);
-        
-        //let table_div = document.createElement('div');
-        //table_div.classList.add('div-states');
-        //this._createSummaryTable(table_div, data.proc_data);
-        //this._append(this.summary_div, [title_div, data_div, table_div]);
-
-        //let chart_div = document.createElement('div');
-        //chart_div.classList.add('div-states');
-        //let chart_title = document.createElement('p');
-        //chart_title.textContent = 'Tiempos por proceso:';
-
-
         let cv = document.createElement('canvas');
         tiempos_td.appendChild(cv);
-        //this.summary_div.appendChild(chart_div);
-
-        this._append(this.summary_div, [title_div, data_div/*, chart_div*/]);
-
+        this._append(this.summary_div, [title_div, data_div]);
         new Graphics().drawBarChart(cv.getContext('2d'), data.chart);
     }
 
 
+    /* Grafica de progreso */
     createProgress(time) {
         this._clearChilds(this.progress_div);
         let cv = document.createElement('canvas');
@@ -593,7 +581,6 @@ class View {
                 row.appendChild(tb)
             }
         });
-        
     }
 
 

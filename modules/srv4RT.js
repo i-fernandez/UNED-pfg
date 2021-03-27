@@ -49,17 +49,21 @@ class Svr4RT {
         this.rt_timeleft = this.rt_pquantum;
     }
 
+    /* Invocar directamente a los metodos */
+    /*
     runTick() {
         let text = '';
         switch (this.proc.p_state) {
             case 'running_kernel':
 
             case 'running_user':
+                
                 this.rt_timeleft -= this.proc.sched.TICK;
                 if (this.proc.current_cycle_time >= this.proc.cpu_burst) 
                     text += this._toSleep();
                 else if (this.rt_timeleft <= 0) 
                     this.proc.sched.roundRobin();
+                
                 break;
 
             case 'sleeping':
@@ -70,6 +74,21 @@ class Svr4RT {
         }
         return text;
     }
+    */
+
+    tick_user() {
+        this.rt_timeleft -= this.proc.sched.TICK;
+        if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
+            // Finalizado ciclo CPU
+            this.proc.p_state = 'sleeping';
+            this.proc.current_cycle_time = 0;
+            this.proc.kernelCount = 2;
+            return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
+        } else if (this.rt_timeleft <= 0) {
+            this.proc.sched.roundRobin();
+        }
+        return '';
+    }
 
     _toSleep() {
         this.proc.p_state = 'sleeping';
@@ -78,7 +97,7 @@ class Svr4RT {
         return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
     }
 
-    _fromSleep() {
+    fromSleep() {
         return `Proceso ${this.proc.p_pid} finaliza su espera por I/O. `;
     }
 

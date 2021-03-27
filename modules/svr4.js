@@ -307,10 +307,13 @@ class Svr4Process {
         this.class = (pClass == 'RealTime') ? new Svr4RT(this) : new Svr4TS(this);
     }
 
+    /* Ejecuta un tick de reloj */
     runTick() {
         let text = '';
         switch (this.p_state) {
             case 'running_kernel':
+                text += this._tick_kernel();
+                /*
                 this.run_ker += this.sched.TICK;
                 if (this.kernelCount > 1) {
                     this.kernelCount--;
@@ -321,7 +324,11 @@ class Svr4Process {
                     this.class.fromSysCall();
                     text += `Proceso ${this.p_pid} finaliza llamada al sistema. `;
                 } 
+                */
             case 'running_user':
+                text += this._tick_user();
+
+                /*
                 this.run_usr += this.sched.TICK;
                 this.execution -= this.sched.TICK;
                 if (this.execution <= 0)
@@ -329,15 +336,19 @@ class Svr4Process {
                 else {
                     this.current_cycle_time += this.sched.TICK;
                     text += this.class.runTick();
-                }        
+                }
+                */        
                 break;
             case 'sleeping':
+                text += this._tick_sleep();
+                /*
                 this.current_cycle_time += this.sched.TICK;
                 if (this.current_cycle_time >= this.io_burst) {
                     text += this.class.runTick()
                     this.p_state = 'ready';
                     this.current_cycle_time = 0;
                 }
+                */
                 break;
             case 'ready':
                 this.wait_time += this.sched.TICK;
@@ -438,12 +449,43 @@ class Svr4Process {
         }
     }
 
-    _toZombie() {
-        this.execution = 0;
-        this.p_state = 'zombie';
-        //this.finish_time = this.sched.time;
-        return `Proceso ${this.p_pid} finalizado en ${this.sched.time} ut. `;
-    }    
+    _tick_kernel() {
+        this.run_ker += this.sched.TICK;
+        if (this.kernelCount > 1) {
+            this.kernelCount--;
+        }
+        else {
+            this.kernelCount = 2;
+            this.p_state = 'running_user';
+            this.class.fromSysCall();
+            return `Proceso ${this.p_pid} finaliza llamada al sistema. `;
+        }
+        return '';
+    }
+
+    _tick_user() {
+        this.run_usr += this.sched.TICK;
+        if (this.execution <= this.sched.TICK) {
+            // finalizada ejecucion
+            this.execution = 0;
+            this.p_state = 'zombie';
+            return `Proceso ${this.p_pid} finalizado en ${this.sched.time} ut. `;
+        } else {
+            this.execution -= this.sched.TICK;
+            this.current_cycle_time += this.sched.TICK;
+            return this.class.tick_user();
+        }
+    }
+
+    _tick_sleep() {
+        this.current_cycle_time += this.sched.TICK;
+        if (this.current_cycle_time >= this.io_burst) {
+            this.p_state = 'ready';
+            this.current_cycle_time = 0;
+            return this.class.fromSleep();
+        }
+        return '';
+    } 
 }
 
 

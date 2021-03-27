@@ -123,6 +123,7 @@ class Svr4TS {
     }
 
 
+    /*
     runTick() {
         let text = '';
         switch (this.proc.p_state) {
@@ -139,8 +140,10 @@ class Svr4TS {
                 break;
 
             case 'sleeping':
+                
                 this._updateQuantum();
                 text += this._fromSleep();
+                
                 break;
 
             default:
@@ -148,7 +151,25 @@ class Svr4TS {
         }
         return text;
     }
+    */
 
+    tick_user() {
+        this._updateQuantum();
+        this.ts_timeleft -= this.proc.sched.TICK;
+        if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
+            // Finalizado ciclo CPU
+            this.proc.p_state = 'sleeping';
+            this.proc.current_cycle_time = 0;
+            this.proc.p_pri = Math.floor(Math.random() * (100 - 60) + 60);
+            this.proc.kernelCount = 2;
+            return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
+        } else if (this.ts_timeleft <= 0) {
+            return this._quantumExpired();
+        }
+        return '';
+    }
+
+    /*
     _toSleep() {
         this.proc.p_state = 'sleeping';
         this.proc.current_cycle_time = 0;
@@ -156,8 +177,10 @@ class Svr4TS {
         this.proc.kernelCount = 2;
         return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
     }
+    */
 
-    _fromSleep() {
+    fromSleep() {
+        this._updateQuantum();
         return `Proceso ${this.proc.p_pid} finaliza su espera por I/O.
             Prioridad temporalmente aumentada a ${this.proc.p_pri}. `;
     }

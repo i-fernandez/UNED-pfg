@@ -340,36 +340,17 @@ class Svr3Process {
             this.p_cpu = Math.floor(this.p_cpu/2);
     }
 
+    /* Ejecuta un tick de reloj */
     runTick(time, currentTime) {
         let text = '';
         switch (this.p_state) {
             case 'running_kernel':
-                //this.run_ker += time;
-                //text = this._fromSysCall();
                 text += this._tick_kernel(time);
             case 'running_user':
                 text += this._tick_user(time, currentTime);
-                /*
-                this.run_usr += time;
-                if (this.p_cpu < 127)   
-                    this.p_cpu++;
-                if (this.execution <= time) 
-                    text = this._toZombie(currentTime);
-                else {
-                    this.execution -= time;
-                    this.current_cycle_time += time;
-                    if (this.current_cycle_time >= this.cpu_burst)
-                        text = this._toSleep();
-                }
-                */
                 break;
             case 'sleeping':
                 text += this._tick_sleep(time);
-                /*
-                this.current_cycle_time += time;
-                if (this.current_cycle_time >= this.io_burst) 
-                    text = this._fromSleep();
-                */
                 break;
             case 'ready':
                 this.wait_time += time;
@@ -381,7 +362,6 @@ class Svr3Process {
                 break;
         }
         return text;
-
     }
 
     /* Datos de la pantalla añadir proceso */
@@ -454,6 +434,7 @@ class Svr3Process {
         }
     }
 
+    /* Ejecuta un tick en modo núcleo */
     _tick_kernel(time) {
         this.run_ker += time;
         if (this.kernelCount > 1) {
@@ -468,6 +449,7 @@ class Svr3Process {
         return '';
     }
 
+    /* Ejecuta un tick en modo usuario */
     _tick_user(time, currentTime) {                        
         this.run_usr += time;
         if (this.p_cpu < 127)   
@@ -493,6 +475,7 @@ class Svr3Process {
         return '';
     }
 
+    /* Ejecuta un tick en estado sleeping */
     _tick_sleep(time) {
         this.current_cycle_time += time;
         if (this.current_cycle_time >= this.io_burst) {
@@ -506,51 +489,6 @@ class Svr3Process {
         }
         return '';
     }
-
-    /*
-    _toSleep() {
-        this.p_state = 'sleeping';
-        this.current_cycle_time = 0;
-        this.kernelCount = 2;
-        this.p_wchan = this.PRIORITIES[Math.floor(Math.random() * this.PRIORITIES.length)]
-        return `Proceso ${this.p_pid} finaliza su ciclo de CPU.
-            Direccion de dormir: ${this.p_wchan}`;
-    }
-    */
-
-    /*
-    _fromSleep() {
-        this.p_state = 'ready';
-        this.current_cycle_time = 0;
-        this.p_pri = this.p_wchan;
-        this.p_wchan = -1;
-        return `Proceso ${this.p_pid} finaliza su espera por I/O. 
-            Aumentada prioridad temporalmente a ${this.p_pri}`;
-    }
-    */
-
-    /*
-    _fromSysCall() {
-        if (this.kernelCount > 1) {
-            this.kernelCount--;
-        }
-        else {
-            this.kernelCount = 2;
-            this.p_pri = this.p_usrpri;
-            this.p_state = 'running_user';
-            return `Proceso ${this.p_pid} finaliza llamada al sistema.`;
-        } 
-    }
-    */
-
-    /*
-    _toZombie(currentTime) {
-        this.execution = 0;
-        this.p_state = 'zombie';
-        //this.finish_time = currentTime;
-        return `Proceso ${this.p_pid} finalizado en ${currentTime} ut.`;
-    }
-    */
 }
 
 
