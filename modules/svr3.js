@@ -162,24 +162,41 @@ class Svr3Scheduler {
             tiempos.push(pr.getSummaryData());
         });
 
-        return {
+        let data = {
+        //return {
             n_proc: n_proc,
             t_time: this.time,
             wait: Math.floor(t_wait / n_proc),
             cswitch: this.contextSwitchCount,
-            //proc_data: table
             chart: {
                 pids: pids,
                 time: tiempos
             }
         }
+        return JSON.stringify(data);
     }
 
     _sendState() {
         // Timeline
+        
         let timeData = [this.time];
         this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
         this.stateManager.pushTime(timeData);
+        
+
+        // Formato JSON
+        /*
+        let timeData_text = `{ "time" : [${this.time}], `;
+        timeData_text += `"pids" : {`
+        this.processTable.forEach(pr => {
+            timeData_text += `"${pr.p_pid}" : [${pr.getStateNumber()}], `;
+        });
+        timeData_text = timeData_text.slice(0, -2);
+        timeData_text += `} }`;
+        this.stateManager.pushJSON(timeData_text);
+        console.log(timeData_text);
+        */
+        
 
         // Estado
         if (this.isFinished())
@@ -193,7 +210,8 @@ class Svr3Scheduler {
             let _qs = [];
             this.qs.forEach(q => {_qs.push(q.getData());});
 
-            this.stateManager.pushState({
+            let state = {
+            //this.stateManager.pushState({
                 name: this.name,
                 state: {
                     time: this.time, 
@@ -204,7 +222,9 @@ class Svr3Scheduler {
                     runrun: this.runrun
                 },
                 info: this.processTable[0].getInfo()
-            });
+            //});
+            }
+            this.stateManager.pushState(JSON.stringify(state));
             this.journal = [];
         }
     }

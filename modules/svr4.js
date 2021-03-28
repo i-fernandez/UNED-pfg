@@ -225,7 +225,9 @@ class Svr4Scheduler {
             pids.push(pr.p_pid);
             tiempos.push(pr.getSummaryData());
         });
-        return {
+        
+        let data = { 
+        //return {
             n_proc : n_proc,
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
@@ -235,6 +237,7 @@ class Svr4Scheduler {
                 time: tiempos
             }
         }
+        return JSON.stringify(data);
     }
 
     _sendState() {
@@ -271,7 +274,8 @@ class Svr4Scheduler {
                 ts_info = pr.getClassInfo();
             });
 
-            this.stateManager.pushState({
+            let state = {
+            //this.stateManager.pushState({
                 name: this.name,
                 state: {
                     time: this.time, 
@@ -287,7 +291,9 @@ class Svr4Scheduler {
                 rt_info: rt_info,
                 ts_info: ts_info,
                 info: this.processTable[0].getInfo()
-            });
+            //});
+            }
+            this.stateManager.pushState(JSON.stringify(state));
             this.journal = [];
         }
     }

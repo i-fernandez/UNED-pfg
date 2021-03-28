@@ -50,6 +50,11 @@ class Simulation {
         }
         this.startVisualizationEvent.trigger(data);
         */
+
+        /* BORRAR */
+        this.stateManager.createJSON();
+        console.log(this.stateManager.getProgressData());
+
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
         // Envía el progreso

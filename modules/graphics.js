@@ -104,7 +104,7 @@ class Graphics {
         });
     }
 
-    // Dibuja un grafico de barras
+    /* Dibuja un grafico de barras */
     drawBarChart(canvas, proc_data) {
         let labels = [];
         let wait = [];
@@ -134,23 +134,6 @@ class Graphics {
                 backgroundColor: 'RGB(85, 125, 65)',
             }]
         };
-
-        /*
-        let canvas = document.createElement('canvas');
-        // Tamaño del grafico
-        div.height = 400;
-        canvas.height = 400;
-        if (labels.length > 1) {
-            div.width = labels.length * 100;
-            canvas.width = labels.length * 100;
-            console.log(`canvas: ${canvas.width} `);
-        } else {
-            div.width = 150;
-            canvas.width = 150;
-            console.log(`canvas: 150 `);
-        }
-        div.appendChild(canvas);
-        */
         
         new Chart(canvas, {
             type: 'bar',
@@ -185,6 +168,7 @@ class Graphics {
     }
 
     // Convierte el formato de tiempos/estados
+    // TODO: usar el JSON generado por los estados
     _parseTimeData(timeSeries) {
         let time = [];
         let pids = [];

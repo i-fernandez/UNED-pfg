@@ -307,7 +307,8 @@ class View {
 
     /* Simulacion */
 
-    createSummary(data) {
+    createSummary(summary) {
+        let data = JSON.parse(summary);
         this._clearChilds(this.summary_div);
         let title_div = document.createElement('div');
         title_div.classList.add('div-states');
@@ -371,7 +372,8 @@ class View {
 
 
     // Elementos para mostrar un estado (comunes)
-    showState(data) {
+    showState(state_data) {
+        let data = JSON.parse(state_data);
         let state = data.state;
         let s_table = document.getElementById('state_table');
         this._clearChilds(s_table);
