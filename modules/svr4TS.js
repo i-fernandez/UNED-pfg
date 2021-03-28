@@ -122,37 +122,6 @@ class Svr4TS {
             Nueva prioridad: ${this.ts_umdpri}`;           
     }
 
-
-    /*
-    runTick() {
-        let text = '';
-        switch (this.proc.p_state) {
-            case 'running_kernel':
-
-            case 'running_user':
-                this._updateQuantum();
-                this.ts_timeleft -= this.proc.sched.TICK;
-                if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
-                    text += this._toSleep();
-                } else if (this.ts_timeleft <= 0) {
-                    text += this._quantumExpired();
-                }
-                break;
-
-            case 'sleeping':
-                
-                this._updateQuantum();
-                text += this._fromSleep();
-                
-                break;
-
-            default:
-                break;
-        }
-        return text;
-    }
-    */
-
     tick_user() {
         this._updateQuantum();
         this.ts_timeleft -= this.proc.sched.TICK;
@@ -168,16 +137,6 @@ class Svr4TS {
         }
         return '';
     }
-
-    /*
-    _toSleep() {
-        this.proc.p_state = 'sleeping';
-        this.proc.current_cycle_time = 0;
-        this.proc.p_pri = Math.floor(Math.random() * (100 - 60) + 60);
-        this.proc.kernelCount = 2;
-        return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
-    }
-    */
 
     fromSleep() {
         this._updateQuantum();

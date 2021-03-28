@@ -177,25 +177,11 @@ class Svr3Scheduler {
     }
 
     _sendState() {
-        // Timeline
-        
+        // Datos de progreso
         let timeData = [this.time];
         this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
         this.stateManager.pushTime(timeData);
-        
 
-        // Formato JSON
-        /*
-        let timeData_text = `{ "time" : [${this.time}], `;
-        timeData_text += `"pids" : {`
-        this.processTable.forEach(pr => {
-            timeData_text += `"${pr.p_pid}" : [${pr.getStateNumber()}], `;
-        });
-        timeData_text = timeData_text.slice(0, -2);
-        timeData_text += `} }`;
-        this.stateManager.pushJSON(timeData_text);
-        console.log(timeData_text);
-        */
         
 
         // Estado
@@ -211,8 +197,8 @@ class Svr3Scheduler {
             this.qs.forEach(q => {_qs.push(q.getData());});
 
             let state = {
-            //this.stateManager.pushState({
                 name: this.name,
+                pt_info: this.processTable[0].getInfo(),
                 state: {
                     time: this.time, 
                     journal: this.journal, 
@@ -220,9 +206,7 @@ class Svr3Scheduler {
                     qs: _qs,
                     whichqs: Array.from(this.whichqs),
                     runrun: this.runrun
-                },
-                info: this.processTable[0].getInfo()
-            //});
+                }
             }
             this.stateManager.pushState(JSON.stringify(state));
             this.journal = [];

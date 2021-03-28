@@ -40,12 +40,23 @@ class PriorityQueue
         return this.items[0]; 
     }
 
+    /* Devuelve el numero de cola seguido de los pids encolados */
+    getData() {
+        let pids = [];
+        this.items.forEach(pr => {pids.push(pr.p_pid)});
+        return {
+            priority: this.priority,
+            items: pids
+        }
+    }
+    /*
     getData() {
         return {
             priority : this.priority,
             items : Array.from(this.items)
         }
     }
+    */
 } 
 
 export default PriorityQueue;

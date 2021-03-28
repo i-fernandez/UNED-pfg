@@ -48,15 +48,17 @@ class StateManager {
         this.timeSeries.push(timeData);
     }
 
+    /*
     getTimeSeries() {
         return this.timeSeries;
     }
+    */
 
     getProgressData() {
         return this.progressData;
     }
 
-    /* Devuelve los datos de progreso en formato JSON */
+    /* Genera los datos de progreso en formato JSON */
     createJSON() {
         this.progressData = `{ "time" : [`
         this.timeSeries.forEach(item => {this.progressData += `${item[0]}, `});

@@ -41,24 +41,11 @@ class Simulation {
         while (!(this.scheduler.isFinished())) 
             this.scheduler.nextTick();
 
-        // Lanza el evento con el resumen y el primer estado
-        /*
-        let data = {
-            summary: this.scheduler.getSummary(),
-            state: this.stateManager.states[0],
-            time: this.stateManager.getTimeSeries()
-        }
-        this.startVisualizationEvent.trigger(data);
-        */
-
-        /* BORRAR */
-        this.stateManager.createJSON();
-        console.log(this.stateManager.getProgressData());
-
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
         // Envía el progreso
-        this.createTimelineEvent.trigger(this.stateManager.getTimeSeries());
+        this.stateManager.createJSON();
+        this.createTimelineEvent.trigger(this.stateManager.getProgressData());
         // Envía el primer estado
         this.createStatesEvent.trigger(this.stateManager.states[0]);
     }

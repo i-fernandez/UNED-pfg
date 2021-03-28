@@ -241,7 +241,7 @@ class Svr4Scheduler {
     }
 
     _sendState() {
-        // Timeline
+        // Datos de progreso
         let timeData = [this.time];
         this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
         this.stateManager.pushTime(timeData);
@@ -275,8 +275,10 @@ class Svr4Scheduler {
             });
 
             let state = {
-            //this.stateManager.pushState({
                 name: this.name,
+                pt_info: this.processTable[0].getInfo(),
+                rt_info: rt_info,
+                ts_info: ts_info,
                 state: {
                     time: this.time, 
                     journal: this.journal, 
@@ -284,14 +286,10 @@ class Svr4Scheduler {
                     dispq: _dispq,
                     dqactmap: Array.from(this.dqactmap),
                     runrun: this.runrun,
-                    kprunrun: this.kprunrun
-                },
-                rt_data: {rt},
-                ts_data: {ts},
-                rt_info: rt_info,
-                ts_info: ts_info,
-                info: this.processTable[0].getInfo()
-            //});
+                    kprunrun: this.kprunrun,
+                    rt_data: rt,
+                    ts_data: ts
+                }
             }
             this.stateManager.pushState(JSON.stringify(state));
             this.journal = [];
@@ -324,42 +322,11 @@ class Svr4Process {
         switch (this.p_state) {
             case 'running_kernel':
                 text += this._tick_kernel();
-                /*
-                this.run_ker += this.sched.TICK;
-                if (this.kernelCount > 1) {
-                    this.kernelCount--;
-                }
-                else {
-                    this.kernelCount = 2;
-                    this.p_state = 'running_user';
-                    this.class.fromSysCall();
-                    text += `Proceso ${this.p_pid} finaliza llamada al sistema. `;
-                } 
-                */
             case 'running_user':
-                text += this._tick_user();
-
-                /*
-                this.run_usr += this.sched.TICK;
-                this.execution -= this.sched.TICK;
-                if (this.execution <= 0)
-                    text += this._toZombie();
-                else {
-                    this.current_cycle_time += this.sched.TICK;
-                    text += this.class.runTick();
-                }
-                */        
+                text += this._tick_user();       
                 break;
             case 'sleeping':
                 text += this._tick_sleep();
-                /*
-                this.current_cycle_time += this.sched.TICK;
-                if (this.current_cycle_time >= this.io_burst) {
-                    text += this.class.runTick()
-                    this.p_state = 'ready';
-                    this.current_cycle_time = 0;
-                }
-                */
                 break;
             case 'ready':
                 this.wait_time += this.sched.TICK;

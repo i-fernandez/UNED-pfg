@@ -49,33 +49,6 @@ class Svr4RT {
         this.rt_timeleft = this.rt_pquantum;
     }
 
-    /* Invocar directamente a los metodos */
-    /*
-    runTick() {
-        let text = '';
-        switch (this.proc.p_state) {
-            case 'running_kernel':
-
-            case 'running_user':
-                
-                this.rt_timeleft -= this.proc.sched.TICK;
-                if (this.proc.current_cycle_time >= this.proc.cpu_burst) 
-                    text += this._toSleep();
-                else if (this.rt_timeleft <= 0) 
-                    this.proc.sched.roundRobin();
-                
-                break;
-
-            case 'sleeping':
-                text += this._fromSleep();
-                break;
-            default:
-                break;
-        }
-        return text;
-    }
-    */
-
     tick_user() {
         this.rt_timeleft -= this.proc.sched.TICK;
         if (this.proc.current_cycle_time >= this.proc.cpu_burst) {

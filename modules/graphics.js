@@ -5,12 +5,33 @@ class Graphics {
     }
 
     // Dibuja un grafico de lineas
-    drawLineChart (canvas, time) {
+    drawLineChart (canvas, data) {
+        let prData = JSON.parse(data);
         // Convierte los datos
-        let prData = this._parseTimeData(time);
+        //let prData = this._parseTimeData(data);
+        
+        //let prData = data;
         // Genera los datasets
         let params = [];
-        let n_pid = 0;
+        //let n_pid = 0;
+        
+        Object.keys(prData.pids).forEach(pid =>{
+            let color = this._getColor();
+            let dataset = {
+                label: `pid ${pid}`,
+                data: prData["pids"][pid],
+                borderWidth: 3,
+                fill: false,
+                steppedLine: true,
+                borderColor: color,
+                backgroundColor: color
+            }
+            params.push(dataset);
+
+        });
+        
+
+        /*
         Object.keys(prData.pids).forEach(pid => {
             let color = this._getColor();
             let dataset = {
@@ -25,6 +46,8 @@ class Graphics {
             params.push(dataset);
             n_pid++;
         });
+        */
+        
         // Muestra la grafica
         new Chart(canvas, {
             type: 'line',
@@ -186,7 +209,7 @@ class Graphics {
         return {time: time, pids: pids}
     }
 
-    // Genera los colores de forma ciclica
+    /* Genera colores de forma cíclica */
     _getColor() {
         let colors = [
             'RGB(239, 134, 119)',

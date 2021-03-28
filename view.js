@@ -10,7 +10,9 @@ class View {
         this.addSVR4ProcessEvent = new Event();
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
-        this.previousStateEvent = new Event();   
+        this.previousStateEvent = new Event();
+
+        this.charts = new Graphics();
     }
 
     /* Añadir proceso */
@@ -331,18 +333,20 @@ class View {
         let cv = document.createElement('canvas');
         tiempos_td.appendChild(cv);
         this._append(this.summary_div, [title_div, data_div]);
-        new Graphics().drawBarChart(cv.getContext('2d'), data.chart);
+        this.charts.drawBarChart(cv.getContext('2d'), data.chart);
+        //new Graphics().drawBarChart(cv.getContext('2d'), data.chart);
     }
 
 
     /* Grafica de progreso */
-    createProgress(time) {
+    createProgress(data) {
         this._clearChilds(this.progress_div);
         let cv = document.createElement('canvas');
         cv.width = 1000;
         cv.height = 200;
         this.progress_div.appendChild(cv);
-        new Graphics().drawLineChart(cv, time);
+        this.charts.drawLineChart(cv.getContext('2d'), data);
+        //new Graphics().drawLineChart(cv.getContext('2d'), data);
     }
 
     _createStates() {
@@ -397,18 +401,18 @@ class View {
         // Tabla de procesos
         if (state.pTable.length > 0) {
             let pt_td = this._addBinaryRow(s_table, 'Tabla de \nprocesos: ');
-            this._displayProcessTable(state.pTable, data.info, pt_td);
+            this._displayProcessTable(state.pTable, data.pt_info, pt_td);
         }
         
         // Tablas de clase (SVR4)
         if (data.name == 'SVR4') { 
-            if (data.rt_data.rt.length > 0) {
+            if (state.rt_data.length > 0) {
                 let rt_td = this._addBinaryRow(s_table, 'Procesos \nRealTime: ');
-                this._showSvr4ClassDepent(data.rt_data.rt, data.rt_info, rt_td, state.pTable);
+                this._showSvr4ClassDepent(state.rt_data, data.rt_info, rt_td, state.pTable);
             }
-            if (data.ts_data.ts.length > 0) {
+            if (state.ts_data.length > 0) {
                 let ts_td = this._addBinaryRow(s_table, 'Procesos \nTimeSharing: ');
-                this._showSvr4ClassDepent(data.ts_data.ts, data.ts_info, ts_td, state.pTable);
+                this._showSvr4ClassDepent(state.ts_data, data.ts_info, ts_td, state.pTable);
             }
         }
         // Eventos
@@ -530,41 +534,6 @@ class View {
         });
     }
 
-    // Muestra la tabla resumen
-    /*
-    _createSummaryTable(domElement, data) {
-        if (data.length > 0) {
-            let table = document.createElement('table');
-            table.id = 'summary_table';
-            table.classList.add('plain_table');
-            // Head
-            let thead = table.createTHead();
-            thead.classList.add('plain_table-th');
-            let head_row = thead.insertRow();
-            let th_1 = document.createElement('th');
-            th_1.appendChild(document.createTextNode('pid'));
-            head_row.appendChild(th_1);
-            let th_2 = document.createElement('th');
-            th_2.appendChild(document.createTextNode('tiempo de espera'));
-            head_row.appendChild(th_2);
-            let th_3 = document.createElement('th');
-            th_3.appendChild(document.createTextNode('tiempo de ejecución'));
-            head_row.appendChild(th_3);
-            // Body
-            let tbody = table.createTBody();
-            data.forEach(pr => {
-                let row = tbody.insertRow();
-                row.classList.add('plain_table-row');
-                for (let item in pr) {
-                    let tb = document.createElement('td');
-                    tb.appendChild(document.createTextNode(pr[item]));
-                    row.appendChild(tb);
-                }
-            });
-            domElement.appendChild(table);
-        }
-    }
-    */
 
     // Muestra la tabla de procesos en la vista Añadir proceso
     _createAddTable(domElement, pTable) {
@@ -736,6 +705,7 @@ class View {
             let row = table.insertRow();
             // Cola
             let td_t = document.createElement('td');
+            
             let pri = item.priority;
             if (name == 'SVR3') 
                 pri = `${item.priority*4} - ${((item.priority*4)+4)}`;
@@ -753,7 +723,7 @@ class View {
                 // PID
                 let dt = document.createElement('div');
                 dt.classList.add('priorityQueue_div');
-                dt.appendChild(document.createTextNode(pr.p_pid));
+                dt.appendChild(document.createTextNode(pr));
                 this._append(td_a, [da, dt]);
             });
             this._append(row, [td_t, td_a]);
