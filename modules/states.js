@@ -6,6 +6,7 @@ class StateManager {
         this.progressData = '';
     }
 
+    /* Devuelve el estado posterior (si existe) */
     getNextState() {
         if (this.currentState+1 < this.states.length) 
             this.currentState++;
@@ -13,6 +14,7 @@ class StateManager {
         return this.states[this.currentState];
     }
 
+    /* Devuelve el estado anterior (si existe) */
     getPreviousState() {
         if (this.currentState > 0) 
             this.currentState--;
@@ -20,46 +22,23 @@ class StateManager {
         return this.states[this.currentState];
     }
 
-    // TODO: modificar el formato
-    // [time, time, time]
-    // [pid1, pid1, pid1]
-    // [pid2, pid2, pid2]
+    /* Envia un estado al almacen */
     pushState(state) {
         this.states.push(state);
     }
 
-    /*
-    pushJSON(json) {
-        let data = JSON.parse(json);
-        if (this.timeData) {
-            this.timeData.time.push(data.time[0]);
-            this.timeData.pids.forEach(pr => {
-                this.timeData.pids[pr].push(data.pids[pr][0]);
-            });
-        } else {
-            this.timeData = data;
-        }
-        console.log(this.timeData);
-
-    }
-    */
-
+    /* Envía datos de progreso de un tiempo determinado */
     pushTime(timeData) {
         this.timeSeries.push(timeData);
     }
 
-    /*
-    getTimeSeries() {
-        return this.timeSeries;
-    }
-    */
-
+    /* Devuelve los datos de progreso en formato JSON */
     getProgressData() {
         return this.progressData;
     }
 
     /* Genera los datos de progreso en formato JSON */
-    createJSON() {
+    generateProgress() {
         this.progressData = `{ "time" : [`
         this.timeSeries.forEach(item => {this.progressData += `${item[0]}, `});
         this.progressData = this.progressData.slice(0, -2);

@@ -8,7 +8,7 @@ class Svr3Scheduler {
         this.SCHED = 1000;
         this.CONTEXT_SWITCH = 10;
         this.TICK = 10;
-
+        // variables
         this.name = 'SVR3';
         this.stateManager = stateManager;
         this.time = 0;
@@ -148,12 +148,11 @@ class Svr3Scheduler {
         return (procesos.length === 0);
     }
 
+    /* Devuelve el resumen de ejecución */
     getSummary() {
         let n_proc = this.processTable.length;
         let t_wait = 0;
         this.processTable.forEach(pr => t_wait += pr.wait_time);
-        //let table = [];
-        //this.processTable.forEach(pr => {table.push(pr.getSummaryData())});
         // Grafica
         let pids = [];
         let tiempos = [];
@@ -161,9 +160,9 @@ class Svr3Scheduler {
             pids.push(pr.p_pid);
             tiempos.push(pr.getSummaryData());
         });
-
         let data = {
-        //return {
+            tick: this.TICK,
+            cs_duration: this.CONTEXT_SWITCH,
             n_proc: n_proc,
             t_time: this.time,
             wait: Math.floor(t_wait / n_proc),
@@ -176,6 +175,7 @@ class Svr3Scheduler {
         return JSON.stringify(data);
     }
 
+    /* Envía un estado */
     _sendState() {
         // Datos de progreso
         let timeData = [this.time];
@@ -213,7 +213,7 @@ class Svr3Scheduler {
         }
     }
 
-    // Comprueba si se inicia un cambio de contexto
+    /* Comprueba si comienza un cambio de contexto */
     _startSwtch() {
         let n = this._getNextProcess();
 
@@ -245,7 +245,7 @@ class Svr3Scheduler {
         }
     }
 
-    // Realiza la expropiacion del proceso en ejecucion
+    /* Realiza la expropiacion del proceso en ejecucion */
     _preempt() {
         this.inContextSwitch = true;
         this.running.p_state = 'ready';
@@ -254,7 +254,7 @@ class Svr3Scheduler {
         
     }
 
-    // Realiza un cambio de contexto
+    /* Realiza un cambio de contexto */
     _swtch() {
         this.runrun = false;
         this.inContextSwitch = false;
@@ -273,7 +273,7 @@ class Svr3Scheduler {
         this.journal.push(`Proceso ${next_pr.p_pid} cargado para su ejecucion.`);
     }
 
-    // Aplica decay y recalcula prioridades para cada proceso
+    /* Aplica decay y recalcula prioridades para cada proceso */
     _schedCPU() {
         this.journal.push('Iniciada rutina schedcpu');
         let procesos = this.processTable.filter(
@@ -301,7 +301,7 @@ class Svr3Scheduler {
         });
     }
 
-    // Comprueba si round robin produce cambio de contexto
+    /* Comprueba si round robin produce cambio de contexto */
     _roundRobin() {
         if (this.running && this.whichqs[0] == Math.floor(this.running.p_pri/4)) 
             this.inRoundRobin = true;
@@ -334,6 +334,7 @@ class Svr3Process {
         this.kernelCount = 0;  // numero de Ticks en modo nucleo
     }
 
+    /* Recalcula la prioridad */
     calcPriority() {
         this.p_pri = Math.floor(this.PUSER + this.p_cpu/4 + this.p_nice*2);
         this.p_usrpri = this.p_pri;
@@ -341,6 +342,7 @@ class Svr3Process {
             Nueva prioridad: ${this.p_pri}`;
     }
 
+    /* Aplica factor decay al proceso */
     decay() {
         if (this.p_state != 'zombie' && this.p_state != 'finished')
             this.p_cpu = Math.floor(this.p_cpu/2);
@@ -398,7 +400,7 @@ class Svr3Process {
         };
     }
 
-    // Datos para la informacion de cada campo en estados
+    /* Devuelve la informacion de los campos */
     getInfo() {
         return {
             p_pid: 'PID del proceso',
@@ -420,7 +422,7 @@ class Svr3Process {
         return [this.wait_time, this.run_usr-this.run_ker, this.run_ker];
     }
 
-    /* Representacion numerica del estado */
+    /* Devuelve la representacion numerica del estado */
     getStateNumber() {
         switch (this.p_state) {
             case 'running_kernel':

@@ -262,7 +262,6 @@ class View {
         document.getElementById('addForm_svr4').style.display = 'none';
     }
 
-
     _getSvr3Input() {
         let data = {
             execution: parseInt(document.getElementById('inputBurst_svr3').value, 10),
@@ -270,12 +269,8 @@ class View {
             io_burst: parseInt(document.getElementById('inputIO_svr3').value, 10),
             pri: parseInt(document.getElementById('inputPriority_svr3').value, 10)
         }
-
-        /* Convierte a JSON */
+        // Convierte a JSON
         return JSON.stringify(data);
-
-
-        //return data;
     }
 
     _getSvr4Input() {
@@ -288,11 +283,8 @@ class View {
             pClass: pc,
             pri: parseInt(document.getElementById('inputPriority_svr4').value, 10)
         }
-
-        /* Convierte a JSON */
+        // Convierte a JSON
         return JSON.stringify(data);
-
-        //return data;
     }
 
     _resetInput() {
@@ -309,6 +301,7 @@ class View {
 
     /* Simulacion */
 
+    /* Rellena los datos del resumen */
     createSummary(summary) {
         let data = JSON.parse(summary);
         this._clearChilds(this.summary_div);
@@ -321,6 +314,8 @@ class View {
         let data_div = document.createElement('div');
         data_div.classList.add('div-states');
         let data_table = document.createElement('table');
+        this._addBinaryRowText(data_table, 'Duración del tick: ', `${data.tick} ut.`);
+        this._addBinaryRowText(data_table, 'Duracion del cambio de contexto: ', `${data.cs_duration} ut. `);
         this._addBinaryRowText(data_table, 'Número de procesos: ', data.n_proc);
         this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
         this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
@@ -334,7 +329,6 @@ class View {
         tiempos_td.appendChild(cv);
         this._append(this.summary_div, [title_div, data_div]);
         this.charts.drawBarChart(cv.getContext('2d'), data.chart);
-        //new Graphics().drawBarChart(cv.getContext('2d'), data.chart);
     }
 
 
@@ -346,7 +340,6 @@ class View {
         cv.height = 200;
         this.progress_div.appendChild(cv);
         this.charts.drawLineChart(cv.getContext('2d'), data);
-        //new Graphics().drawLineChart(cv.getContext('2d'), data);
     }
 
     _createStates() {

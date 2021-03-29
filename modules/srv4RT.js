@@ -15,10 +15,13 @@ class Svr4RT {
         this.rt_pri = proc.p_pri;
     }
 
+    /*
     getPriority() {
         return this.rt_pri;
     }
+    */
 
+    /* Devuelve los datos del proceso */
     getData() {
         return {
             p_pid: this.proc.p_pid,
@@ -34,6 +37,7 @@ class Svr4RT {
         };
     }
 
+    /* Devuelve la informacion de los campos */
     getInfo() {
         return {
             rt_pquantum: 'Cuanto asignado',
@@ -44,11 +48,12 @@ class Svr4RT {
         }
     }
 
-
+    /* Reinicia el cuanto asociado */
     resetQuantum() {
         this.rt_timeleft = this.rt_pquantum;
     }
 
+    /* Ejecuta un tick en modo running_user */
     tick_user() {
         this.rt_timeleft -= this.proc.sched.TICK;
         if (this.proc.current_cycle_time >= this.proc.cpu_burst) {
@@ -63,13 +68,17 @@ class Svr4RT {
         return '';
     }
 
+    /* Finaliza ciclo de CPU */
+    /*
     _toSleep() {
         this.proc.p_state = 'sleeping';
         this.proc.current_cycle_time = 0;
         this.proc.kernelCount = 2;
         return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
     }
+    */
 
+    /* Finaliza espera por IO */
     fromSleep() {
         return `Proceso ${this.proc.p_pid} finaliza su espera por I/O. `;
     }

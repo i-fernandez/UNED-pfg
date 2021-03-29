@@ -7,7 +7,7 @@ class Svr4Scheduler {
         // constantes
         this.CONTEXT_SWITCH = 10;
         this.TICK = 10;
-
+        // variables
         this.name = 'SVR4';
         this.stateManager = stateManager;
         this.time = 0;
@@ -163,6 +163,7 @@ class Svr4Scheduler {
         this.journal.push(`Proceso ${next_pr.p_pid} cargado para ejecucion.`);
     }
 
+    /* Comprueba si comienza un cambio de contexto */
     _startSwtch() {
         let n = this._getNextProcess();
         // No hay ningun proceso en ejecucion 
@@ -214,6 +215,7 @@ class Svr4Scheduler {
         return (procesos.length === 0);
     }
 
+    /* Devuelve el resumen de ejecución */
     getSummary() {
         let n_proc = this.processTable.length;
         let t_wait = 0;
@@ -225,9 +227,9 @@ class Svr4Scheduler {
             pids.push(pr.p_pid);
             tiempos.push(pr.getSummaryData());
         });
-        
         let data = { 
-        //return {
+            tick: this.TICK,
+            cs_duration: this.CONTEXT_SWITCH,
             n_proc : n_proc,
             t_time : this.time,
             wait : Math.floor(t_wait / n_proc),
@@ -240,6 +242,7 @@ class Svr4Scheduler {
         return JSON.stringify(data);
     }
 
+    /* Envía un estado */
     _sendState() {
         // Datos de progreso
         let timeData = [this.time];
@@ -340,6 +343,7 @@ class Svr4Process {
         return text;
     }
 
+    /* Inicia la ejecución del proceso */
     startRun() {
         if (this.kernelCount  > 0)
             this.p_state = 'running_kernel';
@@ -350,6 +354,7 @@ class Svr4Process {
         this.resetQuantum();
     }
 
+    /* Reinicia el cuanto asociado */
     resetQuantum() {
         this.class.resetQuantum();
     }
@@ -380,7 +385,7 @@ class Svr4Process {
         };
     }
 
-    // Datos para la informacion de cada campo en estados
+    /* Devuelve la informacion de los campos */
     getInfo() {
         return {
             p_pid: 'PID del proceso',
@@ -394,20 +399,22 @@ class Svr4Process {
         };
     }
 
+    /* Devuelve la información de los campos de cada clase */
     getClassInfo() {
         return this.class.getInfo();
     }
 
-    /* Datos para la vista resumen */
+    /* Devuelve los datos para la vista resumen */
     getSummaryData() {
         return [this.wait_time, this.run_usr-this.run_ker, this.run_ker];
     }
 
+    /* Devuelve los datos pertenecientes a la clase */
     getClassData() {
         return this.class.getData();
     }
 
-    /* Representacion numerica del estado */
+    /* Devuelve la representacion numerica del estado */
     getStateNumber() {
         switch (this.p_state) {
             case 'running_kernel':
@@ -427,6 +434,7 @@ class Svr4Process {
         }
     }
 
+    /* Ejecuta un tick en modo running_kernel */
     _tick_kernel() {
         this.run_ker += this.sched.TICK;
         if (this.kernelCount > 1) {
@@ -441,6 +449,7 @@ class Svr4Process {
         return '';
     }
 
+    /* Ejecuta un tick en modo running_user */
     _tick_user() {
         this.run_usr += this.sched.TICK;
         if (this.execution <= this.sched.TICK) {
@@ -455,6 +464,7 @@ class Svr4Process {
         }
     }
 
+    /* Ejecuta un tick en modo sleeping */
     _tick_sleep() {
         this.current_cycle_time += this.sched.TICK;
         if (this.current_cycle_time >= this.io_burst) {

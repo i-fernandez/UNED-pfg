@@ -38,10 +38,13 @@ class Svr4TS {
         this.wait = 0;
     }
 
+    /*
     getPriority() {
         return this.ts_umdpri;
     }
+    */
 
+    /* Devuelve los datos del proceso */
     getData() {
         return {
             p_pid: this.proc.p_pid,
@@ -63,6 +66,7 @@ class Svr4TS {
         }
     }
 
+    /* Devuelve la informacion de los campos */
     getInfo() {
         return {
             ts_timeleft: 'Tiempo restante del cuanto',
@@ -79,18 +83,20 @@ class Svr4TS {
         }
     }
 
+    /* Reinicia el cuanto asociado */
     resetQuantum() {
         this.ts_timeleft = this.ts_quantum;
         this.wait = 0;
         this.ts_dispwait = 0;
     }
 
+    /* Actualiza el valor del cuanto */
     _updateQuantum() {
         this.wait += this.proc.sched.TICK * this.proc.sched.time;
         this.ts_dispwait = Math.floor(this.wait / 1000);
     }
 
-    
+    /* Lee valores de la tabla ts_dptbl */
     _readDptbl(pri) {
         this.ts_globpri = pri;
         this.ts_quantum = ts_dptbl(pri)[1];
@@ -100,6 +106,7 @@ class Svr4TS {
         this.ts_lwait = ts_dptbl(pri)[5];
     }
 
+    /* Establece la prioridad del proceso */
     _setPri() {
         this.ts_umdpri = this.ts_cpupri + this.ts_upri;
         if (this.ts_umdpri > 59)
@@ -110,6 +117,7 @@ class Svr4TS {
         this.resetQuantum();
     }
 
+    /* Cuanto expirado: recualcula la prioridad */
     _quantumExpired() {
         if (this.ts_dispwait >= this.ts_maxwait)
             this.ts_cpupri = this.ts_lwait;            
@@ -122,6 +130,7 @@ class Svr4TS {
             Nueva prioridad: ${this.ts_umdpri}`;           
     }
 
+    /* Ejecuta un tick en modo running_user */
     tick_user() {
         this._updateQuantum();
         this.ts_timeleft -= this.proc.sched.TICK;
@@ -138,12 +147,14 @@ class Svr4TS {
         return '';
     }
 
+    /* Finaliza espera por IO */
     fromSleep() {
         this._updateQuantum();
         return `Proceso ${this.proc.p_pid} finaliza su espera por I/O.
             Prioridad temporalmente aumentada a ${this.proc.p_pri}. `;
     }
 
+    /* Finaliza ejecución en modo núcleo */
     fromSysCall() {
         this.ts_cpupri = this.ts_slpret;
         this._setPri();

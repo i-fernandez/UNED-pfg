@@ -5,7 +5,6 @@ import StateManager from './modules/states.js';
 
 class Simulation {
     constructor() {
-        this._init();
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
         this.createSummaryEvent = new Event();
@@ -14,17 +13,15 @@ class Simulation {
         this.sendStateEvent = new Event();
     }
 
-    _init() {
-        this.stateManager = new StateManager();
-    }
-
+    /* Crea un planificador SVR3 */
     createSVR3() {
-        this._init();
+        this.stateManager = new StateManager();
         this.scheduler = new SVR3Scheduler(this.stateManager);
     }
 
+    /* Crea un planificador SVR4 */
     createSVR4() {
-        this._init();
+        this.stateManager = new StateManager();
         this.scheduler = new SVR4Scheduler(this.stateManager);
     }
 
@@ -35,6 +32,7 @@ class Simulation {
     }
 
 
+    /* Lanza la simulación en el planificador */
     startSimulation() { 
         // Genera todos los estados
         this.scheduler.start();
@@ -43,17 +41,19 @@ class Simulation {
 
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
-        // Envía el progreso
-        this.stateManager.createJSON();
+        // Genera y envía el progreso
+        this.stateManager.generateProgress();
         this.createTimelineEvent.trigger(this.stateManager.getProgressData());
         // Envía el primer estado
         this.createStatesEvent.trigger(this.stateManager.states[0]);
     }
 
+    /* Obtiene el estado siguiente */
     getNextState() {
         this.sendStateEvent.trigger(this.stateManager.getNextState());
     }
 
+    /* Obtiene el estado anterior */
     getPreviousState() {
         this.sendStateEvent.trigger(this.stateManager.getPreviousState());
     }
