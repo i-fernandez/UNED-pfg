@@ -1,5 +1,5 @@
-import Simulation from './model.js';
-import View from './view.js';
+import Simulation from '../model/model.js';
+import View from '../view/view.js';
 
 class Controller {
     constructor() {

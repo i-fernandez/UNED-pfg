@@ -1,7 +1,7 @@
-import SVR3Scheduler from './modules/svr3.js'
-import SVR4Scheduler from './modules/svr4.js'
-import Event from './event.js';
-import StateManager from './modules/states.js';
+import SVR3Scheduler from './svr3.js'
+import SVR4Scheduler from './svr4.js'
+import Event from '../util/event.js';
+import StateManager from './states.js';
 
 class Simulation {
     constructor() {

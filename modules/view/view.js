@@ -1,9 +1,9 @@
-import Event from './event.js';
-import Graphics from './modules/graphics.js';
+import Event from '../util/event.js';
+import Graphics from './graphics.js';
 
 class View {
     constructor() {
-        this.loadEvent = new Event();
+        // Eventos
         this.newSVR3Event = new Event();
         this.newSVR4Event = new Event();
         this.addSVR3ProcessEvent = new Event();
@@ -15,10 +15,8 @@ class View {
         this.charts = new Graphics();
     }
 
-    /* Añadir proceso */
-
     render() {
-        // Elementos comunes
+        // Cabecera inicial
         let header_div = document.createElement('div');
         header_div.id = 'header_div';
         let logo = document.createElement('img');
@@ -26,49 +24,63 @@ class View {
         logo.classList.add('image-right');
         header_div.appendChild(logo);
 
+        // Menu de navegacion
         let header_menu_div = document.createElement('div');
         header_menu_div.id = 'header_menu_div';
         header_menu_div.style.display = 'none';
-        let nav_menu = document.createElement('ul');
-        nav_menu.classList.add('states-menu-ul');
-        let summary_li = document.createElement('li');
-        summary_li.textContent = 'RESUMEN';
-        summary_li.classList.add('states-menu-li');
-        summary_li.addEventListener('click', event => {
-            summary_li.classList.add('states-menu-li-sel');
-            states_li.classList.remove('states-menu-li-sel');
-            progress_li.classList.remove('states-menu-li-sel');
-            this.summary_div.style.display = 'inherit';
-            this.progress_div.style.display = 'none';
-            this.states_div.style.display = 'none';
-        });
-        let progress_li = document.createElement('li');
-        progress_li.textContent = 'PROGRESO';
-        progress_li.classList.add('states-menu-li');
-        progress_li.addEventListener('click', event => {
-            progress_li.classList.add('states-menu-li-sel');
-            summary_li.classList.remove('states-menu-li-sel');
-            states_li.classList.remove('states-menu-li-sel');
-            this.progress_div.style.display = 'inherit';
-            this.states_div.style.display = 'none';
-            this.summary_div.style.display = 'none';
-        });
-        let states_li = document.createElement('li');
-        states_li.textContent = 'ESTADOS';
-        states_li.classList.add('states-menu-li');
-        states_li.addEventListener('click', event => {
-            states_li.classList.add('states-menu-li-sel');
-            summary_li.classList.remove('states-menu-li-sel');
-            progress_li.classList.remove('states-menu-li-sel');
-            this.states_div.style.display = 'inherit';
-            this.progress_div.style.display = 'none';
-            this.summary_div.style.display = 'none';
-        });
+
+        // Bienvenida inicial
+        let init_div = document.createElement('div');
+        init_div.id = 'init_div';
+        init_div.classList.add('div-main');
+
+        // Añadir proceso 
+        let addproc_div = document.createElement('div');
+        addproc_div.id = 'addproc_div';
+        addproc_div.classList.add('div-main');
+        addproc_div.style.display = 'none';
+
+        // Explorador de estados
+        let states_div = document.createElement('div');
+        states_div.id = 'states_div';
+        states_div.classList.add('div-main');
+        states_div.style.display = 'none';
+
+        // Progreso de la ejecucion
+        let progress_div = document.createElement('div');
+        progress_div.id = 'progress_div';
+        progress_div.classList.add('div-main');
+        progress_div.style.display = 'none';
+
+        // Resumen de la ejecucion
+        let summary_div = document.createElement('div');
+        summary_div.id = 'summary_div';
+        summary_div.classList.add('div-main');
+        summary_div.style.display = 'none';
         
-        header_menu_div.appendChild(nav_menu);
-        this._append(nav_menu, [summary_li, progress_li, states_li]);
-        
-        /* Selector de algoritmo */
+        this._append(document.body, 
+            [header_div, header_menu_div, init_div, addproc_div, 
+            summary_div, progress_div, states_div]
+        );
+        // Selector de algoritmo
+        this._schedulerSelector();
+        // Bienvenida
+        this._createWellcome();
+        // Añadir proceso
+        this._addProcess();
+        // Crea la vista de estados (mirar si se puede sacar de aqui)
+        this._createStates();
+        // Menu de navegacion (mirar si se puede sacar de aqui)
+        this._navigationMenu();
+        // Añadir proceso SVR3
+        this._createSvr3Add();
+        // Añadir proceso SVR4
+        this._createSvr4Add();
+    }
+
+    /* Crea los elementos del selector de algoritmo */
+    _schedulerSelector() {
+        let header_div = document.getElementById('header_div');
         let sch_selector = document.createElement('ul');
         sch_selector.classList.add('header-menu-ul-center');
         let sel_svr3 = document.createElement('li');
@@ -80,9 +92,9 @@ class View {
             this._showAddProcess();
             init_div.style.display = 'none';
             header_menu_div.style.display = 'none';
-            this.states_div.style.display = 'none';
-            this.summary_div.style.display = 'none';
-            this.progress_div.style.display = 'none';
+            states_div.style.display = 'none';
+            summary_div.style.display = 'none';
+            progress_div.style.display = 'none';
             this._showSvr3Add();
             this.newSVR3Event.trigger();
         });
@@ -95,30 +107,30 @@ class View {
             this._showAddProcess();
             init_div.style.display = 'none';
             header_menu_div.style.display = 'none';
-            this.states_div.style.display = 'none';
-            this.summary_div.style.display = 'none';
-            this.progress_div.style.display = 'none';
+            states_div.style.display = 'none';
+            summary_div.style.display = 'none';
+            progress_div.style.display = 'none';
             this._showSvr4Add();
             this.newSVR4Event.trigger();
         });
         this._append(sch_selector, [sel_svr3, sel_svr4]);
         header_div.appendChild(sch_selector);
+    }
 
-        /* Bienvenida inicial */
-        let init_div = document.createElement('div');
-        init_div.classList.add('div-main');
+    /* Crea los elementos de la bienvenida inicial */
+    _createWellcome() {
+        let init_div = document.getElementById('init_div');
         let title = document.createElement('h1');
         title.classList.add('text');
         title.textContent = 'Simulador de algoritmos de planificación de procesos';
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
         this._append(init_div, [title, description]);
+    }
 
-        /* Añadir proceso */
-        let addproc_div = document.createElement('div');
-        addproc_div.id = 'addproc_div';
-        addproc_div.classList.add('div-main');
-        addproc_div.style.display = 'none';
+    /* Crea los elementos de añadir proceso (comunes) */
+    _addProcess() {
+        let addproc_div = document.getElementById('addproc_div');
         let addTitle = document.createElement('h1');
         addTitle.textContent = 'Añadir proceso';
         addTitle.classList.add('text');
@@ -131,45 +143,26 @@ class View {
         start_div.id = 'start_div';
         start_div.classList.add('high_margin','div-states');
         start_div.style.display = 'none';
-
         let startButton = document.createElement('button');
         startButton.textContent = 'Simular';
         startButton.addEventListener('click', () => {
             addproc_div.style.display = 'none';
-            this.summary_div.style.display = 'inherit';
+            summary_div.style.display = 'inherit';
             header_menu_div.style.display = 'inherit';
-            summary_li.classList.add('states-menu-li-sel');
-            progress_li.classList.remove('states-menu-li-sel');
-            states_li.classList.remove('states-menu-li-sel');
+            document.getElementById('summary_li').classList.add('states-menu-li-sel');
+            document.getElementById('progress_li').classList.remove('states-menu-li-sel');
+            document.getElementById('states_li').classList.remove('states-menu-li-sel');
             this.startSimulationEvent.trigger();
         });
         start_div.appendChild(startButton);
         this._append(addproc_div, [addTitle, formDiv, addTable, start_div]);
-        this.states_div = document.createElement('div');
-        this.states_div.classList.add('div-main');
-        this.states_div.style.display = 'none';
-
-        this.progress_div = document.createElement('div');
-        this.progress_div.classList.add('div-main');
-        this.progress_div.style.display = 'none';
-
-        this.summary_div = document.createElement('div');
-        this.summary_div.classList.add('div-main');
-        this.summary_div.style.display = 'none';
-        this._createStates();
-        this._append(document.body, 
-            [header_div, header_menu_div, init_div, addproc_div, 
-            this.summary_div, this.progress_div, this.states_div]
-        );
-        this._createSvr3Add();
-        this._createSvr4Add();
-        this._hideSvr3Add();
-        this._hideSvr4Add();
     }
 
+    /* Elementos para añadir proceso SVR3 */
     _createSvr3Add() {
         let addForm_svr3 = document.createElement('form');
         addForm_svr3.id = 'addForm_svr3';
+        addForm_svr3.style.display = 'none';
         addForm_svr3.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR3ProcessEvent.trigger(this._getSvr3Input());
@@ -192,15 +185,17 @@ class View {
         document.getElementById('inputform_div').appendChild(addForm_svr3);
     }
 
+    /* Elementos para añadir proceso SVR4 */
     _createSvr4Add() {
         let addForm_svr4 = document.createElement('form');
         addForm_svr4.id = 'addForm_svr4';
+        addForm_svr4.style.display = 'none';
         addForm_svr4.addEventListener('submit', event => {
             event.preventDefault();
             this.addSVR4ProcessEvent.trigger(this._getSvr4Input());
             this._resetInput();
         });
-        /* Selector de clase */
+        // Selector de clase 
         let cs_table = this._createInputAddTable(addForm_svr4, 'Clase');
         let classSel = document.createElement('select');
         classSel.id = 'class_sel';
@@ -242,26 +237,24 @@ class View {
         document.getElementById('inputform_div').appendChild(addForm_svr4);
     }
 
+    /* Muestra añadir SVR3, oculta añadir SVR4 */
     _showSvr3Add() {
-        this._hideSvr4Add();
+        this._clearChilds(document.getElementById('addTable'));
+        document.getElementById('addForm_svr4').style.display = 'none';
+
         document.getElementById('addForm_svr3').style.display = 'inline-flex';
     }
 
+    /* Muestra añadir SVR4, oculta añadir SVR3 */
     _showSvr4Add() {
-        this._hideSvr3Add();
+        this._clearChilds(document.getElementById('addTable'));
+        document.getElementById('addForm_svr3').style.display = 'none';
+
+
         document.getElementById('addForm_svr4').style.display = 'inline-flex';
     }
 
-    _hideSvr3Add() {
-        this._clearChilds(document.getElementById('addTable'));
-        document.getElementById('addForm_svr3').style.display = 'none';
-    }
-
-    _hideSvr4Add() {
-        this._clearChilds(document.getElementById('addTable'));
-        document.getElementById('addForm_svr4').style.display = 'none';
-    }
-
+    /* Devuelve los datos del formulario de SVR3 */
     _getSvr3Input() {
         let data = {
             execution: parseInt(document.getElementById('inputBurst_svr3').value, 10),
@@ -273,6 +266,7 @@ class View {
         return JSON.stringify(data);
     }
 
+    /* Devuelve los datos del formulario de SVR4 */
     _getSvr4Input() {
         let pc = 'RealTime'
         if (document.getElementById('class_sel').value == 2) {pc = 'TimeSharing';}
@@ -287,24 +281,72 @@ class View {
         return JSON.stringify(data);
     }
 
+    /* Restablece los valores de los elementos 'input' */
     _resetInput() {
         let items = document.getElementsByClassName('inputValue_input');
         Array.prototype.forEach.call(items, function(i) {i.value = ''});
     }
 
+    /* Muestra la vista añadir proceso */
     _showAddProcess() {
         document.getElementById('addproc_div').style.display = 'inherit';
         document.getElementById('start_div').style.display = 'none';
-        this.states_div.style.display = 'none';
+        document.getElementById('states_div').style.display = 'none';
     }
     
 
     /* Simulacion */
 
-    /* Rellena los datos del resumen */
+    /* Crea el menu de navegacion */
+    _navigationMenu() {
+        let nav_menu = document.createElement('ul');
+        nav_menu.classList.add('states-menu-ul');
+        let summary_li = document.createElement('li');
+        summary_li.id = 'summary_li';
+        summary_li.textContent = 'RESUMEN';
+        summary_li.classList.add('states-menu-li');
+        summary_li.addEventListener('click', event => {
+            summary_li.classList.add('states-menu-li-sel');
+            states_li.classList.remove('states-menu-li-sel');
+            progress_li.classList.remove('states-menu-li-sel');
+            summary_div.style.display = 'inherit';
+            progress_div.style.display = 'none';
+            states_div.style.display = 'none';
+        });
+        let progress_li = document.createElement('li');
+        progress_li.id = 'progress_li';
+        progress_li.textContent = 'PROGRESO';
+        progress_li.classList.add('states-menu-li');
+        progress_li.addEventListener('click', event => {
+            progress_li.classList.add('states-menu-li-sel');
+            summary_li.classList.remove('states-menu-li-sel');
+            states_li.classList.remove('states-menu-li-sel');
+            progress_div.style.display = 'inherit';
+            states_div.style.display = 'none';
+            summary_div.style.display = 'none';
+        });
+        let states_li = document.createElement('li');
+        states_li.id = 'states_li';
+        states_li.textContent = 'ESTADOS';
+        states_li.classList.add('states-menu-li');
+        states_li.addEventListener('click', event => {
+            states_li.classList.add('states-menu-li-sel');
+            summary_li.classList.remove('states-menu-li-sel');
+            progress_li.classList.remove('states-menu-li-sel');
+            states_div.style.display = 'inherit';
+            progress_div.style.display = 'none';
+            summary_div.style.display = 'none';
+        }); 
+        //header_menu_div.appendChild(nav_menu);
+        this._append(nav_menu, [summary_li, progress_li, states_li]);
+        document.getElementById('header_menu_div').appendChild(nav_menu);
+    }
+
+    /* Apartado Resumen */
     createSummary(summary) {
+        let summary_div = document.getElementById('summary_div');
         let data = JSON.parse(summary);
-        this._clearChilds(this.summary_div);
+        this._clearChilds(summary_div);
         let title_div = document.createElement('div');
         title_div.classList.add('div-states');
         let title = document.createElement('h1');
@@ -327,21 +369,22 @@ class View {
         data_div.appendChild(data_table);
         let cv = document.createElement('canvas');
         tiempos_td.appendChild(cv);
-        this._append(this.summary_div, [title_div, data_div]);
+        this._append(summary_div, [title_div, data_div]);
         this.charts.drawBarChart(cv.getContext('2d'), data.chart);
     }
 
-
-    /* Grafica de progreso */
+    /* Apartado Progreso */
     createProgress(data) {
-        this._clearChilds(this.progress_div);
+        let progress_div = document.getElementById('progress_div');
+        this._clearChilds(progress_div);
         let cv = document.createElement('canvas');
         cv.width = 1000;
         cv.height = 200;
-        this.progress_div.appendChild(cv);
+        progress_div.appendChild(cv);
         this.charts.drawLineChart(cv.getContext('2d'), data);
     }
 
+    /* Apartado Estados */
     _createStates() {
         // Botones navegation
         let navigation_div = document.createElement('div');
@@ -363,12 +406,12 @@ class View {
         let state_table = document.createElement('table');
         state_table.id = 'state_table';
         state_div.appendChild(state_table);
-        this._append(this.states_div,[navigation_div, state_div]
+        let states_div = document.getElementById('states_div');
+        this._append(states_div,[navigation_div, state_div]
         ); 
     }
 
-
-    // Elementos para mostrar un estado (comunes)
+    /* Muesta un estado */
     showState(state_data) {
         let data = JSON.parse(state_data);
         let state = data.state;
@@ -418,7 +461,7 @@ class View {
         });   
     }
    
-    // Elementos para mostrar un estado de SVR3
+    /* Muestra un estado de SVR3 */
     _showSvr3State(state) {
         let s_table = document.getElementById('state_table');
         // whichqs
@@ -433,7 +476,7 @@ class View {
         }
     }
 
-    // Elementos para mostrar un estado de SVR4
+    /* Muestra un estado de SVR4 */
     _showSvr4State(state) {
         let s_table = document.getElementById('state_table');
         // kprunrun
@@ -460,8 +503,7 @@ class View {
         }
     }
 
-
-    // Muestra los datos dependientes de la clase 
+    /* Muestra los datos dependientes de la clase (SVR4)  */
     _showSvr4ClassDepent(state, info, domElement, pTable) {
         let table = document.createElement('table');
         table.classList.add('classTable');
@@ -527,8 +569,7 @@ class View {
         });
     }
 
-
-    // Muestra la tabla de procesos en la vista Añadir proceso
+    /* Muestra la tabla de procesos en la vista Añadir proceso */
     _createAddTable(domElement, pTable) {
         this._clearChilds(domElement);
         // Table head
@@ -559,7 +600,7 @@ class View {
 
     /* Funciones auxiliares */
 
-    // Crea un objeto para añadir datos numericos y lo devuelve
+    /* Crea un objeto tipo input para añadir datos numericos y lo devuelve */
     _addInput(domElement, text) {
         let item = this._createInputAddTable(domElement, text);
         let input = document.createElement('input');
@@ -571,6 +612,7 @@ class View {
         return input;
     }
 
+    /* Crea una tabla para datos de entrada y devuelve la segunda columna */
     _createInputAddTable(domElement, text) {
         let table = document.createElement('table');
         table.classList.add('input_table');
@@ -585,7 +627,7 @@ class View {
         return tdb;
     }
 
-
+    /* Muestra un bitmap de colas de prioridad */
     _showArrayQueue(data, table, text, start, end) {
         let row = table.insertRow();
         if (text) {
@@ -613,6 +655,7 @@ class View {
         }
     }
 
+    /* Establece la clase de una fila segun el estado */
     _setRowClass(row, state) {
         switch (state) {
             case 'running_user':
@@ -632,7 +675,7 @@ class View {
         }
     }
 
-
+    /* Muestra una tabla de procesos */
     _displayProcessTable(pTable, info, domElement) {
         // Crea la tabla
         let table = document.createElement('table');
@@ -666,7 +709,7 @@ class View {
         });
     }
 
-    // Añade una fila a la tabla con tupla de texto
+    /* Añade una fila a la tabla con tupla de texto */
     _addBinaryRowText(table, text, data) {
         let row = table.insertRow();
         let td_t = document.createElement('td');
@@ -678,7 +721,7 @@ class View {
         this._append(row, [td_t, td_d]);
     }
 
-    // Añade una fila a la tabla solo con texto, devuelve la segunda columna
+    /* Añade una fila a la tabla solo con texto, devuelve la segunda columna */
     _addBinaryRow(table, text) {
         let row = table.insertRow();
         let td_t = document.createElement('td');
@@ -690,6 +733,7 @@ class View {
         return td_d;
     }
 
+    /* Rellena la cola de prioridad con los procesos */
     _fillPriorityQueue(domElement, data, name) {
         let table = document.createElement('table');
         let img_path = './resources/bi_arrow_15.png';
@@ -724,6 +768,7 @@ class View {
         domElement.appendChild(table);
     }
 
+    /* Tabla de procesos ha cambiado */
     pTableChanged(pTable) {
         let table = JSON.parse(pTable);
         if(table.length > 0) {
@@ -732,14 +777,14 @@ class View {
         }
     }
 
-    // Añade varios elementos al padre
+    /* Añade varios elementos al padre */
     _append(parent, elements) {
         elements.forEach(item => {
             parent.appendChild(item);
         });
     }
 
-    // Elimina los elementos de una tabla
+    /* Limpia todos los hijos de un elemento */
     _clearChilds(domElement) {
         while (domElement.firstChild) {
             domElement.removeChild(domElement.firstChild);
