@@ -111,9 +111,7 @@ class Svr4Scheduler {
 
     /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
-        let pTable = [];
-        this.processTable.forEach(pr => {pTable.push(pr.getData());});
-        return JSON.stringify(pTable);
+        return JSON.stringify(this.processTable.map(p => p.getData()));
     }
 
     /* Ejecuta un tick de reloj */
@@ -245,8 +243,8 @@ class Svr4Scheduler {
     /* Envía un estado */
     _sendState() {
         // Datos de progreso
-        let timeData = [this.time];
-        this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
+        let timeData = this.processTable.map(p => p.getStateNumber());
+        timeData.unshift(this.time);
         this.stateManager.pushTime(timeData);
 
         // Estado
@@ -254,28 +252,16 @@ class Svr4Scheduler {
             this.journal.push('Ejecución finalizada.');
 
         if (this.journal.length > 0) {
-            let pTable = [];
             let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
-            notFinished.forEach(pr => {
-                pTable.push(pr.getFullData());
-            });
-
-            let _dispq = [];
-            this.dispq.forEach(q => {_dispq.push(q.getData());});
-
-            // Datos de la clase
-            let rt = [];
-            let ts = [];
+            let rtProc = notFinished.filter(pr => pr.class.name == 'RealTime');
+            let tsProc = notFinished.filter(pr => pr.class.name == 'TimeSharing');
             let rt_info = '';
             let ts_info = '';
-            notFinished.filter(pr => pr.class.name == 'RealTime').forEach(pr => {
-                rt.push(pr.getClassData());
-                rt_info = pr.getClassInfo();
-            });
-            notFinished.filter(pr => pr.class.name == 'TimeSharing').forEach(pr => {
-                ts.push(pr.getClassData());
-                ts_info = pr.getClassInfo();
-            });
+
+            if (rtProc.length > 0)
+                rt_info = rtProc[0].getClassInfo();
+            if (tsProc.length > 0)
+                ts_info = tsProc[0].getClassInfo();
 
             let state = {
                 name: this.name,
@@ -285,13 +271,13 @@ class Svr4Scheduler {
                 state: {
                     time: this.time, 
                     journal: this.journal, 
-                    pTable: pTable,
-                    dispq: _dispq,
+                    pTable: notFinished.map(p => p.getFullData()),
+                    dispq: this.dispq.map(q => q.getData()),
                     dqactmap: Array.from(this.dqactmap),
                     runrun: this.runrun,
                     kprunrun: this.kprunrun,
-                    rt_data: rt,
-                    ts_data: ts
+                    rt_data: rtProc.map(p => p.getClassData()),
+                    ts_data: tsProc.map(p => p.getClassData())
                 }
             }
             this.stateManager.pushState(JSON.stringify(state));

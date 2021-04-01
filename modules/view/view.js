@@ -11,7 +11,7 @@ class View {
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
         this.previousStateEvent = new Event();
-
+        // Diagramas
         this.charts = new Graphics();
     }
 
@@ -779,9 +779,7 @@ class View {
 
     /* Añade varios elementos al padre */
     _append(parent, elements) {
-        elements.forEach(item => {
-            parent.appendChild(item);
-        });
+        elements.map(i => parent.appendChild(i));
     }
 
     /* Limpia todos los hijos de un elemento */

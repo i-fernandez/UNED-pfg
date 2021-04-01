@@ -4,11 +4,8 @@ class Svr4TS {
     constructor(proc) {
         this.name = 'TimeSharing';
         this.proc = proc;
-        //this.p_pid = pid;
-
         // Tiempo de inicio del cuanto
         this.startQuantum = 0;
-
         // Prioridad global
         this.ts_globpri = 0;
         // Cuanto asignado a la prioridad
@@ -21,9 +18,8 @@ class Svr4TS {
         this.ts_maxwait = 0;
         // Usado en lugar de ts_tqexp si el proceso tarda mas de ts_maxwait en usar su cuanto
         this.ts_lwait = 0;
-        
+        // Rellena los datos dependientes de la prioridad
         this._readDptbl(proc.p_pri);
-
         // Tiempo restante del cuanto asignado
         this.ts_timeleft = this.ts_quantum;
         // Parte de prioridad del sistema
@@ -37,12 +33,6 @@ class Svr4TS {
         // Número de ut desde que comenzo el cuanto
         this.wait = 0;
     }
-
-    /*
-    getPriority() {
-        return this.ts_umdpri;
-    }
-    */
 
     /* Devuelve los datos del proceso */
     getData() {

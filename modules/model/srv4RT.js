@@ -15,12 +15,6 @@ class Svr4RT {
         this.rt_pri = proc.p_pri;
     }
 
-    /*
-    getPriority() {
-        return this.rt_pri;
-    }
-    */
-
     /* Devuelve los datos del proceso */
     getData() {
         return {
@@ -68,16 +62,6 @@ class Svr4RT {
         return '';
     }
 
-    /* Finaliza ciclo de CPU */
-    /*
-    _toSleep() {
-        this.proc.p_state = 'sleeping';
-        this.proc.current_cycle_time = 0;
-        this.proc.kernelCount = 2;
-        return `Proceso ${this.proc.p_pid} finaliza su ciclo de CPU. `;
-    }
-    */
-
     /* Finaliza espera por IO */
     fromSleep() {
         return `Proceso ${this.proc.p_pid} finaliza su espera por I/O. `;
@@ -85,8 +69,6 @@ class Svr4RT {
 
     // En esta clase no se hace nada especial al volver a modo usuario
     fromSysCall() {}
-
-
 }
 
 /* Devuelve el valor de cuanto correspondiente a la prioridad */

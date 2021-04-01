@@ -78,9 +78,7 @@ class Svr3Scheduler {
 
     /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
-        let pTable = [];
-        this.processTable.forEach(pr => {pTable.push(pr.getData());});
-        return JSON.stringify(pTable);
+        return JSON.stringify(this.processTable.map(p => p.getData()));
     }
     
     /* Comienza la ejecución */
@@ -143,7 +141,6 @@ class Svr3Scheduler {
             return true;
         }
             
-
         let procesos = this.processTable.filter(pr => pr.p_state != 'finished');
         return (procesos.length === 0);
     }
@@ -178,32 +175,24 @@ class Svr3Scheduler {
     /* Envía un estado */
     _sendState() {
         // Datos de progreso
-        let timeData = [this.time];
-        this.processTable.forEach(pr => {timeData.push(pr.getStateNumber())});
+        let timeData = this.processTable.map(p => p.getStateNumber());
+        timeData.unshift(this.time);
         this.stateManager.pushTime(timeData);
-
-        
 
         // Estado
         if (this.isFinished())
             this.journal.push('Ejecución finalizada.');
 
         if (this.journal.length > 0) {
-            let pTable = [];
-            this.processTable.filter(pr => pr.p_state != 'finished').forEach(pr => {
-                pTable.push(pr.getFullData());
-            });
-            let _qs = [];
-            this.qs.forEach(q => {_qs.push(q.getData());});
-
+            let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
             let state = {
                 name: this.name,
                 pt_info: this.processTable[0].getInfo(),
                 state: {
                     time: this.time, 
                     journal: this.journal, 
-                    pTable: pTable,
-                    qs: _qs,
+                    pTable: notFinished.map(p => p.getFullData()),
+                    qs: this.qs.map(q => q.getData()),
                     whichqs: Array.from(this.whichqs),
                     runrun: this.runrun
                 }
@@ -250,8 +239,7 @@ class Svr3Scheduler {
         this.inContextSwitch = true;
         this.running.p_state = 'ready';
         this._enqueueProcess(this.running);
-        this.running = '';
-        
+        this.running = ''; 
     }
 
     /* Realiza un cambio de contexto */
