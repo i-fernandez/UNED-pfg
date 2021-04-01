@@ -6,6 +6,7 @@ class Controller {
         this.model = new Simulation;
         this.view = new View;
 
+        /* Eventos en la vista */
         this.view.newSVR3Event.addListener(() => {
             this.model.createSVR3();
         });
@@ -34,9 +35,9 @@ class Controller {
             this.model.getPreviousState();
         });
 
-
-        this.model.pTableChangedEvent.addListener(pTable => {
-            this.view.pTableChanged(pTable);
+        /* Eventos en el modelo */
+        this.model.pTableChangedEvent.addListener(data => {
+            this.view.showProcessTable(data);
         });
 
         this.model.createSummaryEvent.addListener(data => {
@@ -59,7 +60,6 @@ class Controller {
     run() {
         this.view.render();
     }
-
 }
 
 export default Controller;

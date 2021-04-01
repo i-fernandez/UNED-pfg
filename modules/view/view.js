@@ -15,6 +15,7 @@ class View {
         this.charts = new Graphics();
     }
 
+    /* Elementos iniciales */
     render() {
         // Cabecera inicial
         let header_div = document.createElement('div');
@@ -68,10 +69,6 @@ class View {
         this._createWellcome();
         // Añadir proceso
         this._addProcess();
-        // Crea la vista de estados (mirar si se puede sacar de aqui)
-        this._createStates();
-        // Menu de navegacion (mirar si se puede sacar de aqui)
-        this._navigationMenu();
         // Añadir proceso SVR3
         this._createSvr3Add();
         // Añadir proceso SVR4
@@ -130,7 +127,6 @@ class View {
 
     /* Crea los elementos de añadir proceso (comunes) */
     _addProcess() {
-        let addproc_div = document.getElementById('addproc_div');
         let addTitle = document.createElement('h1');
         addTitle.textContent = 'Añadir proceso';
         addTitle.classList.add('text');
@@ -146,16 +142,52 @@ class View {
         let startButton = document.createElement('button');
         startButton.textContent = 'Simular';
         startButton.addEventListener('click', () => {
-            addproc_div.style.display = 'none';
-            summary_div.style.display = 'inherit';
-            header_menu_div.style.display = 'inherit';
-            document.getElementById('summary_li').classList.add('states-menu-li-sel');
-            document.getElementById('progress_li').classList.remove('states-menu-li-sel');
-            document.getElementById('states_li').classList.remove('states-menu-li-sel');
-            this.startSimulationEvent.trigger();
+            this._startSimulation();
         });
         start_div.appendChild(startButton);
         this._append(addproc_div, [addTitle, formDiv, addTable, start_div]);
+    }
+
+    /* Muestra la tabla de procesos (vista añadir proceso) */
+    showProcessTable(pTable) {
+        let table = JSON.parse(pTable);
+        if (table.length > 0) {
+            let addTable = document.getElementById('addTable');
+            this._clearChilds(addTable);
+            document.getElementById('start_div').style.display = 'block';
+            // Table head
+            let thead = addTable.createTHead();
+            thead.classList.add('plain_table-th');
+            let row = thead.insertRow();
+            let data = Object.keys(table[0]);
+            for (let key of data) {
+                let th = document.createElement('th');
+                th.classList.add('th_ptable');
+                th.appendChild(document.createTextNode(key));
+                row.appendChild(th);
+            }
+            // Table Data
+            let tbody = addTable.createTBody();
+            table.forEach(pr => {
+                let row = tbody.insertRow();
+                row.classList.add('plain_table-row');
+                for (let item in pr) {
+                    let tb = document.createElement('td');
+                    tb.appendChild(document.createTextNode(pr[item]));
+                    row.appendChild(tb)
+                }
+            }); 
+        }
+    }
+
+    /* Comienzo de la simulacion */
+    _startSimulation() {
+        addproc_div.style.display = 'none';
+        summary_div.style.display = 'inherit';
+        header_menu_div.style.display = 'inherit';
+        this._navigationMenu();
+        this._createStates();
+        this.startSimulationEvent.trigger();
     }
 
     /* Elementos para añadir proceso SVR3 */
@@ -299,12 +331,14 @@ class View {
 
     /* Crea el menu de navegacion */
     _navigationMenu() {
+        let header_menu_div = document.getElementById('header_menu_div');
+        this._clearChilds(header_menu_div);
         let nav_menu = document.createElement('ul');
         nav_menu.classList.add('states-menu-ul');
         let summary_li = document.createElement('li');
         summary_li.id = 'summary_li';
         summary_li.textContent = 'RESUMEN';
-        summary_li.classList.add('states-menu-li');
+        summary_li.classList.add('states-menu-li','states-menu-li-sel');
         summary_li.addEventListener('click', event => {
             summary_li.classList.add('states-menu-li-sel');
             states_li.classList.remove('states-menu-li-sel');
@@ -337,16 +371,15 @@ class View {
             progress_div.style.display = 'none';
             summary_div.style.display = 'none';
         }); 
-        //header_menu_div.appendChild(nav_menu);
         this._append(nav_menu, [summary_li, progress_li, states_li]);
-        document.getElementById('header_menu_div').appendChild(nav_menu);
+        header_menu_div.appendChild(nav_menu);
     }
 
     /* Apartado Resumen */
     createSummary(summary) {
         let summary_div = document.getElementById('summary_div');
-        let data = JSON.parse(summary);
         this._clearChilds(summary_div);
+        let data = JSON.parse(summary);
         let title_div = document.createElement('div');
         title_div.classList.add('div-states');
         let title = document.createElement('h1');
@@ -386,9 +419,12 @@ class View {
 
     /* Apartado Estados */
     _createStates() {
+        let states_div = document.getElementById('states_div');
+        this._clearChilds(states_div);
         // Botones navegation
         let navigation_div = document.createElement('div');
         navigation_div.classList.add('div-nav', 'div-states');
+        //this._clearChilds(navigation_div);
         let prev = document.createElement('button');
         prev.textContent = 'Anterior';
         prev.addEventListener('click', () => {
@@ -406,9 +442,12 @@ class View {
         let state_table = document.createElement('table');
         state_table.id = 'state_table';
         state_div.appendChild(state_table);
-        let states_div = document.getElementById('states_div');
+//        let states_div = document.getElementById('states_div');
         this._append(states_div,[navigation_div, state_div]
-        ); 
+        );
+
+        // Muestra el primer estado
+        //this.showState(data);
     }
 
     /* Muesta un estado */
@@ -565,34 +604,6 @@ class View {
                         r.appendChild(td);
                     }
                 }
-            }
-        });
-    }
-
-    /* Muestra la tabla de procesos en la vista Añadir proceso */
-    _createAddTable(domElement, pTable) {
-        this._clearChilds(domElement);
-        // Table head
-        let thead = domElement.createTHead();
-        thead.classList.add('plain_table-th');
-        let row = thead.insertRow();
-        let data = Object.keys(pTable[0]);
-        for (let key of data) {
-            let th = document.createElement('th');
-            th.classList.add('th_ptable');
-            let text = document.createTextNode(key);
-            th.appendChild(text);
-            row.appendChild(th);
-        }
-        // Table Data
-        let tbody = domElement.createTBody();
-        pTable.forEach(pr => {
-            let row = tbody.insertRow();
-            row.classList.add('plain_table-row');
-            for (let item in pr) {
-                let tb = document.createElement('td');
-                tb.appendChild(document.createTextNode(pr[item]));
-                row.appendChild(tb)
             }
         });
     }
@@ -766,15 +777,6 @@ class View {
             this._append(row, [td_t, td_a]);
         });
         domElement.appendChild(table);
-    }
-
-    /* Tabla de procesos ha cambiado */
-    pTableChanged(pTable) {
-        let table = JSON.parse(pTable);
-        if(table.length > 0) {
-            document.getElementById('start_div').style.display = 'block';
-            this._createAddTable(document.getElementById('addTable'), table);
-        }
     }
 
     /* Añade varios elementos al padre */

@@ -213,7 +213,6 @@ class Svr3Scheduler {
         } 
         // Proceso encolado con mayor prioridad
         else if (this.running && this.whichqs[0] < Math.floor(this.running.p_pri/4)) {
-        //else if (this.running && n.p_pri < this.running.p_pri) {
             if (this.running.p_state == 'running_kernel') {
                 // Proceso con llamada al sistema
                 this.runrun = true;
@@ -451,7 +450,7 @@ class Svr3Process {
         if (this.p_cpu < 127)   
             this.p_cpu++;
         if (this.execution <= time)  {
-            // finalizada ejecucion
+            // Ejecución finalizada
             this.execution = 0;
             this.p_state = 'zombie';
             return `Proceso ${this.p_pid} finalizado en ${currentTime} ut. `;

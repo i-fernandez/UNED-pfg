@@ -59,6 +59,7 @@ class Svr4Scheduler {
         this._sortDispq();
     }
 
+    /* Añade la cola correspondiente al dqactmap si no existe ya y la ordena */
     _setDqactmap(qn) {
         if (!(this.dqactmap.includes(qn))) {
             this.dqactmap.push(qn);
