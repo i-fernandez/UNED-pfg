@@ -1,4 +1,4 @@
-import Simulation from '../model/model.js';
+import Simulation from '../model/simulation.js';
 import View from '../view/view.js';
 
 class Controller {
