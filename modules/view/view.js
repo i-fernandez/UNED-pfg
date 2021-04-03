@@ -619,6 +619,7 @@ class View {
         input.type = 'number';
         input.required = true;
         input.placeholder = 0;
+        input.min = 0;
         item.appendChild(input);
         return input;
     }

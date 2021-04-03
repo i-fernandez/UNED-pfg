@@ -1,5 +1,4 @@
-
-class Svr4RT {
+class Svr4ProcRT {
     constructor(proc) {
         this.name = 'RealTime'
         this.proc = proc;      
@@ -82,4 +81,4 @@ function rt_dptbl(pri) {
     return 0;
 };
 
-export default Svr4RT;
+export default Svr4ProcRT;

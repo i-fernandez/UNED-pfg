@@ -1,6 +1,4 @@
-
-
-class Svr4TS {
+class Svr4ProcTS {
     constructor(proc) {
         this.name = 'TimeSharing';
         this.proc = proc;
@@ -221,5 +219,4 @@ function ts_dptbl(pri) {
 }
 
 
-
-export default Svr4TS;
+export default Svr4ProcTS;
