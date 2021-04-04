@@ -82,8 +82,15 @@ class Svr3Scheduler {
         return JSON.stringify(this.processTable.map(p => p.getData()));
     }
     
+    /* Ejecuta la simulacion */
+    runSimulation() {
+        this._start();
+        while (!(this._isFinished())) 
+            this._nextTick();
+    }
+
     /* Comienza la ejecución */
-    start() {
+    _start() {
         this.journal.push('Inicio de la ejecucion.');
         let pr = this._dequeueProcess();
         this.running = pr;
@@ -93,7 +100,7 @@ class Svr3Scheduler {
     }
 
     /* Ejecuta un tick de reloj */
-    nextTick() {
+    _nextTick() {
         this.time += this.TICK;
         this.nextRoundRobin -= this.TICK;
 
@@ -135,13 +142,12 @@ class Svr3Scheduler {
     }
 
     /* Comprueba si ha finalizado la ejecucion */
-    isFinished() {
+    _isFinished() {
         // GUARDA
         if (this.time > 50000) {
             console.log('Alcanzado tiempo máximo de ejecución');
             return true;
-        }
-            
+        }     
         let procesos = this.processTable.filter(pr => pr.p_state != 'finished');
         return (procesos.length === 0);
     }
@@ -181,7 +187,7 @@ class Svr3Scheduler {
         this.stateManager.pushTime(timeData);
 
         // Estado
-        if (this.isFinished())
+        if (this._isFinished())
             this.journal.push('Ejecución finalizada.');
 
         if (this.journal.length > 0) {

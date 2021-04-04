@@ -100,7 +100,7 @@ class Svr4Scheduler {
     }
 
     /* Comienza la ejecución */
-    start() {
+    _start() {
         this.journal.push('Inicio de la ejecucion');
         let pr = this.dequeueProcess();
         this.running = pr;
@@ -114,8 +114,15 @@ class Svr4Scheduler {
         return JSON.stringify(this.processTable.map(p => p.getData()));
     }
 
+    /* Ejecuta la simulacion */
+    runSimulation() {
+        this._start();
+        while (!(this._isFinished())) 
+            this._nextTick();
+    }
+
     /* Ejecuta un tick de reloj */
-    nextTick() {
+    _nextTick() {
         this.time += this.TICK;
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == 'sleeping');
 
@@ -202,7 +209,7 @@ class Svr4Scheduler {
     }
 
     /* Comprueba si ha finalizado la ejecucion */
-    isFinished() {
+    _isFinished() {
         // GUARDA
         if (this.time > 50000) {
             console.log('Alcanzado tiempo máximo de ejecución');
@@ -248,7 +255,7 @@ class Svr4Scheduler {
         this.stateManager.pushTime(timeData);
 
         // Estado
-        if (this.isFinished())
+        if (this._isFinished())
             this.journal.push('Ejecución finalizada.');
 
         if (this.journal.length > 0) {

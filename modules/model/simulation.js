@@ -34,11 +34,8 @@ class Simulation {
 
     /* Lanza la simulación en el planificador */
     startSimulation() { 
-        // Genera todos los estados
-        this.scheduler.start();
-        while (!(this.scheduler.isFinished())) 
-            this.scheduler.nextTick();
-
+        // Realiza la simulacion
+        this.scheduler.runSimulation();
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
         // Genera y envía el progreso
