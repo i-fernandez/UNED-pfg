@@ -29,7 +29,7 @@ class Svr4Scheduler {
             data.io_burst, data.pClass, data.pri
         );
         this.processTable.push(pr);
-        this.setBackDQ(pr);
+        this._setBackDQ(pr);
     }
 
     /* Añade un proceso al inicio de la cola (proceso expropiado) */
@@ -46,7 +46,7 @@ class Svr4Scheduler {
     }
 
     /* Añade un proceso al final de la cola (nuevo proceso) */
-    setBackDQ(process) {
+    _setBackDQ(process) {
         let qn = process.p_pri;
         this._setDqactmap(qn);
         let queue = this.dispq.find(item => item.priority == qn);
@@ -78,7 +78,7 @@ class Svr4Scheduler {
     }
 
     /* Elige un proceso para ser planificado y lo desencola */
-    dequeueProcess() {
+    _dequeueProcess() {
         let qn = this.dqactmap[this.dqactmap.length-1];
         let queue = this.dispq.find(item => item.priority == qn);
         if (queue) {
@@ -102,7 +102,7 @@ class Svr4Scheduler {
     /* Comienza la ejecución */
     _start() {
         this.journal.push('Inicio de la ejecucion');
-        let pr = this.dequeueProcess();
+        let pr = this._dequeueProcess();
         this.running = pr;
         pr.startRun();
         this.journal.push(`Proceso ${pr.p_pid} cargado para ejecucion.`);
@@ -143,7 +143,7 @@ class Svr4Scheduler {
         // Encola procesos que finalizaron IO
         sleeping_pr.forEach(pr => {
             if (pr.p_state != 'sleeping') 
-                this.setBackDQ(pr);
+                this._setBackDQ(pr);
         });
                     
         // Comprueba si empieza un cambio de contexto
@@ -158,7 +158,7 @@ class Svr4Scheduler {
         this.kprunrun = false;
         this.inContextSwitch = false;
         // Proximo proceso a ejecutar
-        let next_pr = this.dequeueProcess();
+        let next_pr = this._dequeueProcess();
         if (next_pr == null) 
             return;
         
@@ -196,7 +196,7 @@ class Svr4Scheduler {
             this.inRoundRobin = false;
             this.inContextSwitch = true;
             this.running.p_state = 'ready';
-            this.setBackDQ(this.running);
+            this._setBackDQ(this.running);
         }
     }
 

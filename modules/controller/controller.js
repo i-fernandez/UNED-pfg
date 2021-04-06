@@ -48,10 +48,6 @@ class Controller {
             this.view.createProgress(data);
         });
 
-        this.model.createStatesEvent.addListener(data => {
-            this.view.showState(data);
-        });
-
         this.model.sendStateEvent.addListener(data => {
             this.view.showState(data);
         }); 

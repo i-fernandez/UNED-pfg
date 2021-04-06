@@ -1,7 +1,7 @@
 import SVR3Scheduler from './svr3scheduler.js'
 import SVR4Scheduler from './svr4scheduler.js'
 import Event from '../util/event.js'
-import StateManager from './states.js'
+import StateManager from './statemanager.js'
 
 class Simulation {
     constructor() {
@@ -38,11 +38,15 @@ class Simulation {
         this.scheduler.runSimulation();
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
+
+        /* BORRAR */
+        console.log(this.scheduler.getSummary());
+
         // Genera y envía el progreso
         this.stateManager.generateProgress();
         this.createTimelineEvent.trigger(this.stateManager.getProgressData());
         // Envía el primer estado
-        this.createStatesEvent.trigger(this.stateManager.states[0]);
+        this.sendStateEvent.trigger(this.stateManager.states[0]);
     }
 
     /* Obtiene el estado siguiente */
