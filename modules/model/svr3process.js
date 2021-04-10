@@ -3,6 +3,7 @@ class Svr3Process {
         // constantes
         this.PUSER = 50;
         this.PRIORITIES = [10, 20, 21, 25, 28, 29, 30, 35 ,40];
+        this.STATES = ['finished','zombie','sleeping','ready','running_user','running_kernel'];
 
         this.p_pid = pid;
         this.p_state = 'ready';
@@ -26,10 +27,12 @@ class Svr3Process {
 
     /* Recalcula la prioridad */
     calcPriority() {
-        this.p_pri = Math.floor(this.PUSER + this.p_cpu/4 + this.p_nice*2);
-        this.p_usrpri = this.p_pri;
+        this.p_usrpri = Math.floor(this.PUSER + this.p_cpu/4 + this.p_nice*2);
+        if (this.p_state != 'running_kernel')
+            this.p_pri = this.p_usrpri;
+        
         return `Recalculada la prioridad del proceso ${this.p_pid}.
-            Nueva prioridad: ${this.p_pri}`;
+            Nueva prioridad: ${this.p_usrpri}`;
     }
 
     /* Aplica factor decay al proceso */
@@ -114,22 +117,7 @@ class Svr3Process {
 
     /* Devuelve la representacion numerica del estado */
     getStateNumber() {
-        switch (this.p_state) {
-            case 'running_kernel':
-                return 5;
-            case 'running_user':
-                return 4;
-            case 'ready':
-                return 3;
-            case 'sleeping':
-                return 2;
-            case 'zombie':
-                return 1;
-            case 'finished':
-                return 0;
-            default:
-                return -1;
-        }
+        return this.STATES.indexOf(this.p_state);
     }
 
     /* Ejecuta un tick en modo núcleo */

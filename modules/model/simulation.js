@@ -38,10 +38,6 @@ class Simulation {
         this.scheduler.runSimulation();
         // Envía el resumen
         this.createSummaryEvent.trigger(this.scheduler.getSummary());
-
-        /* BORRAR */
-        console.log(this.scheduler.getSummary());
-
         // Genera y envía el progreso
         this.stateManager.generateProgress();
         this.createTimelineEvent.trigger(this.stateManager.getProgressData());

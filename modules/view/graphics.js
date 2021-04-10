@@ -7,14 +7,8 @@ class Graphics {
     // Dibuja un grafico de lineas
     drawLineChart (canvas, data) {
         let prData = JSON.parse(data);
-        // Convierte los datos
-        //let prData = this._parseTimeData(data);
-        
-        //let prData = data;
         // Genera los datasets
         let params = [];
-        //let n_pid = 0;
-        
         Object.keys(prData.pids).forEach(pid =>{
             let color = this._getColor();
             let dataset = {
@@ -27,27 +21,7 @@ class Graphics {
                 backgroundColor: color
             }
             params.push(dataset);
-
-        });
-        
-
-        /*
-        Object.keys(prData.pids).forEach(pid => {
-            let color = this._getColor();
-            let dataset = {
-                label: `pid ${n_pid + 1}`,
-                data: prData["pids"][n_pid],
-                borderWidth: 3,
-                fill: false,
-                steppedLine: true,
-                borderColor: color,
-                backgroundColor: color
-            }
-            params.push(dataset);
-            n_pid++;
-        });
-        */
-        
+        }); 
         // Muestra la grafica
         new Chart(canvas, {
             type: 'line',
@@ -140,7 +114,6 @@ class Graphics {
             run_kernel.push(proc[2]);
         });
 
-
         let barData = {
             labels: labels,
             datasets: [{
@@ -188,25 +161,6 @@ class Graphics {
             }
         });
 
-    }
-
-    // Convierte el formato de tiempos/estados
-    // TODO: usar el JSON generado por los estados
-    _parseTimeData(timeSeries) {
-        let time = [];
-        let pids = [];
-        // Crea los arrays vacios de los pids
-        for (let i=1; i< timeSeries[0].length; i++) {
-            pids.push([]);
-        }
-        // Rellena los datos
-        timeSeries.forEach(item => {
-            time.push(item[0]);
-            for (let i=1; i< item.length; i++) {
-                pids[i-1].push(item[i]);
-            }
-        });
-        return {time: time, pids: pids}
     }
 
     /* Genera colores de forma cíclica */

@@ -3,6 +3,9 @@ import Svr4ProcTS from './svr4procTS.js'
 
 class Svr4Process {
     constructor(sched, pid, execution, cpu_burst, io_burst, pClass, pri) {
+        // constantes
+        this.STATES = ['finished','zombie','sleeping','ready','running_user','running_kernel'];
+
         this.sched = sched;
         this.p_pid = pid;
         this.p_state = 'ready';
@@ -116,22 +119,7 @@ class Svr4Process {
 
     /* Devuelve la representacion numerica del estado */
     getStateNumber() {
-        switch (this.p_state) {
-            case 'running_kernel':
-                return 5;
-            case 'running_user':
-                return 4;
-            case 'ready':
-                return 3;
-            case 'sleeping':
-                return 2;
-            case 'zombie':
-                return 1;
-            case 'finished':
-                return 0;
-            default:
-                return -1;
-        }
+        return this.STATES.indexOf(this.p_state);
     }
 
     /* Ejecuta un tick en modo running_kernel */
