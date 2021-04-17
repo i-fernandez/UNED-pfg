@@ -165,6 +165,7 @@ class Svr3Scheduler {
             tiempos.push(pr.getSummaryData());
         });
         let data = {
+            name: this.name,
             tick: this.TICK,
             cs_duration: this.CONTEXT_SWITCH,
             n_proc: n_proc,
@@ -184,6 +185,7 @@ class Svr3Scheduler {
         // Datos de progreso
         let timeData = this.processTable.map(p => p.getStateNumber());
         timeData.unshift(this.time);
+        timeData.unshift(this.name);
         this.stateManager.pushTime(timeData);
 
         // Estado

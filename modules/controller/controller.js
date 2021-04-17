@@ -8,16 +8,16 @@ class Controller {
 
         /* Eventos en la vista */
         this.view.newFCFSEvent.addListener(() => {
-            //this.model.createSVR3();
+            this.model.createFCFS();
         });
         this.view.newSJFEvent.addListener(() => {
-            //this.model.createSVR3();
+            this.model.createSJF();
         });
         this.view.newRREvent.addListener(() => {
-            //this.model.createSVR3();
+            this.model.createRR();
         });
         this.view.newPRIEvent.addListener(() => {
-            //this.model.createSVR3();
+            this.model.createPRI();
         });
         this.view.newSVR3Event.addListener(() => {
             this.model.createSVR3();

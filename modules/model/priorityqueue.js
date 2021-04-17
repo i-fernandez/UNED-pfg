@@ -1,9 +1,12 @@
 class PriorityQueue { 
-    constructor(pri, element) { 
-        this.items = [element]; 
+    constructor(pri, element) {
         this.priority = pri;
-    } 
-                  
+        if (element == null)
+            this.items = [];
+        else
+            this.items = [element]; 
+    }
+                      
     /* Añade un elemento al final de la cola */
     enqueue(element) {     
         this.items.push(element); 

@@ -431,7 +431,10 @@ class View {
         let cv = document.createElement('canvas');
         tiempos_td.appendChild(cv);
         this._append(summary_div, [title_div, data_div]);
-        this.charts.drawBarChart(cv.getContext('2d'), data.chart);
+        if (data.name == 'SVR3' || data.name == 'SVR4')
+            this.charts.drawBarChart(cv.getContext('2d'), data.chart);
+        else
+            this.charts.drawSimpleBarChart(cv.getContext('2d'), data.chart);
     }
 
     /* Apartado Progreso */
@@ -442,7 +445,11 @@ class View {
         cv.width = 1000;
         cv.height = 200;
         progress_div.appendChild(cv);
-        this.charts.drawLineChart(cv.getContext('2d'), data);
+        let prData = JSON.parse(data);
+        if (prData.name == 'SVR3' || prData.name == 'SVR4')
+            this.charts.drawLineChart(cv.getContext('2d'), prData);
+        else
+            this.charts.drawSimpleLineChart(cv.getContext('2d'), prData);
     }
 
     /* Apartado Estados */
@@ -486,20 +493,26 @@ class View {
         this._clearChilds(s_table);
         this._addBinaryRowText(s_table, 'Time: ', `${state.time} ut.`);
         // runrun
-        let rr_td = this._addBinaryRow(s_table, 'runrun: ');
-        let rr_div = document.createElement('div');
-        rr_div.classList.add('array-queue');
-        rr_td.appendChild(rr_div);
-        if (state.runrun)
-            rr_div.classList.add('array-queue-1');
-        else
-            rr_div.classList.add('array-queue-0');
-
+        if (data.name == 'SVR3' || data.name == 'SVR4') {
+            let rr_td = this._addBinaryRow(s_table, 'runrun: ');
+            let rr_div = document.createElement('div');
+            rr_div.classList.add('array-queue');
+            rr_td.appendChild(rr_div);
+            if (state.runrun)
+                rr_div.classList.add('array-queue-1');
+            else
+                rr_div.classList.add('array-queue-0');
+        }
         // Campos especificos (colas y bitmap)
         if (data.name == 'SVR3') 
             this._showSvr3State(state);
         else if (data.name == 'SVR4')
             this._showSvr4State(state);
+        else if (data.name == 'PRI')
+            this._showPriState(state);
+        else    
+            this._showGenericState(state);
+
         
         // Tabla de procesos
         if (state.pTable.length > 0) {
@@ -527,7 +540,25 @@ class View {
             ev_td.appendChild(li);
         });   
     }
+
+    /* Muestra un estado generico */
+    _showGenericState(state) {
+        let s_table = document.getElementById('state_table');
+        if (state.queue.length > 0) {
+            let q_td = this._addBinaryRow(s_table, 'queue: ');
+            // Añadir los procesos 
+
+        }
+        
+
+    }
    
+    /* Muestra un estado de planificador con Prioridades */
+    _showPriState(state) {
+        let s_table = document.getElementById('state_table');
+
+    }
+
     /* Muestra un estado de SVR3 */
     _showSvr3State(state) {
         let s_table = document.getElementById('state_table');
@@ -698,6 +729,7 @@ class View {
     /* Establece la clase de una fila segun el estado */
     _setRowClass(row, state) {
         switch (state) {
+            case 'running':
             case 'running_user':
                 row.classList.add('pr_run_user', 'row_ptable');
                 break;
