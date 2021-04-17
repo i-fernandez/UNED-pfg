@@ -310,6 +310,11 @@ select {
     height: inherit;
     border: white;
 }
+
+form {
+    display: inline-flex;
+}
+
 /* Formatos por id */
 #header_div {
     margin: 0px;
@@ -324,7 +329,6 @@ select {
 #summary_table {
     width: 500px;
 }
-
 #barChart_td {
     /*position: relative;*/
     height: 450px;

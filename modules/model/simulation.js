@@ -1,5 +1,9 @@
 import SVR3Scheduler from './svr3scheduler.js'
 import SVR4Scheduler from './svr4scheduler.js'
+import FCFSScheduler from './fcfsscheduler.js'
+import SJFScheduler from './sjfscheduler.js'
+import RRScheduler from './rrscheduler.js'
+import PRIScheduler from './prischeduler.js'
 import Event from '../util/event.js'
 import StateManager from './statemanager.js'
 
@@ -11,6 +15,30 @@ class Simulation {
         this.createTimelineEvent = new Event();
         this.createStatesEvent = new Event();
         this.sendStateEvent = new Event();
+    }
+
+    /* Crea un planificador FCFS */
+    createFCFS() {
+        this.stateManager = new StateManager();
+        this.scheduler = new FCFSScheduler(this.stateManager);
+    }
+
+    /* Crea un planificador SJF */
+    createSJF() {
+        this.stateManager = new StateManager();
+        this.scheduler = new SJFScheduler(this.stateManager);
+    }
+
+    /* Crea un planificador RR */
+    createRR() {
+        this.stateManager = new StateManager();
+        this.scheduler = new RRScheduler(this.stateManager);
+    }
+
+    /* Crea un planificador PRI */
+    createPRI() {
+        this.stateManager = new StateManager();
+        this.scheduler = new PRIScheduler(this.stateManager);
     }
 
     /* Crea un planificador SVR3 */

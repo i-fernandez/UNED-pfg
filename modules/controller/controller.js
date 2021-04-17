@@ -7,6 +7,18 @@ class Controller {
         this.view = new View;
 
         /* Eventos en la vista */
+        this.view.newFCFSEvent.addListener(() => {
+            //this.model.createSVR3();
+        });
+        this.view.newSJFEvent.addListener(() => {
+            //this.model.createSVR3();
+        });
+        this.view.newRREvent.addListener(() => {
+            //this.model.createSVR3();
+        });
+        this.view.newPRIEvent.addListener(() => {
+            //this.model.createSVR3();
+        });
         this.view.newSVR3Event.addListener(() => {
             this.model.createSVR3();
         });
@@ -15,11 +27,7 @@ class Controller {
             this.model.createSVR4();
         });
 
-        this.view.addSVR3ProcessEvent.addListener(data => {
-            this.model.addProcess(data);
-        });
-
-        this.view.addSVR4ProcessEvent.addListener(data => {
+        this.view.addProcessEvent.addListener(data => {
             this.model.addProcess(data);
         });
 
