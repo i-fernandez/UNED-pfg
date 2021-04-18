@@ -47,7 +47,7 @@ class StateManager {
         
         for (let i=2; i<this.timeSeries[0].length; i++) {
             // Añade los pids
-            this.progressData += `"${i}" : [`;
+            this.progressData += `"${i-1}" : [`;
             // Añade los estados
             this.timeSeries.forEach(item => {
                 this.progressData += `${item[i]}, `

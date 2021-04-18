@@ -22,7 +22,7 @@ class FCFSScheduler {
     /* Añade un nuevo proceso en el sistema */
     addProcess(data) {
         let pr = new Process(
-            this.processTable.length+1, data.execution, data.cpu_burst, data.io_burst, data.pri);
+            this.processTable.length+1, data.execution, data.cpu_burst, data.io_burst);
         this.processTable.push(pr);
         this.queue.enqueue(pr);
     }
@@ -109,8 +109,7 @@ class FCFSScheduler {
             this.inContextSwitch = true;
 
         // Envia el estado
-        this._sendState();
-        
+        this._sendState();  
     }
 
 
@@ -155,7 +154,7 @@ class FCFSScheduler {
                     time: this.time, 
                     journal: this.journal, 
                     pTable: notFinished.map(p => p.getFullData()),
-                    queue: this.queue.getData(),
+                    queue: this.queue.getData()
                 }
             }
             this.stateManager.pushState(JSON.stringify(state));

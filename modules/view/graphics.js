@@ -17,7 +17,8 @@ class Graphics {
                 fill: false,
                 steppedLine: true,
                 borderColor: color,
-                backgroundColor: color
+                backgroundColor: color,
+                pointRadius: 1
             }
             params.push(dataset);
         }); 
@@ -108,7 +109,8 @@ class Graphics {
                 fill: false,
                 steppedLine: true,
                 borderColor: color,
-                backgroundColor: color
+                backgroundColor: color,
+                pointRadius: 2
             }
             params.push(dataset);
         }); 

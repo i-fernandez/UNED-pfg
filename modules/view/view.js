@@ -119,7 +119,7 @@ class View {
         sel_rr.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_rr.classList.add('header-menu-sel');
-            this._createAddForm();
+            this._createRRAdd();
             this.newRREvent.trigger();
         });
         let sel_pri = document.createElement('li');
@@ -177,7 +177,7 @@ class View {
         // Formulario de entrada
         let addForm = document.createElement('form');
         addForm.id = 'add_form';
-        formDiv.appendChild(addForm);        
+        formDiv.appendChild(addForm);    
         // Tabla de procesoso añadidos
         let addTable = document.createElement('table');
         addTable.id = 'addTable';
@@ -282,6 +282,16 @@ class View {
         form.appendChild(addButton);
     }
 
+
+    /* Campo de entrada para el cuanto (solo RR) */
+    _createRRAdd() {
+        this._createAddForm();
+        let form_div = document.getElementById('inputform_div');
+        // TODO: mirar a ver porque descojona el input
+        let inputQuantum = this._addInput(form_div, 'Cuanto');
+        inputQuantum.placeholder = '50';
+        form_div.appendChild(inputQuantum);
+    }
 
     /* Elementos adicionales para añadir proceso SVR3 */
     _createSvr3Add() {
@@ -404,6 +414,8 @@ class View {
         let data_table = document.createElement('table');
         this._addBinaryRowText(data_table, 'Duración del tick: ', `${data.tick} ut.`);
         this._addBinaryRowText(data_table, 'Duracion del cambio de contexto: ', `${data.cs_duration} ut. `);
+        if (data.name == 'RR')
+            this._addBinaryRowText(data_table, 'Duración del cuanto: ', `${data.quantum} ut.`);
         this._addBinaryRowText(data_table, 'Número de procesos: ', data.n_proc);
         this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
         this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
@@ -444,7 +456,6 @@ class View {
         // Botones navegation
         let navigation_div = document.createElement('div');
         navigation_div.classList.add('div-nav', 'div-states');
-        //this._clearChilds(navigation_div);
         let prev = document.createElement('button');
         prev.textContent = 'Anterior';
         prev.addEventListener('click', () => {
@@ -462,12 +473,7 @@ class View {
         let state_table = document.createElement('table');
         state_table.id = 'state_table';
         state_div.appendChild(state_table);
-//        let states_div = document.getElementById('states_div');
-        this._append(states_div,[navigation_div, state_div]
-        );
-
-        // Muestra el primer estado
-        //this.showState(data);
+        this._append(states_div,[navigation_div, state_div]);
     }
 
     /* Muesta un estado */
@@ -476,7 +482,7 @@ class View {
         let state = data.state;
         let s_table = document.getElementById('state_table');
         this._clearChilds(s_table);
-        this._addBinaryRowText(s_table, 'Time: ', `${state.time} ut.`);
+        this._addBinaryRowText(s_table, 'Tiempo: ', `${state.time} ut.`);
         // runrun
         if (data.name == 'SVR3' || data.name == 'SVR4') {
             let rr_td = this._addBinaryRow(s_table, 'runrun: ');
@@ -488,16 +494,29 @@ class View {
             else
                 rr_div.classList.add('array-queue-0');
         }
-        // Campos especificos (colas y bitmap)
-        if (data.name == 'SVR3') 
-            this._showSvr3State(state);
-        else if (data.name == 'SVR4')
-            this._showSvr4State(state);
-        else if (data.name == 'PRI')
-            this._showPriState(state);
-        else    
-            this._showGenericState(state);
-
+        // Campos especificos (colas, bitmap)
+        switch (data.name) {
+            case 'SVR3':
+                this._showSvr3State(state);
+                break;
+            case 'SVR4':
+                this._showSvr4State(state);
+                break;
+            case 'FCFS':
+                this._showFCFSState(state);
+                break;
+            case 'SJF':
+                this._showSJFState(state);
+                break;
+            case 'RR':
+                this._showRRState(state);
+                break;
+            case 'PRI':
+                this._showPriState(state);
+                break;
+            default:
+                break;
+        }
         
         // Tabla de procesos
         if (state.pTable.length > 0) {
@@ -526,13 +545,32 @@ class View {
         });   
     }
 
-    /* Muestra un estado generico */
-    _showGenericState(state) {
+    /* Muestra un estado FCFS */
+    _showFCFSState(state) {
         let s_table = document.getElementById('state_table');
-        let q_td = this._addBinaryRow(s_table, 'Queue: ');
+        let q_td = this._addBinaryRow(s_table, 'Cola: ');
         if (state.queue.items.length > 0)    
-            this._fillQueue(q_td, state.queue.items);
+            this._fillQueue(q_td, state.queue.items, true);
         
+    }
+
+    /* Muestra un estado de planificador con Prioridades */
+    _showSJFState(state) {
+        let s_table = document.getElementById('state_table');
+        let q_td = this._addBinaryRow(s_table, 'Cola: ');
+        if (state.queue.length > 0)    
+            this._fillQueue(q_td, state.queue);
+
+    }
+
+    /* Muestra un estado de planificador con Prioridades */
+    _showRRState(state) {
+        let s_table = document.getElementById('state_table');
+        this._addBinaryRowText(s_table, 'Cuanto restante: ', `${state.q_left} ut.`);
+        let q_td = this._addBinaryRow(s_table, 'Cola: ');
+        if (state.queue.items.length > 0)    
+            this._fillQueue(q_td, state.queue.items, true);
+
     }
    
     /* Muestra un estado de planificador con Prioridades */
@@ -823,15 +861,17 @@ class View {
     }
 
     /* Rellena la cola de procesos con sus datos */
-    _fillQueue(domElement, data) {
+    _fillQueue(domElement, data, arrow) {
         let img_path = './resources/left_arrow_15.png';
-        // Queue head
-        let dh = document.createElement('div');
-        dh.classList.add('queueArrow_div');
-        let hArrow = document.createElement('img');
-        hArrow.src = img_path;
-        dh.appendChild(hArrow);
-        domElement.appendChild(dh);
+        if (arrow) {
+            // Queue head
+            let dh = document.createElement('div');
+            dh.classList.add('queueArrow_div');
+            let hArrow = document.createElement('img');
+            hArrow.src = img_path;
+            dh.appendChild(hArrow);
+            domElement.appendChild(dh);
+        }
         // Queue data
         data.forEach(pr => {
             let dp = document.createElement('div');
@@ -839,13 +879,15 @@ class View {
             dp.appendChild(document.createTextNode(pr));
             domElement.appendChild(dp);
         });
-        // Queue tail
-        let dt = document.createElement('div');
-        dt.classList.add('queueArrow_div');
-        let tArrow = document.createElement('img');
-        tArrow.src = img_path;
-        dt.appendChild(tArrow);
-        domElement.appendChild(dt);
+        if (arrow) {
+            // Queue tail
+            let dt = document.createElement('div');
+            dt.classList.add('queueArrow_div');
+            let tArrow = document.createElement('img');
+            tArrow.src = img_path;
+            dt.appendChild(tArrow);
+            domElement.appendChild(dt);
+        }
     }
 
     /* Añade varios elementos al padre */
