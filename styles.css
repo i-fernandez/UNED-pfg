@@ -138,6 +138,18 @@
     display: inline-block;
     margin-left: 15px;
 }
+.queue_div {
+    display: inline-block;
+    border: solid 1px black;
+    text-align: center;
+    width: 30px;
+}
+.queueArrow_div {
+    display: inline-block;
+    text-align: center;
+    margin-left: 15px;
+    margin-right: 15px;
+}
 .div-main {
     margin-left: 5%;
     margin-right: 5%;

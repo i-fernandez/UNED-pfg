@@ -101,7 +101,7 @@ class View {
         sel_fcfs.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_fcfs.classList.add('header-menu-sel');
-            this._createGenericAdd();
+            this._createAddForm();
             this.newFCFSEvent.trigger();
         });
         let sel_sjf = document.createElement('li');
@@ -110,7 +110,7 @@ class View {
         sel_sjf.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_sjf.classList.add('header-menu-sel');
-            this._createGenericAdd();
+            this._createAddForm();
             this.newSJFEvent.trigger();
         });
         let sel_rr = document.createElement('li');
@@ -119,7 +119,7 @@ class View {
         sel_rr.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_rr.classList.add('header-menu-sel');
-            this._createGenericAdd();
+            this._createAddForm();
             this.newRREvent.trigger();
         });
         let sel_pri = document.createElement('li');
@@ -128,7 +128,7 @@ class View {
         sel_pri.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_pri.classList.add('header-menu-sel');
-            this._createGenericAdd();
+            this._createAddForm(true);
             this.newPRIEvent.trigger();
         });
 
@@ -238,9 +238,9 @@ class View {
         this.startSimulationEvent.trigger();
     }
 
-    /* Elementos para añadir un proceso generico 
-       Prioridad, t.ejecucion, cpu, io */
-    _createGenericAdd() {
+    /* Elementos para añadir un proceso 
+       Prioridad, t.ejecucion, cpu, io, clase */
+    _createAddForm(pri, pClass) {
         let form = document.getElementById('add_form');
         form.addEventListener('submit', event => {
             event.preventDefault();
@@ -248,11 +248,29 @@ class View {
             this._resetInput();
         });
 
-        let inputPriority = this._addInput(form, 'Prioridad');
-        inputPriority.id = 'inputPriority';
-        inputPriority.placeholder = '1-100';
-        inputPriority.min = 1;
-        inputPriority.max = 100;
+        if (pClass) {
+            let cs_table = this._createInputAddTable(form, 'Clase');
+            let classSel = document.createElement('select');
+            classSel.id = 'class_sel';
+            let option_rt = document.createElement('option');
+            option_rt.value = '1';
+            option_rt.innerHTML = 'Real Time';
+            let option_ts = document.createElement('option');
+            option_ts.value = '2';
+            option_ts.innerHTML = 'Time Sharing';
+            this._append(classSel, [option_rt, option_ts]);
+            cs_table.appendChild(classSel);
+
+        }
+
+        if (pri) {
+            let inputPriority = this._addInput(form, 'Prioridad');
+            inputPriority.id = 'inputPriority';
+            inputPriority.placeholder = '1-100';
+            inputPriority.min = 1;
+            inputPriority.max = 100;
+        }
+        
         let inputBurst = this._addInput(form, 'T. ejecución');
         inputBurst.id = 'inputBurst';
         let inputCPU = this._addInput(form, 'Ciclo CPU');
@@ -267,7 +285,7 @@ class View {
 
     /* Elementos adicionales para añadir proceso SVR3 */
     _createSvr3Add() {
-        this._createGenericAdd();
+        this._createAddForm(true);
         let inputPriority = document.getElementById('inputPriority')
         inputPriority.placeholder = '50-127';
         inputPriority.min = 50;
@@ -276,17 +294,12 @@ class View {
 
     /* Elementos para añadir proceso SVR4 */
     _createSvr4Add() {
-        let form = document.getElementById('add_form');
-        form.addEventListener('submit', event => {
-            event.preventDefault();
-            this.addProcessEvent.trigger(this._getSvr4Input());
-            this._resetInput();
-        });
-
-        // Selector de clase 
-        let cs_table = this._createInputAddTable(form, 'Clase');
-        let classSel = document.createElement('select');
-        classSel.id = 'class_sel';
+        this._createAddForm(true, true);
+        let inputPriority = document.getElementById('inputPriority')
+        inputPriority.placeholder = '100-159';
+        inputPriority.min = 100;
+        inputPriority.max = 159;
+        let classSel = document.getElementById('class_sel');
         classSel.addEventListener('change', event => {
             if (classSel.value == 1) {
                 inputPriority.placeholder = '100-159';
@@ -298,51 +311,23 @@ class View {
                 inputPriority.max = 59;
             }
         });
-        let option_rt = document.createElement('option');
-        option_rt.value = '1';
-        option_rt.innerHTML = 'Real Time';
-        let option_ts = document.createElement('option');
-        option_ts.value = '2';
-        option_ts.innerHTML = 'Time Sharing';
-        this._append(classSel, [option_rt, option_ts]);
-        cs_table.appendChild(classSel);
-        // Campos numericos
-        let inputPriority = this._addInput(form, 'Prioridad');
-        inputPriority.id = 'inputPriority';
-        inputPriority.placeholder = '100-159';
-        inputPriority.min = 100;
-        inputPriority.max = 159;
-        let inputBurst = this._addInput(form, 'T. ejecución');
-        inputBurst.id = 'inputBurst';
-        let inputCPU = this._addInput(form, 'Ciclo CPU');
-        inputCPU.id = 'inputCPU';
-        let inputIO = this._addInput(form, 'Ciclo IO');
-        inputIO.id = 'inputIO';
-        // Boton
-        let addButton = document.createElement('button');
-        addButton.textContent = 'Agregar';
-        form.appendChild(addButton);
     }
 
-    /* Devuelve los datos del formulario de SVR3 */
+    /* Devuelve los datos del formulario  */
     _getInput() {
         let data = {
             execution: parseInt(document.getElementById('inputBurst').value, 10),
             cpu_burst: parseInt(document.getElementById('inputCPU').value, 10),
-            io_burst: parseInt(document.getElementById('inputIO').value, 10),
-            pri: parseInt(document.getElementById('inputPriority').value, 10)
+            io_burst: parseInt(document.getElementById('inputIO').value, 10)
         }
-        // Convierte a JSON
-        return JSON.stringify(data);
-    }
-
-    /* Devuelve los datos del formulario de SVR4 */
-    // TODO: mirar si puedo usar _getInput y modificar el resultado
-    _getSvr4Input() {
-        let pc = 'RealTime'
-        if (document.getElementById('class_sel').value == 2) {pc = 'TimeSharing';}
-        let data = JSON.parse(this._getInput());
-        data.pClass = pc;
+        let pri = document.getElementById('inputPriority');
+        if (pri) { data.pri = parseInt(pri.value, 10); }
+        let class_sel = document.getElementById('class_sel');
+        if (class_sel) {
+            let pc = 'RealTime'
+            if (class_sel.value == 2) {pc = 'TimeSharing';}
+            data.pClass = pc;
+        }
         // Convierte a JSON
         return JSON.stringify(data);
     }
@@ -544,13 +529,10 @@ class View {
     /* Muestra un estado generico */
     _showGenericState(state) {
         let s_table = document.getElementById('state_table');
-        if (state.queue.length > 0) {
-            let q_td = this._addBinaryRow(s_table, 'queue: ');
-            // Añadir los procesos 
-
-        }
+        let q_td = this._addBinaryRow(s_table, 'Queue: ');
+        if (state.queue.items.length > 0)    
+            this._fillQueue(q_td, state.queue.items);
         
-
     }
    
     /* Muestra un estado de planificador con Prioridades */
@@ -838,6 +820,32 @@ class View {
             this._append(row, [td_t, td_a]);
         });
         domElement.appendChild(table);
+    }
+
+    /* Rellena la cola de procesos con sus datos */
+    _fillQueue(domElement, data) {
+        let img_path = './resources/left_arrow_15.png';
+        // Queue head
+        let dh = document.createElement('div');
+        dh.classList.add('queueArrow_div');
+        let hArrow = document.createElement('img');
+        hArrow.src = img_path;
+        dh.appendChild(hArrow);
+        domElement.appendChild(dh);
+        // Queue data
+        data.forEach(pr => {
+            let dp = document.createElement('div');
+            dp.classList.add('queue_div');
+            dp.appendChild(document.createTextNode(pr));
+            domElement.appendChild(dp);
+        });
+        // Queue tail
+        let dt = document.createElement('div');
+        dt.classList.add('queueArrow_div');
+        let tArrow = document.createElement('img');
+        tArrow.src = img_path;
+        dt.appendChild(tArrow);
+        domElement.appendChild(dt);
     }
 
     /* Añade varios elementos al padre */
