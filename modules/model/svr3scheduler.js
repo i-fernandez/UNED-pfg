@@ -103,20 +103,21 @@ class Svr3Scheduler {
     _nextTick() {
         this.time += this.TICK;
         this.nextRoundRobin -= this.TICK;
-
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == 'sleeping');
+
         // Actualiza los procesos
         this.processTable.forEach (pr => {
             let out = pr.runTick(this.TICK, this.time);
             if (out)
                 this.journal.push(out);
         });
+
         // Actualiza el proceso en ejecucion
         if (this.running.p_state != 'running_user' && this.running.p_state != 'running_kernel')
             this.running = '';
         
+        // Finaliza el cambio de contexto
         if (this.inContextSwitch)
-            // Finaliza el cambio de contexto
             this._swtch();
 
         // Encola procesos que finalizaron IO
@@ -137,7 +138,8 @@ class Svr3Scheduler {
         
         // Comprueba si empieza un cambio de contexto
         this._startSwtch();
-
+        
+        // Envia el estado
         this._sendState();
     }
 

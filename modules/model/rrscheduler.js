@@ -5,7 +5,7 @@ class RRScheduler {
     constructor(stateManager) {
         // constantes
         this.TICK = 1;
-        this.QUANTUM = 100;     // meter como parametro
+        this.QUANTUM = 50;     
         this.CONTEXT_SWITCH = 1;
         // variables
         this.name = 'RR';
@@ -83,7 +83,8 @@ class RRScheduler {
     /* Ejecuta un tick de reloj */
     _nextTick() {
         this.time += this.TICK;
-        this.quantumLeft -= this.TICK;
+        if (this.running)
+            this.quantumLeft -= this.TICK;
         let sleeping_pr  = this.processTable.filter(pr => pr.p_state == 'sleeping');
         
         // Actualiza los procesos

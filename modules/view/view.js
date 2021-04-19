@@ -119,7 +119,7 @@ class View {
         sel_rr.addEventListener('click', event => {
             this._clickAlgorithm();
             sel_rr.classList.add('header-menu-sel');
-            this._createRRAdd();
+            this._createAddForm();
             this.newRREvent.trigger();
         });
         let sel_pri = document.createElement('li');
@@ -266,9 +266,9 @@ class View {
         if (pri) {
             let inputPriority = this._addInput(form, 'Prioridad');
             inputPriority.id = 'inputPriority';
-            inputPriority.placeholder = '1-100';
+            inputPriority.placeholder = '1-10';
             inputPriority.min = 1;
-            inputPriority.max = 100;
+            inputPriority.max = 10;
         }
         
         let inputBurst = this._addInput(form, 'T. ejecución');
@@ -284,6 +284,7 @@ class View {
 
 
     /* Campo de entrada para el cuanto (solo RR) */
+    // TODO: BORRAR
     _createRRAdd() {
         this._createAddForm();
         let form_div = document.getElementById('inputform_div');
@@ -554,7 +555,7 @@ class View {
         
     }
 
-    /* Muestra un estado de planificador con Prioridades */
+    /* Muestra un estado SJF */
     _showSJFState(state) {
         let s_table = document.getElementById('state_table');
         let q_td = this._addBinaryRow(s_table, 'Cola: ');
@@ -563,7 +564,7 @@ class View {
 
     }
 
-    /* Muestra un estado de planificador con Prioridades */
+    /* Muestra un estado Round Robin */
     _showRRState(state) {
         let s_table = document.getElementById('state_table');
         this._addBinaryRowText(s_table, 'Cuanto restante: ', `${state.q_left} ut.`);
@@ -576,7 +577,11 @@ class View {
     /* Muestra un estado de planificador con Prioridades */
     _showPriState(state) {
         let s_table = document.getElementById('state_table');
-
+        this._addBinaryRowText(s_table, 'Cuanto restante: ', `${state.q_left} ut.`);
+        if (state.qs.length > 0) {
+            let qs_td = this._addBinaryRow(s_table, 'qs: ');
+            this._fillPriorityQueue(qs_td, state.qs, 'PRI');
+        }
     }
 
     /* Muestra un estado de SVR3 */
