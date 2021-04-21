@@ -44,7 +44,7 @@ class SJFScheduler {
             tiempos.push(pr.getSummaryData());
         });
         let data = {
-            name: this.name,
+            //name: this.name,
             tick: this.TICK,
             cs_duration: this.CONTEXT_SWITCH,
             n_proc: n_proc,
@@ -135,7 +135,7 @@ class SJFScheduler {
         // Datos de progreso
         let timeData = this.processTable.map(p => p.getStateNumber());
         timeData.unshift(this.time);
-        timeData.unshift(this.name);
+        //timeData.unshift(this.name);
         this.stateManager.pushTime(timeData);
 
         // Estado
@@ -145,7 +145,7 @@ class SJFScheduler {
         if (this.journal.length > 0) {
             let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
             let state = {
-                name: this.name,
+                //name: this.name,
                 pt_info: this.processTable[0].getInfo(),
                 state: {
                     time: this.time, 

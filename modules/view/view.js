@@ -14,6 +14,7 @@ class View {
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
         this.previousStateEvent = new Event();
+        this.exportEvent = new Event();
         // Diagramas
         this.charts = new Graphics();
     }
@@ -78,6 +79,7 @@ class View {
         let sch_selector = document.createElement('ul');
         sch_selector.classList.add('header-menu-ul-center');
         let sel_svr3 = document.createElement('li');
+        sel_svr3.id = 'sel_svr3';
         sel_svr3.textContent = 'SVR 3';
         sel_svr3.classList.add('header-menu-li');
         sel_svr3.addEventListener('click', event => {
@@ -87,6 +89,7 @@ class View {
             this.newSVR3Event.trigger();
         });
         let sel_svr4 = document.createElement('li');
+        sel_svr4.id = 'sel_svr4';
         sel_svr4.textContent = 'SVR 4';
         sel_svr4.classList.add('header-menu-li');
         sel_svr4.addEventListener('click', event => {
@@ -96,6 +99,7 @@ class View {
             this.newSVR4Event.trigger();
         });
         let sel_fcfs = document.createElement('li');
+        sel_fcfs.id = 'sel_fcfs';
         sel_fcfs.textContent = 'FCFS';
         sel_fcfs.classList.add('header-menu-li');
         sel_fcfs.addEventListener('click', event => {
@@ -105,6 +109,7 @@ class View {
             this.newFCFSEvent.trigger();
         });
         let sel_sjf = document.createElement('li');
+        sel_sjf.id = 'sel_sjf';
         sel_sjf.textContent = 'SJF';
         sel_sjf.classList.add('header-menu-li');
         sel_sjf.addEventListener('click', event => {
@@ -114,6 +119,7 @@ class View {
             this.newSJFEvent.trigger();
         });
         let sel_rr = document.createElement('li');
+        sel_rr.id = 'sel_rr';
         sel_rr.textContent = 'RR';
         sel_rr.classList.add('header-menu-li');
         sel_rr.addEventListener('click', event => {
@@ -123,6 +129,7 @@ class View {
             this.newRREvent.trigger();
         });
         let sel_pri = document.createElement('li');
+        sel_pri.id = 'sel_id';
         sel_pri.textContent = 'PRI';
         sel_pri.classList.add('header-menu-li');
         sel_pri.addEventListener('click', event => {
@@ -145,7 +152,19 @@ class View {
         title.textContent = 'Simulador de algoritmos de planificación de procesos';
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
-        this._append(init_div, [title, description]);
+
+        let input = document.createElement('input'); 
+        input.accept = '.json';
+        input.type = 'file'; 
+        input.addEventListener('change', (event) => {
+            let reader = new FileReader();
+            reader.addEventListener('load', event => {
+                this._crateFromFile(reader.result);
+            });
+            reader.readAsText(event.target.files[0]);
+        });
+        input.click()
+        this._append(init_div, [title, description, input]);
     }
 
     /* Algoritmo seleccionado */
@@ -234,7 +253,7 @@ class View {
         summary_div.style.display = 'inherit';
         header_menu_div.style.display = 'inherit';
         this._navigationMenu();
-        this._createStates();
+        this._createStatesView();
         this.startSimulationEvent.trigger();
     }
 
@@ -280,18 +299,6 @@ class View {
         let addButton = document.createElement('button');
         addButton.textContent = 'Agregar';
         form.appendChild(addButton);
-    }
-
-
-    /* Campo de entrada para el cuanto (solo RR) */
-    // TODO: BORRAR
-    _createRRAdd() {
-        this._createAddForm();
-        let form_div = document.getElementById('inputform_div');
-        // TODO: mirar a ver porque descojona el input
-        let inputQuantum = this._addInput(form_div, 'Cuanto');
-        inputQuantum.placeholder = '50';
-        form_div.appendChild(inputQuantum);
     }
 
     /* Elementos adicionales para añadir proceso SVR3 */
@@ -353,6 +360,48 @@ class View {
 
     /* Simulacion */
 
+    /* Simulacion a partir de fichero */
+    _crateFromFile(data) {
+        console.log("SIMULATION");
+        console.log(data);
+        
+
+        init_div.style.display = 'none';
+        addproc_div.style.display = 'none';
+        summary_div.style.display = 'inherit';
+        header_menu_div.style.display = 'inherit';
+        switch (data.name) {
+            case 'FCFS':
+                sel_fcfs.classList.add('header-menu-sel');
+                break;
+            case 'SJF':
+                sel_sjf.classList.add('header-menu-sel');
+                break;
+            case 'RR':
+                sel_rr.classList.add('header-menu-sel');
+                break;
+            case 'PRI':
+                sel_pri.classList.add('header-menu-sel');
+                break;
+            case 'SVR3':
+                sel_svr3.classList.add('header-menu-sel');
+                break;
+            case 'SVR4':
+                sel_svr4.classList.add('header-menu-sel');
+                break;
+            default:
+                break;
+        }
+
+
+        // TODO: Recibir todos los datos
+        // Enviar estados al state manager para poder leerlos despues
+        this._navigationMenu();
+        this._createSummaryView(data);
+        this._createStatesView();
+        
+    }
+
     /* Crea el menu de navegacion */
     _navigationMenu() {
         let header_menu_div = document.getElementById('header_menu_div');
@@ -399,11 +448,29 @@ class View {
         header_menu_div.appendChild(nav_menu);
     }
 
+    /* Recibe los datos en JSON desde el modelo para mostrar la simulacion */
+    showSimulationData(data) {
+        let d = JSON.parse(data);
+        this._createSummaryView(d.summary, d.name);
+        this._createProgressView(d.progress, d.name);
+        this._createState(d.state, d.name);
+    }
+
+    /* Recibe un estado en JSON desde el modelo y lo muestra */
+    showState(data) {
+        let d = JSON.parse(data);
+        this._createState(d.state, d.name);
+    }
+
     /* Apartado Resumen */
-    createSummary(summary) {
+    _createSummaryView(data, name) {
         let summary_div = document.getElementById('summary_div');
         this._clearChilds(summary_div);
-        let data = JSON.parse(summary);
+        let save = document.createElement('button');
+        save.textContent = 'Exportar';
+        save.addEventListener('click', () => {
+            this.exportEvent.trigger();
+        });
         let title_div = document.createElement('div');
         title_div.classList.add('div-states');
         let title = document.createElement('h1');
@@ -421,37 +488,45 @@ class View {
         this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
         this._addBinaryRowText(data_table, 'Tiempo medio de espera: ', `${data.wait} ut.`);
         this._addBinaryRowText(data_table, 'Número de cambios de contexto: ', data.cswitch);
-
         /* Grafico de barras */
         let tiempos_td = this._addBinaryRow(data_table, 'Tiempos por proceso: ');
         tiempos_td.id = 'barChart_td';
         data_div.appendChild(data_table);
         let cv = document.createElement('canvas');
         tiempos_td.appendChild(cv);
-        this._append(summary_div, [title_div, data_div]);
-        if (data.name == 'SVR3' || data.name == 'SVR4')
+        this._append(summary_div, [title_div, save, data_div]);
+        if (name == 'SVR3' || name == 'SVR4')
             this.charts.drawBarChart(cv.getContext('2d'), data.chart);
         else
             this.charts.drawSimpleBarChart(cv.getContext('2d'), data.chart);
     }
 
+    /* Exporta los datos */
+    exportData(data) {
+        let a = document.createElement('a');
+        a.href=`data:application/json;charset=utf-8,${data}`;
+        a.download = 'simulation.json'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    }
+
     /* Apartado Progreso */
-    createProgress(data) {
+    _createProgressView(data, name) {
         let progress_div = document.getElementById('progress_div');
         this._clearChilds(progress_div);
         let cv = document.createElement('canvas');
         cv.width = 1000;
         cv.height = 200;
         progress_div.appendChild(cv);
-        let prData = JSON.parse(data);
-        if (prData.name == 'SVR3' || prData.name == 'SVR4')
-            this.charts.drawLineChart(cv.getContext('2d'), prData);
+        if (name == 'SVR3' || name == 'SVR4')
+            this.charts.drawLineChart(cv.getContext('2d'), data);
         else
-            this.charts.drawSimpleLineChart(cv.getContext('2d'), prData);
+            this.charts.drawSimpleLineChart(cv.getContext('2d'), data);
     }
 
     /* Apartado Estados */
-    _createStates() {
+    _createStatesView() {
         let states_div = document.getElementById('states_div');
         this._clearChilds(states_div);
         // Botones navegation
@@ -478,14 +553,13 @@ class View {
     }
 
     /* Muesta un estado */
-    showState(state_data) {
-        let data = JSON.parse(state_data);
+    _createState(data, name) {
         let state = data.state;
         let s_table = document.getElementById('state_table');
         this._clearChilds(s_table);
         this._addBinaryRowText(s_table, 'Tiempo: ', `${state.time} ut.`);
         // runrun
-        if (data.name == 'SVR3' || data.name == 'SVR4') {
+        if (name == 'SVR3' || name == 'SVR4') {
             let rr_td = this._addBinaryRow(s_table, 'runrun: ');
             let rr_div = document.createElement('div');
             rr_div.classList.add('array-queue');
@@ -496,7 +570,7 @@ class View {
                 rr_div.classList.add('array-queue-0');
         }
         // Campos especificos (colas, bitmap)
-        switch (data.name) {
+        switch (name) {
             case 'SVR3':
                 this._showSvr3State(state);
                 break;
@@ -526,7 +600,7 @@ class View {
         }
         
         // Tablas de clase (SVR4)
-        if (data.name == 'SVR4') { 
+        if (name == 'SVR4') { 
             if (state.rt_data.length > 0) {
                 let rt_td = this._addBinaryRow(s_table, 'Procesos \nRealTime: ');
                 this._showSvr4ClassDepent(state.rt_data, data.rt_info, rt_td, state.pTable);

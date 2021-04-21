@@ -43,22 +43,26 @@ class Controller {
             this.model.getPreviousState();
         });
 
+        this.view.exportEvent.addListener(() => {
+            this.model.getTotalData();
+        });
+
         /* Eventos en el modelo */
         this.model.pTableChangedEvent.addListener(data => {
             this.view.showProcessTable(data);
         });
 
-        this.model.createSummaryEvent.addListener(data => {
-            this.view.createSummary(data);
-        });
-
-        this.model.createTimelineEvent.addListener(data => {
-            this.view.createProgress(data);
-        });
-
         this.model.sendStateEvent.addListener(data => {
             this.view.showState(data);
         }); 
+    
+        this.model.startVisualizationEvent.addListener(data => {
+            this.view.showSimulationData(data);
+        });
+
+        this.model.sendTotalDataEvent.addListener(data => {
+            this.view.exportData(data);
+        });
     }
 
     run() {

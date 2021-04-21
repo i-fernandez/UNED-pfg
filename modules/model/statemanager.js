@@ -39,15 +39,16 @@ class StateManager {
 
     /* Genera los datos de progreso en formato JSON */
     generateProgress() {
-        this.progressData = `{ "name" : "${this.timeSeries[0][0]}", "time" : [`
-        this.timeSeries.forEach(item => {this.progressData += `${item[1]}, `});
+        //this.progressData = `{ "name" : "${this.timeSeries[0][0]}", "time" : [`
+        this.progressData = `{ "time" : [`
+        this.timeSeries.forEach(item => {this.progressData += `${item[0]}, `});
         this.progressData = this.progressData.slice(0, -2);
         this.progressData += `], `;
         this.progressData += `"pids" : {`
         
-        for (let i=2; i<this.timeSeries[0].length; i++) {
+        for (let i=1; i<this.timeSeries[0].length; i++) {
             // Añade los pids
-            this.progressData += `"${i-1}" : [`;
+            this.progressData += `"${i}" : [`;
             // Añade los estados
             this.timeSeries.forEach(item => {
                 this.progressData += `${item[i]}, `

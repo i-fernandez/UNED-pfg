@@ -11,10 +11,8 @@ class Simulation {
     constructor() {
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
-        this.createSummaryEvent = new Event();
-        this.createTimelineEvent = new Event();
-        this.createStatesEvent = new Event();
         this.sendStateEvent = new Event();
+        this.sendTotalDataEvent = new Event();
     }
 
     /* Crea un planificador FCFS */
@@ -59,28 +57,44 @@ class Simulation {
         this.pTableChangedEvent.trigger(this.scheduler.getPTable());
     }
 
-
     /* Lanza la simulación en el planificador */
     startSimulation() { 
         // Realiza la simulacion
         this.scheduler.runSimulation();
-        // Envía el resumen
-        this.createSummaryEvent.trigger(this.scheduler.getSummary());
-        // Genera y envía el progreso
+        // Genera el progreso
         this.stateManager.generateProgress();
-        this.createTimelineEvent.trigger(this.stateManager.getProgressData());
-        // Envía el primer estado
-        this.sendStateEvent.trigger(this.stateManager.states[0]);
+        // Genera un JSON y lo envia a la vista
+        let data = {
+            name: this.scheduler.name,
+            summary: JSON.parse(this.scheduler.getSummary()),
+            progress: JSON.parse(this.stateManager.getProgressData()),
+            state: JSON.parse(this.stateManager.states[0])
+        };
+        this.startVisualizationEvent.trigger(JSON.stringify(data));
     }
 
     /* Obtiene el estado siguiente */
     getNextState() {
-        this.sendStateEvent.trigger(this.stateManager.getNextState());
+        let data = {
+            name: this.scheduler.name,
+            state: JSON.parse(this.stateManager.getNextState())
+        }
+        this.sendStateEvent.trigger(JSON.stringify(data));
     }
 
     /* Obtiene el estado anterior */
     getPreviousState() {
-        this.sendStateEvent.trigger(this.stateManager.getPreviousState());
+        let data = {
+            name: this.scheduler.name,
+            state: JSON.parse(this.stateManager.getPreviousState())
+        }
+        this.sendStateEvent.trigger(JSON.stringify(data));
+    }
+
+    /* Recopila el total de la informacion para exportarla */
+    getTotalData() {
+        // TODO: falta exportar todos los datos
+        this.sendTotalDataEvent.trigger(this.scheduler.getSummary());
     }
 }
 
