@@ -39,7 +39,7 @@ class Controller {
             this.view.showProcessTable(data);
         });
 
-        this.model.sendStateEvent.addListener(data => {
+        this.model.stateRequestedEvent.addListener(data => {
             this.view.showState(data);
         }); 
     

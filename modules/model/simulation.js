@@ -11,7 +11,7 @@ class Simulation {
     constructor() {
         this.pTableChangedEvent = new Event();
         this.startVisualizationEvent = new Event();
-        this.sendStateEvent = new Event();
+        this.stateRequestedEvent = new Event();
         this.sendTotalDataEvent = new Event();
     }
 
@@ -71,7 +71,7 @@ class Simulation {
             name: this.name,
             state: JSON.parse(this.stateManager.getNextState())
         }
-        this.sendStateEvent.trigger(JSON.stringify(data, null, 1));
+        this.stateRequestedEvent.trigger(JSON.stringify(data, null, 1));
     }
 
     /* Obtiene el estado anterior */
@@ -80,7 +80,7 @@ class Simulation {
             name: this.name,
             state: JSON.parse(this.stateManager.getPreviousState())
         }
-        this.sendStateEvent.trigger(JSON.stringify(data, null, 1));
+        this.stateRequestedEvent.trigger(JSON.stringify(data, null, 1));
     }
 
     /* Recopila el total de la informacion para exportarla */
@@ -104,13 +104,12 @@ class Simulation {
         });
     }
 
-    /* Cambio espacios por %20 antes de la exportacion */
+    /* Cambia espacios por %20 antes de la exportacion */
     _replacer(key, value) {
         if (typeof value === "string")
             return value.replaceAll(' ', '%20');
         return value;
-    }
-      
+    } 
 }
 
 export default Simulation;

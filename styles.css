@@ -32,14 +32,6 @@
 .header-menu-sel:hover {
     color: rgb(0, 76, 48);    
 }
-.flag {
-    float: right;
-    margin-right: 1%;
-    margin-top: 30px;
-}
-.flag:hover {
-    cursor: pointer;
-}
 .states-menu-ul {
     list-style-type: none;
     display: flex;
@@ -68,12 +60,8 @@
     list-style-type: disclosure-closed;
     margin-left: 15px;
 }
-.inputProcess {
-    width: 90px;
-    margin: 10px;
-    display: inline;
-}
-/* Prueba: datos de entrada */
+
+/* Datos de entrada */
 .input_table {
     border-spacing: 0px;
     margin-right: 10px;
@@ -102,8 +90,6 @@
     border: 0px;
     text-align: center;
 }
-
-
 .array-queue {
     margin: 1px;
     width: 10px;
@@ -163,9 +149,6 @@
     margin-right: 5%;
     margin-top: 15px;
 }
-.div-center {
-    text-align: center;
-}
 .div-states {
     margin-top: 5px;
 }
@@ -174,9 +157,6 @@
 }
 .high_margin {
     margin-left: 200px;
-}
-.no-wrap {
-    white-space: pre-wrap;
 }
 .table-italic {
     font-style: italic;
@@ -350,11 +330,8 @@ form {
     width: 500px;
 }
 #barChart_td {
-    /*position: relative;*/
     height: 450px;
     width: 500px;
-    /*width: 30vw;*/
-    /*margin-top: 15px;*/
  }
  
 

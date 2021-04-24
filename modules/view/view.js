@@ -1,6 +1,5 @@
 import Event from '../util/event.js';
 import Graphics from './graphics.js';
-import {en_us, es_es} from './view.lang.js';
 
 class View {
     constructor() {
@@ -14,8 +13,6 @@ class View {
         this.dataLoadedEvent = new Event();
         // Diagramas
         this.charts = new Graphics();
-        // Idioma por defecto
-        this.lang = en_us;
     }
 
     /* Elementos iniciales */
@@ -28,7 +25,6 @@ class View {
         logo.classList.add('image-right');
         header_div.append(logo);
 
-    
         // Menu de navegacion
         let header_menu_div = document.createElement('div');
         header_menu_div.id = 'header_menu_div';
@@ -67,31 +63,11 @@ class View {
             [header_div, header_menu_div, init_div, addproc_div, 
             summary_div, progress_div, states_div]
         );
-        // Selector de idioma
-        this._languageSelector();
+
         // Selector de algoritmo
         this._schedulerSelector();
         // Bienvenida
         this._createWellcome();
-    }
-
-    /* Crea los elementos para la seleccion de idioma */
-    _languageSelector() {
-        let header_div = document.getElementById('header_div');
-        let es = document.createElement('img');
-        es.src = './resources/ES_24.png';
-        es.classList.add('flag');
-        es.addEventListener('click', event => {
-            console.log("ES");
-        });
-        let en  = document.createElement('img');
-        en.src = './resources/UK_24.png';
-        en.classList.add('flag');
-        en.addEventListener('click', event => {
-            console.log("EN");
-        });
-        this._append(header_div, [es, en]);
-
     }
 
     /* Crea los elementos del selector de algoritmo */
@@ -170,8 +146,7 @@ class View {
         let init_div = document.getElementById('init_div');
         let title = document.createElement('h1');
         title.classList.add('text');
-        //title.textContent = 'Simulador de algoritmos de planificación de procesos';
-        title.textContent = this.lang.title;
+        title.textContent = 'Simulador de algoritmos de planificación de procesos';
         let description = document.createElement('p');
         description.textContent = 'Seleccione un algoritmo de planificación para empezar' + 
             ' o cargue una simulacion existente.';
@@ -206,7 +181,6 @@ class View {
         summary_div.style.display = 'none';
         progress_div.style.display = 'none';
     }
-
 
     /* Crea los elementos de añadir proceso (comunes) */
     _addProcess() {
@@ -647,7 +621,6 @@ class View {
         let q_td = this._addBinaryRow(s_table, 'Cola: ');
         if (state.queue.items.length > 0)    
             this._fillQueue(q_td, state.queue.items, true);
-        
     }
 
     /* Muestra un estado SJF */
@@ -656,7 +629,6 @@ class View {
         let q_td = this._addBinaryRow(s_table, 'Cola: ');
         if (state.queue.length > 0)    
             this._fillQueue(q_td, state.queue);
-
     }
 
     /* Muestra un estado Round Robin */
@@ -666,7 +638,6 @@ class View {
         let q_td = this._addBinaryRow(s_table, 'Cola: ');
         if (state.queue.items.length > 0)    
             this._fillQueue(q_td, state.queue.items, true);
-
     }
    
     /* Muestra un estado de planificador con Prioridades */
