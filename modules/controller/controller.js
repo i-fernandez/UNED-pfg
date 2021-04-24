@@ -7,25 +7,9 @@ class Controller {
         this.view = new View;
 
         /* Eventos en la vista */
-        this.view.newFCFSEvent.addListener(() => {
-            this.model.createFCFS();
-        });
-        this.view.newSJFEvent.addListener(() => {
-            this.model.createSJF();
-        });
-        this.view.newRREvent.addListener(() => {
-            this.model.createRR();
-        });
-        this.view.newPRIEvent.addListener(() => {
-            this.model.createPRI();
-        });
-        this.view.newSVR3Event.addListener(() => {
-            this.model.createSVR3();
-        });
-
-        this.view.newSVR4Event.addListener(() => {
-            this.model.createSVR4();
-        });
+        this.view.newScheduler.addListener(name => {
+            this.model.createScheduler(name);
+        });        
 
         this.view.addProcessEvent.addListener(data => {
             this.model.addProcess(data);
@@ -45,6 +29,9 @@ class Controller {
 
         this.view.exportEvent.addListener(() => {
             this.model.getTotalData();
+        });
+        this.view.dataLoadedEvent.addListener(data => {
+            this.model.createFromFile(data);
         });
 
         /* Eventos en el modelo */

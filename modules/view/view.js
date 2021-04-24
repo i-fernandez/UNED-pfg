@@ -1,34 +1,34 @@
 import Event from '../util/event.js';
 import Graphics from './graphics.js';
+import {en_us, es_es} from './view.lang.js';
 
 class View {
     constructor() {
         // Eventos
-        this.newFCFSEvent = new Event();
-        this.newSJFEvent = new Event();
-        this.newRREvent = new Event();
-        this.newPRIEvent = new Event();
-        this.newSVR3Event = new Event();
-        this.newSVR4Event = new Event();
+        this.newScheduler = new Event();
         this.addProcessEvent = new Event();       
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
         this.previousStateEvent = new Event();
         this.exportEvent = new Event();
+        this.dataLoadedEvent = new Event();
         // Diagramas
         this.charts = new Graphics();
+        // Idioma por defecto
+        this.lang = en_us;
     }
 
     /* Elementos iniciales */
     render() {
         // Cabecera inicial
         let header_div = document.createElement('div');
-        header_div.id = 'header_div';
+        header_div.id = 'header_div';    
         let logo = document.createElement('img');
         logo.src = './resources/uned_etsi_60.png';
         logo.classList.add('image-right');
-        header_div.appendChild(logo);
+        header_div.append(logo);
 
+    
         // Menu de navegacion
         let header_menu_div = document.createElement('div');
         header_menu_div.id = 'header_menu_div';
@@ -67,10 +67,31 @@ class View {
             [header_div, header_menu_div, init_div, addproc_div, 
             summary_div, progress_div, states_div]
         );
+        // Selector de idioma
+        this._languageSelector();
         // Selector de algoritmo
         this._schedulerSelector();
         // Bienvenida
         this._createWellcome();
+    }
+
+    /* Crea los elementos para la seleccion de idioma */
+    _languageSelector() {
+        let header_div = document.getElementById('header_div');
+        let es = document.createElement('img');
+        es.src = './resources/ES_24.png';
+        es.classList.add('flag');
+        es.addEventListener('click', event => {
+            console.log("ES");
+        });
+        let en  = document.createElement('img');
+        en.src = './resources/UK_24.png';
+        en.classList.add('flag');
+        en.addEventListener('click', event => {
+            console.log("EN");
+        });
+        this._append(header_div, [es, en]);
+
     }
 
     /* Crea los elementos del selector de algoritmo */
@@ -86,7 +107,7 @@ class View {
             this._clickAlgorithm();
             sel_svr3.classList.add('header-menu-sel');
             this._createSvr3Add();
-            this.newSVR3Event.trigger();
+            this.newScheduler.trigger('SVR3');
         });
         let sel_svr4 = document.createElement('li');
         sel_svr4.id = 'sel_svr4';
@@ -96,7 +117,7 @@ class View {
             this._clickAlgorithm();
             sel_svr4.classList.add('header-menu-sel');    
             this._createSvr4Add();
-            this.newSVR4Event.trigger();
+            this.newScheduler.trigger('SVR4');
         });
         let sel_fcfs = document.createElement('li');
         sel_fcfs.id = 'sel_fcfs';
@@ -106,7 +127,7 @@ class View {
             this._clickAlgorithm();
             sel_fcfs.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newFCFSEvent.trigger();
+            this.newScheduler.trigger('FCFS');
         });
         let sel_sjf = document.createElement('li');
         sel_sjf.id = 'sel_sjf';
@@ -116,7 +137,7 @@ class View {
             this._clickAlgorithm();
             sel_sjf.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newSJFEvent.trigger();
+            this.newScheduler.trigger('SJF');
         });
         let sel_rr = document.createElement('li');
         sel_rr.id = 'sel_rr';
@@ -126,7 +147,7 @@ class View {
             this._clickAlgorithm();
             sel_rr.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newRREvent.trigger();
+            this.newScheduler.trigger('RR');
         });
         let sel_pri = document.createElement('li');
         sel_pri.id = 'sel_id';
@@ -136,7 +157,7 @@ class View {
             this._clickAlgorithm();
             sel_pri.classList.add('header-menu-sel');
             this._createAddForm(true);
-            this.newPRIEvent.trigger();
+            this.newScheduler.trigger('PRI');
         });
 
         this._append(sch_selector, 
@@ -149,10 +170,11 @@ class View {
         let init_div = document.getElementById('init_div');
         let title = document.createElement('h1');
         title.classList.add('text');
-        title.textContent = 'Simulador de algoritmos de planificación de procesos';
+        //title.textContent = 'Simulador de algoritmos de planificación de procesos';
+        title.textContent = this.lang.title;
         let description = document.createElement('p');
-        description.textContent = 'Seleccione un algoritmo de planificación para empezar...';
-
+        description.textContent = 'Seleccione un algoritmo de planificación para empezar' + 
+            ' o cargue una simulacion existente.';
         let input = document.createElement('input'); 
         input.accept = '.json';
         input.type = 'file'; 
@@ -347,7 +369,7 @@ class View {
             data.pClass = pc;
         }
         // Convierte a JSON
-        return JSON.stringify(data);
+        return JSON.stringify(data, null, 1);
     }
 
     /* Restablece los valores de los elementos 'input' */
@@ -361,11 +383,8 @@ class View {
     /* Simulacion */
 
     /* Simulacion a partir de fichero */
-    _crateFromFile(data) {
-        console.log("SIMULATION");
-        console.log(data);
-        
-
+    _crateFromFile(json) {
+        let data = JSON.parse(json);
         init_div.style.display = 'none';
         addproc_div.style.display = 'none';
         summary_div.style.display = 'inherit';
@@ -393,13 +412,15 @@ class View {
                 break;
         }
 
+        // Envia estados al state manager para poder leerlos despues
+        this.dataLoadedEvent.trigger(json);
 
-        // TODO: Recibir todos los datos
-        // Enviar estados al state manager para poder leerlos despues
+        // Muestra las vistas
         this._navigationMenu();
-        this._createSummaryView(data);
+        this._createSummaryView(data.summary, data.name);
+        this._createProgressView(data.progress, data.name);
         this._createStatesView();
-        
+        this._createState(data.states[0], data.name);
     }
 
     /* Crea el menu de navegacion */
@@ -482,7 +503,7 @@ class View {
         let data_table = document.createElement('table');
         this._addBinaryRowText(data_table, 'Duración del tick: ', `${data.tick} ut.`);
         this._addBinaryRowText(data_table, 'Duracion del cambio de contexto: ', `${data.cs_duration} ut. `);
-        if (data.name == 'RR')
+        if (name == 'RR')
             this._addBinaryRowText(data_table, 'Duración del cuanto: ', `${data.quantum} ut.`);
         this._addBinaryRowText(data_table, 'Número de procesos: ', data.n_proc);
         this._addBinaryRowText(data_table, 'Tiempo de ejecución: ', `${data.t_time} ut.`);
@@ -504,7 +525,7 @@ class View {
     /* Exporta los datos */
     exportData(data) {
         let a = document.createElement('a');
-        a.href=`data:application/json;charset=utf-8,${data}`;
+        a.href = `data:application/json;charset=utf-8,${data}`;
         a.download = 'simulation.json'
         document.body.appendChild(a)
         a.click()

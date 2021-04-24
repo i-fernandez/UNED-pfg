@@ -32,6 +32,14 @@
 .header-menu-sel:hover {
     color: rgb(0, 76, 48);    
 }
+.flag {
+    float: right;
+    margin-right: 1%;
+    margin-top: 30px;
+}
+.flag:hover {
+    cursor: pointer;
+}
 .states-menu-ul {
     list-style-type: none;
     display: flex;

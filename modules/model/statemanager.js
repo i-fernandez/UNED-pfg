@@ -39,7 +39,6 @@ class StateManager {
 
     /* Genera los datos de progreso en formato JSON */
     generateProgress() {
-        //this.progressData = `{ "name" : "${this.timeSeries[0][0]}", "time" : [`
         this.progressData = `{ "time" : [`
         this.timeSeries.forEach(item => {this.progressData += `${item[0]}, `});
         this.progressData = this.progressData.slice(0, -2);

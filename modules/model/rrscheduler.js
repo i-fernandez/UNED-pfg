@@ -8,7 +8,6 @@ class RRScheduler {
         this.QUANTUM = 50;     
         this.CONTEXT_SWITCH = 1;
         // variables
-        this.name = 'RR';
         this.stateManager = stateManager;
         this.time = 0;
         this.queue = new PriorityQueue(0);
@@ -31,7 +30,7 @@ class RRScheduler {
     
     /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
-        return JSON.stringify(this.processTable.map(p => p.getData()));
+        return JSON.stringify(this.processTable.map(p => p.getData()), null, 1);
     }
 
     /* Devuelve el resumen de ejecución */
@@ -47,7 +46,6 @@ class RRScheduler {
             tiempos.push(pr.getSummaryData());
         });
         let data = {
-            //name: this.name,
             quantum: this.QUANTUM,
             tick: this.TICK,
             cs_duration: this.CONTEXT_SWITCH,
@@ -60,7 +58,7 @@ class RRScheduler {
                 time: tiempos
             }
         }
-        return JSON.stringify(data);
+        return JSON.stringify(data, null, 1);
     }
 
     /* Ejecuta la simulacion */
@@ -158,7 +156,6 @@ class RRScheduler {
         // Datos de progreso
         let timeData = this.processTable.map(p => p.getStateNumber());
         timeData.unshift(this.time);
-        //timeData.unshift(this.name);
         this.stateManager.pushTime(timeData);
 
         // Estado
@@ -168,7 +165,6 @@ class RRScheduler {
         if (this.journal.length > 0) {
             let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
             let state = {
-                //name: this.name,
                 pt_info: this.processTable[0].getInfo(),
                 state: {
                     time: this.time, 
@@ -178,7 +174,7 @@ class RRScheduler {
                     q_left: this.quantumLeft
                 }
             }
-            this.stateManager.pushState(JSON.stringify(state));
+            this.stateManager.pushState(JSON.stringify(state, null, 1));
             this.journal = [];
         }
     }

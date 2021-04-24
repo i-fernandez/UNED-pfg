@@ -7,7 +7,6 @@ class FCFSScheduler {
         this.TICK = 1;
         this.CONTEXT_SWITCH = 1;
         // variables
-        this.name = 'FCFS';
         this.stateManager = stateManager;
         this.time = 0;
         this.queue = new PriorityQueue(0);
@@ -29,7 +28,7 @@ class FCFSScheduler {
 
     /* Devuelve un JSON con los procesos de la tabla */
     getPTable() {
-        return JSON.stringify(this.processTable.map(p => p.getData()));
+        return JSON.stringify(this.processTable.map(p => p.getData()), null, 1);
     }
 
     /* Devuelve el resumen de ejecución */
@@ -45,7 +44,6 @@ class FCFSScheduler {
             tiempos.push(pr.getSummaryData());
         });
         let data = {
-            //name: this.name,
             tick: this.TICK,
             cs_duration: this.CONTEXT_SWITCH,
             n_proc: n_proc,
@@ -57,7 +55,7 @@ class FCFSScheduler {
                 time: tiempos
             }
         }
-        return JSON.stringify(data);
+        return JSON.stringify(data, null, 1);
     }
 
     /* Ejecuta la simulacion */
@@ -138,7 +136,6 @@ class FCFSScheduler {
         // Datos de progreso
         let timeData = this.processTable.map(p => p.getStateNumber());
         timeData.unshift(this.time);
-        //timeData.unshift(this.name);
         this.stateManager.pushTime(timeData);
 
         // Estado
@@ -148,7 +145,6 @@ class FCFSScheduler {
         if (this.journal.length > 0) {
             let notFinished = this.processTable.filter(pr => pr.p_state != 'finished');
             let state = {
-                //name: this.name,
                 pt_info: this.processTable[0].getInfo(),
                 state: {
                     time: this.time, 
@@ -157,7 +153,7 @@ class FCFSScheduler {
                     queue: this.queue.getData()
                 }
             }
-            this.stateManager.pushState(JSON.stringify(state));
+            this.stateManager.pushState(JSON.stringify(state, null, 1));
             this.journal = [];
         }
     }

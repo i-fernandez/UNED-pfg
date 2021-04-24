@@ -15,40 +15,32 @@ class Simulation {
         this.sendTotalDataEvent = new Event();
     }
 
-    /* Crea un planificador FCFS */
-    createFCFS() {
+    /* Crea una instancia del planificador */
+    createScheduler(name) {
         this.stateManager = new StateManager();
-        this.scheduler = new FCFSScheduler(this.stateManager);
-    }
-
-    /* Crea un planificador SJF */
-    createSJF() {
-        this.stateManager = new StateManager();
-        this.scheduler = new SJFScheduler(this.stateManager);
-    }
-
-    /* Crea un planificador RR */
-    createRR() {
-        this.stateManager = new StateManager();
-        this.scheduler = new RRScheduler(this.stateManager);
-    }
-
-    /* Crea un planificador PRI */
-    createPRI() {
-        this.stateManager = new StateManager();
-        this.scheduler = new PRIScheduler(this.stateManager);
-    }
-
-    /* Crea un planificador SVR3 */
-    createSVR3() {
-        this.stateManager = new StateManager();
-        this.scheduler = new SVR3Scheduler(this.stateManager);
-    }
-
-    /* Crea un planificador SVR4 */
-    createSVR4() {
-        this.stateManager = new StateManager();
-        this.scheduler = new SVR4Scheduler(this.stateManager);
+        this.name = name;
+        switch (name) {
+            case 'FCFS':
+                this.scheduler = new FCFSScheduler(this.stateManager);
+                break;
+            case 'SJF':
+                this.scheduler = new SJFScheduler(this.stateManager);
+                break;
+            case 'RR':
+                this.scheduler = new RRScheduler(this.stateManager);
+                break;
+            case 'PRI':
+                this.scheduler = new PRIScheduler(this.stateManager);
+                break;
+            case 'SVR3':
+                this.scheduler = new SVR3Scheduler(this.stateManager);
+                break;
+            case 'SVR4':
+                this.scheduler = new SVR4Scheduler(this.stateManager);
+                break;
+            default:
+                break;
+        }
     }
 
     /* Convierte el JSON y se lo envia al planificador */
@@ -65,37 +57,60 @@ class Simulation {
         this.stateManager.generateProgress();
         // Genera un JSON y lo envia a la vista
         let data = {
-            name: this.scheduler.name,
+            name: this.name,
             summary: JSON.parse(this.scheduler.getSummary()),
             progress: JSON.parse(this.stateManager.getProgressData()),
             state: JSON.parse(this.stateManager.states[0])
         };
-        this.startVisualizationEvent.trigger(JSON.stringify(data));
+        this.startVisualizationEvent.trigger(JSON.stringify(data, null, 1));
     }
 
     /* Obtiene el estado siguiente */
     getNextState() {
         let data = {
-            name: this.scheduler.name,
+            name: this.name,
             state: JSON.parse(this.stateManager.getNextState())
         }
-        this.sendStateEvent.trigger(JSON.stringify(data));
+        this.sendStateEvent.trigger(JSON.stringify(data, null, 1));
     }
 
     /* Obtiene el estado anterior */
     getPreviousState() {
         let data = {
-            name: this.scheduler.name,
+            name: this.name,
             state: JSON.parse(this.stateManager.getPreviousState())
         }
-        this.sendStateEvent.trigger(JSON.stringify(data));
+        this.sendStateEvent.trigger(JSON.stringify(data, null, 1));
     }
 
     /* Recopila el total de la informacion para exportarla */
     getTotalData() {
-        // TODO: falta exportar todos los datos
-        this.sendTotalDataEvent.trigger(this.scheduler.getSummary());
+        let data = {
+            name: this.name,
+            summary: JSON.parse(this.scheduler.getSummary()),
+            progress: JSON.parse(this.stateManager.getProgressData()),
+            states: this.stateManager.states.map(s => JSON.parse(s))
+        }
+        this.sendTotalDataEvent.trigger(JSON.stringify(data, this._replacer, 1));
     }
+
+    /* Crea la instancia a partir de los datos guardados */
+    createFromFile(data) {
+        this.stateManager = new StateManager();
+        let d = JSON.parse(data);
+        this.name = d.name;
+        d.states.forEach(s => {
+            this.stateManager.pushState(JSON.stringify(s, null, 1));
+        });
+    }
+
+    /* Cambio espacios por %20 antes de la exportacion */
+    _replacer(key, value) {
+        if (typeof value === "string")
+            return value.replaceAll(' ', '%20');
+        return value;
+    }
+      
 }
 
 export default Simulation;
