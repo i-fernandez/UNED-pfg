@@ -7,7 +7,7 @@ class Controller {
         this.view = new View;
 
         /* Eventos en la vista */
-        this.view.newScheduler.addListener(name => {
+        this.view.newSchedulerEvent.addListener(name => {
             this.model.createScheduler(name);
         });        
 

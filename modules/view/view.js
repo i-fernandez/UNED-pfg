@@ -4,7 +4,7 @@ import Graphics from './graphics.js';
 class View {
     constructor() {
         // Eventos
-        this.newScheduler = new Event();
+        this.newSchedulerEvent = new Event();
         this.addProcessEvent = new Event();       
         this.startSimulationEvent = new Event();
         this.nextStateEvent = new Event();
@@ -83,7 +83,7 @@ class View {
             this._clickAlgorithm();
             sel_svr3.classList.add('header-menu-sel');
             this._createSvr3Add();
-            this.newScheduler.trigger('SVR3');
+            this.newSchedulerEvent.trigger('SVR3');
         });
         let sel_svr4 = document.createElement('li');
         sel_svr4.id = 'sel_svr4';
@@ -93,7 +93,7 @@ class View {
             this._clickAlgorithm();
             sel_svr4.classList.add('header-menu-sel');    
             this._createSvr4Add();
-            this.newScheduler.trigger('SVR4');
+            this.newSchedulerEvent.trigger('SVR4');
         });
         let sel_fcfs = document.createElement('li');
         sel_fcfs.id = 'sel_fcfs';
@@ -103,7 +103,7 @@ class View {
             this._clickAlgorithm();
             sel_fcfs.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newScheduler.trigger('FCFS');
+            this.newSchedulerEvent.trigger('FCFS');
         });
         let sel_sjf = document.createElement('li');
         sel_sjf.id = 'sel_sjf';
@@ -113,7 +113,7 @@ class View {
             this._clickAlgorithm();
             sel_sjf.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newScheduler.trigger('SJF');
+            this.newSchedulerEvent.trigger('SJF');
         });
         let sel_rr = document.createElement('li');
         sel_rr.id = 'sel_rr';
@@ -123,7 +123,7 @@ class View {
             this._clickAlgorithm();
             sel_rr.classList.add('header-menu-sel');
             this._createAddForm();
-            this.newScheduler.trigger('RR');
+            this.newSchedulerEvent.trigger('RR');
         });
         let sel_pri = document.createElement('li');
         sel_pri.id = 'sel_id';
@@ -133,7 +133,7 @@ class View {
             this._clickAlgorithm();
             sel_pri.classList.add('header-menu-sel');
             this._createAddForm(true);
-            this.newScheduler.trigger('PRI');
+            this.newSchedulerEvent.trigger('PRI');
         });
 
         this._append(sch_selector, 
