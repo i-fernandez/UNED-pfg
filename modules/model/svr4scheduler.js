@@ -175,7 +175,7 @@ class Svr4Scheduler {
             this.journal.push(`Rutina swtch selecciona al proceso ${n.p_pid} para su ejecución.`);
             this.inContextSwitch = true;
         }
-        else if (this.running && this.dqactmap[this.dqactmap.length-1] >this.running.p_pri){
+        else if (this.running && this.dqactmap[this.dqactmap.length-1] > this.running.p_pri){
             if (this.running.p_state == 'running_kernel') {
                 // Proceso con llamada al sistema
                 this.runrun = true;

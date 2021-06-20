@@ -320,6 +320,7 @@ class Graphics {
             'RGB(255, 219, 148)',
             'RGB(225, 150, 220)',
             'RGB(170, 215, 220)',
+            'RGB(150, 105, 085)',
             'RGB(190, 170, 235)'
         ];
         let i = this.colorIndex % colors.length;
